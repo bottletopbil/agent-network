@@ -1,0 +1,78 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*.tmp
+*.swp
+*.bak
+*.DS_Store
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Bytecode cache
+**/__pycache__/
+
+# --- Environment & Secrets ---
+.env
+*.key
+*.pem
+*.crt
+*.pub
+*.token
+*.secret
+
+# --- Runtime / Generated Data ---
+logs/
+.state/
+.cas/
+tmp/
+*.jsonl
+*.sqlite
+*.db
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.code-workspace
+
+# --- Docker / Compose ---
+*.pid
+*.sock
+*.tar
+docker-compose.override.yml
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- Documentation Build Outputs ---
+*.pdf
+*.docx
+
+# --- Notebooks or scratchpads ---
+*.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# --- Backup & Misc ---
+*.old
+*.orig
+*.rej
+
+# --- Node (if ever used for UI parts) ---
+node_modules/
+dist/
+build/
+
+# --- Local test or debug folders ---
+coverage/
+test_output/
+__snapshots__/
+
+# --- Ignore temporary project metadata ---
+*.lock
+*.log
