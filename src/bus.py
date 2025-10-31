@@ -2,9 +2,10 @@ import asyncio, os, json
 from nats.aio.client import Client as NATS
 from nats.js import JetStreamContext
 from typing import Callable, Awaitable
-from audit import log_event
-from envelope import verify_envelope, observe_envelope  # NEW
 
+from audit import log_event
+from envelope import observe_envelope
+from policy import validate_envelope  # ✅ Rule book v0 gate
 
 NATS_URL = os.getenv("NATS_URL", "nats://127.0.0.1:4222")
 STREAM = os.getenv("SWARM_STREAM", "THREADS")
@@ -37,16 +38,19 @@ async def publish_raw(thread_id: str, subject: str, message: dict):
 
 async def publish_envelope(thread_id: str, subject: str, envelope: dict):
     """
-    High-level: publish a SIGNED ENVELOPE only if it verifies locally.
+    High-level: publish a SIGNED ENVELOPE only if it passes the rule book locally.
     """
-    if not verify_envelope(envelope):
-        raise ValueError("Refusing to publish: envelope failed local verification")
+    # ✅ Policy check BEFORE putting on the wire (includes sig/lamport/payload/CAS)
+    validate_envelope(envelope)
     await publish_raw(thread_id, subject, envelope)
 
-async def subscribe_envelopes(thread_id: str, subject: str,
-                              handler: Callable[[dict], Awaitable[None]]):
+async def subscribe_envelopes(
+    thread_id: str,
+    subject: str,
+    handler: Callable[[dict], Awaitable[None]]
+):
     """
-    Subscribe and ONLY deliver verified envelopes to handler.
+    Subscribe and ONLY deliver envelopes that pass the rule book to your handler.
     """
     nc, js = await connect()
     durable = subject.replace(".", "_")
@@ -54,6 +58,7 @@ async def subscribe_envelopes(thread_id: str, subject: str,
 
     async def _runner():
         async for msg in sub.messages:
+            # Decode (malformed messages are dropped but still logged)
             try:
                 env = json.loads(msg.data.decode())
             except Exception:
@@ -65,12 +70,14 @@ async def subscribe_envelopes(thread_id: str, subject: str,
             # Always log delivery (CCTV)
             log_event(thread_id=thread_id, subject=subject, kind="BUS.DELIVER", payload=env)
 
-            # Verify envelope signature & payload hash
-            if not verify_envelope(env):
+            # ✅ Verify via policy (defense in depth on receive)
+            try:
+                validate_envelope(env)
+            except Exception:
                 await msg.term()
                 continue
 
-            # Update our lamport clock from the message
+            # Update local Lamport clock from the verified envelope
             observe_envelope(env)
 
             await handler(env)
