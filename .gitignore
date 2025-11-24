@@ -17,6 +17,9 @@ venv/
 # Bytecode cache
 **/__pycache__/
 
+# Pytest cache
+.pytest_cache/
+
 # --- Environment & Secrets ---
 .env
 *.key

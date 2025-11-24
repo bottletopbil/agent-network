@@ -36,6 +36,13 @@ async def publish_raw(thread_id: str, subject: str, message: dict):
     finally:
         await nc.drain()
 
+async def publish(thread_id: str, subject: str, message: dict):
+    """
+    Backward-compatible wrapper: publish a simple message (not an envelope).
+    Logs to audit trail but does NOT validate as an envelope.
+    """
+    await publish_raw(thread_id, subject, message)
+
 async def publish_envelope(thread_id: str, subject: str, envelope: dict):
     """
     High-level: publish a SIGNED ENVELOPE only if it passes the rule book locally.
@@ -47,13 +54,14 @@ async def publish_envelope(thread_id: str, subject: str, envelope: dict):
 async def subscribe_envelopes(
     thread_id: str,
     subject: str,
-    handler: Callable[[dict], Awaitable[None]]
+    handler: Callable[[dict], Awaitable[None]],
+    durable_name: str = None
 ):
     """
     Subscribe and ONLY deliver envelopes that pass the rule book to your handler.
     """
     nc, js = await connect()
-    durable = subject.replace(".", "_")
+    durable = durable_name or subject.replace(".", "_").replace("*", "ALL").replace(">", "ALL")
     sub = await js.subscribe(subject, durable=durable)
 
     async def _runner():
@@ -87,3 +95,38 @@ async def subscribe_envelopes(
         await _runner()
     finally:
         await nc.drain()
+
+async def subscribe(
+    thread_id: str,
+    subject: str,
+    handler: Callable[[dict], Awaitable[None]],
+    durable_name: str = None
+):
+    """
+    Backward-compatible wrapper: subscribe to simple messages (not envelopes).
+    Logs to audit trail but does NOT validate as envelopes.
+    """
+    nc, js = await connect()
+    durable = durable_name or subject.replace(".", "_").replace("*", "ALL").replace(">", "ALL")
+    sub = await js.subscribe(subject, durable=durable)
+
+    async def _runner():
+        async for msg in sub.messages:
+            # Decode message
+            try:
+                payload = json.loads(msg.data.decode())
+            except Exception:
+                payload = {"_raw": msg.data.decode(errors="ignore")}
+            
+            # Always log delivery (CCTV)
+            log_event(thread_id=thread_id, subject=subject, kind="BUS.DELIVER", payload=payload)
+            
+            # Call handler (no envelope validation)
+            await handler(payload)
+            await msg.ack()
+
+    try:
+        await _runner()
+    finally:
+        await nc.drain()
+

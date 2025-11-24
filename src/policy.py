@@ -6,7 +6,7 @@ from envelope import verify_envelope
 from cas import has_blob
 
 # ---- Policy config (v0) ----
-ALLOWED_KINDS = {"NEED", "PLAN", "COMMIT", "ATTEST", "FINAL"}
+ALLOWED_KINDS = {"NEED", "PLAN", "COMMIT", "ATTEST", "FINAL", "FINALIZE", "DECIDE", "PROPOSE", "CLAIM", "YIELD", "RELEASE"}
 MAX_PAYLOAD_BYTES = 64 * 1024  # 64 KB
 
 # This dict defines the current rulebook. Hash it to pin the version.
@@ -15,7 +15,7 @@ _POLICY_SPEC = {
     "max_payload_bytes": MAX_PAYLOAD_BYTES,
     "require_artifact_for_commit": True,
     "hash_algo": "sha256",
-    "version": 0,
+    "version": 1,
 }
 
 def _cjson(obj: Dict[str, Any]) -> bytes:

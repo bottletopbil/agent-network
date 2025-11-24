@@ -8,5 +8,15 @@ services:
       - "8222:8222"   # NATS monitoring UI
     volumes:
       - nats-data:/data
+  
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
 volumes:
   nats-data:
+  redis-data:

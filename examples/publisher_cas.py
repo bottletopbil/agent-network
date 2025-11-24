@@ -28,7 +28,6 @@ async def main():
         thread_id=thread_id,
         sender_pk_b64=sender_pk_b64,
         payload=payload,
-        policy_engine_hash="v0",
     )
     signed = sign_envelope(env)
     await publish_envelope(thread_id, subject, signed)

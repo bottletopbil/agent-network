@@ -25,6 +25,9 @@ def make_envelope(
     """
     Create a canonical, unsigned envelope.
     """
+    # Import here to avoid circular dependency with policy.py
+    from policy import current_policy_hash
+    
     lamport = CLOCK.tick()
     return {
         "v": 1,
@@ -36,7 +39,7 @@ def make_envelope(
         "sender_pk_b64": sender_pk_b64,
         "payload_hash": _hash_payload(payload),
         "payload": payload,
-        "policy_engine_hash": policy_engine_hash or "v0",  # placeholder for now
+        "policy_engine_hash": policy_engine_hash or current_policy_hash(),
         "nonce": nonce or str(uuid.uuid4()),
     }
 
