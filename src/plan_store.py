@@ -117,6 +117,12 @@ class PlanStore:
             """, (op.task_id, op.thread_id, op.payload.get("type"), op.lamport))
         
         elif op.op_type == OpType.STATE:
+            # Ensure task exists (create if needed)
+            self.conn.execute("""
+                INSERT OR IGNORE INTO tasks (task_id, thread_id, task_type, last_lamport)
+                VALUES (?, ?, NULL, 0)
+            """, (op.task_id, op.thread_id))
+            
             # Monotonic: only advance if lamport is newer
             new_state = op.payload["state"]
             self.conn.execute("""

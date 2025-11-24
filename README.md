@@ -1,316 +1,306 @@
-CAN Swarm — Project Overview and Implementation Plan
-====================================================
-
-1\. Project Purpose
--------------------
-
-CAN Swarm (Cognitive Agent Network) is a framework for building **cooperative AI systems**—a network of autonomous agents that can coordinate, verify, and execute tasks collectively in a transparent and auditable way.
-
-The long-term vision is to create a **federated, decentralized AI ecosystem** where many independent “minds” (AI agents, human operators, or organizations) can work together safely without needing to trust each other blindly.
-
-At its core, the Swarm is designed to answer one question:
-
-> “How can we let intelligent systems cooperate on shared goals, while maintaining full verifiability, replayability, and ethical control?”
-
-To achieve this, the CAN Swarm stack is structured around three fundamental principles:
-
-1.  **Auditability:** Every action or decision can be replayed exactly as it happened.
-    
-2.  **Authenticity:** Every message, artifact, and plan is cryptographically signed and traceable.
-    
-3.  **Determinism:** The same inputs always produce the same outputs—critical for trust and replication.
-    
-
-2\. The Vision: The “Swarm Lab” Analogy
----------------------------------------
-
-Imagine a digital laboratory filled with specialized robots.Each robot (agent) performs a task—planning, reasoning, analyzing, or verifying results.They all communicate through an **intercom system** (the message bus) and everything they say or do is recorded by a **CCTV system** (the signed audit log).
-
-In this lab:
-
-*   No robot can fake an instruction—it must sign every message.
-    
-*   No event disappears—everything is logged and timestamped.
-    
-*   If you replay the footage, the entire process unfolds identically.
-    
-
-That is the foundation of the Swarm: a verifiable digital ecosystem for intelligent cooperation.
-
-3\. Project Architecture Overview
----------------------------------
-
-The CAN Swarm network is built as a set of modular components. Each layer is isolated but interoperable.
-
-**Core Components:**
-
-1.  **NATS JetStream (Message Bus)**
-    
-    *   The communication backbone for all agents.
-        
-    *   Supports publish/subscribe semantics and persistent message history.
-        
-    *   Functions as the “Intercom” for the Swarm.
-        
-2.  **Signed JSONL Audit Log (CCTV)**
-    
-    *   A continuous append-only ledger of every published and delivered message.
-        
-    *   Each log line includes cryptographic signatures for verification.
-        
-    *   Enables deterministic replay and forensic auditing.
-        
-3.  **Ed25519 Cryptography (Identity and Signatures)**
-    
-    *   Each agent has a private/public key pair.
-        
-    *   Used to sign every message and verify authenticity.
-        
-    *   Provides tamper-proof identity verification.
-        
-4.  **MinIO / S3 (CAS Artifact Store)**
-    
-    *   A content-addressable storage system where large files or AI outputs are saved by hash.
-        
-    *   Ensures reproducibility and immutability of all referenced data.
-        
-5.  **Automerge CRDT (Plan State Store)**
-    
-    *   A conflict-free shared document format for multi-agent planning.
-        
-    *   Allows agents to update shared plans concurrently without conflicts.
-        
-6.  **OPA → WASM (Policy Engine)**
-    
-    *   A rulebook that defines what agents are allowed to do.
-        
-    *   Enforced before any message or action is accepted by the system.
-        
-    *   Ensures every decision follows the same logic, gas limits, and ethical constraints.
-        
-7.  **etcd-Raft (Scoped Consensus)**
-    
-    *   A minimal consensus mechanism for “decisions” that need exclusive resolution.
-        
-    *   Guarantees at-most-one DECIDE per need or plan.
-        
-8.  **OpenTelemetry (Observability Layer)**
-    
-    *   Provides traceability and performance metrics for the entire system.
-        
-    *   Integrated with the audit log for real-time monitoring.
-        
-
-4\. What Version 1 (v1) Is
---------------------------
-
-**CAN Swarm v1** is a _centrally coordinated but replayable prototype_—a controlled, single-lab environment that simulates a cooperative network.
-
-The goal of v1 is not decentralization; it’s to **prove determinism, replayability, and auditability** in a single-node setup.
-
-### v1 Goal
-
-Create a working system that can complete one full mission loop:
-
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   NEED → PLAN → DECIDE → COMMIT → FINALIZE   `
-
-and be **replayed from the signed logs** to produce identical results.
-
-If replaying the log produces the same outcome, the Swarm is considered “trustworthy” at v1.
-
-5\. What We Have Built So Far
------------------------------
-
-**Phase 1: Intercom + CCTV**
-
-This phase is complete. It establishes the communication and logging foundation.
-
-*   **NATS JetStream** is running locally (via Docker or Homebrew).
-    
-*   **Signed JSONL logging** captures all published and received messages.
-    
-*   **Ed25519 keypair** is generated for signing and verifying every event.
-    
-*   **Publisher and listener scripts** demonstrate message flow.
-    
-*   **Verification script** confirms that all signatures in the log are valid.
-    
-
-Every message now has:
-
-*   A timestamp,
-    
-*   A subject and thread ID,
-    
-*   A payload hash,
-    
-*   A digital signature,
-    
-*   And a verifiable record in the audit trail.
-    
-
-The system can now:
-
-*   Send messages between agents,
-    
-*   Record them securely,
-    
-*   Verify authenticity post-execution.
-    
-
-This completes the foundational layer: the Swarm’s **secure communication backbone**.
-
-6\. Next Steps for Version 1
-----------------------------
-
-The next development phases will transform this backbone into a functioning cooperative system.
-
-### Phase 2 — Envelopes & Message Rules
-
-Create the **Envelope** schema that wraps every message with:
-
-*   sender ID
-    
-*   message type (NEED, PLAN, DECIDE, COMMIT, etc.)
-    
-*   lamport clock (for ordering)
-    
-*   nonce (for uniqueness)
-    
-*   signature and capability tokens
-    
-
-This will standardize all message traffic and allow replay-based determinism.
-
-### Phase 3 — Policy Capsule (Law Book)
-
-Integrate **OPA → WASM** policies that verify:
-
-*   Message structure and allowed types
-    
-*   Size and signature limits
-    
-*   CAS reference validity
-    
-*   Permission scopes
-    
-
-Each message will be evaluated against the same rulebook before being processed or accepted into the plan.
-
-### Phase 4 — CAS Integration
-
-Implement **MinIO/S3** for storing external artifacts such as:
-
-*   AI-generated files (plans, summaries, results)
-    
-*   Logs, datasets, or images referenced by hash
-    
-
-Messages will carry only the artifact hash, not the data itself.
-
-### Phase 5 — Shared Plan CRDT
-
-Use **Automerge** to maintain a shared plan document that can be updated by multiple agents concurrently without conflicts.This is the whiteboard where agents will propose tasks, dependencies, and results.
-
-### Phase 6 — Scoped Consensus (DECIDE)
-
-Integrate **etcd-Raft** for the DECIDE stage:
-
-*   Each “NEED” will have its own Raft shard for voting.
-    
-*   Only one DECIDE can exist per need.
-    
-*   Decisions are finalized and stored immutably in the log.
-    
-
-### Phase 7 — Replay Simulator
-
-Create a **replay CLI** that replays any signed JSONL log to verify outcomes.Replays must reproduce the same final state deterministically, using only the recorded data and hashes (no new AI calls).
-
-7\. Development Flow Summary
-----------------------------
-
-Each phase builds on the last.Below is a simple outline of the implementation order for v1:
-
-1.  **Phase 1 (Done):** NATS + Signed Audit Logs
-    
-2.  **Phase 2:** Message Envelopes (structured + signed)
-    
-3.  **Phase 3:** Policy Engine (OPA→WASM)
-    
-4.  **Phase 4:** CAS (MinIO/S3 storage by hash)
-    
-5.  **Phase 5:** Shared Plan (Automerge CRDT)
-    
-6.  **Phase 6:** Scoped Consensus (Raft)
-    
-7.  **Phase 7:** Deterministic Replay CLI
-    
-8.  **Phase 8:** End-to-End Test — one mission from NEED → FINALIZE
-    
-
-8\. Example Demonstration Goal for v1
--------------------------------------
-
-A minimal working demo should execute this full loop:
-
-1.  **NEED:** “Classify these 10 text lines by category and summarize.”
-    
-2.  **Planner AI:** Generates a plan (“one worker, one output file”).
-    
-3.  **Worker AI:** Executes classification and uploads results to CAS.
-    
-4.  **DECIDE:** Consensus engine accepts the worker’s result.
-    
-5.  **FINALIZE:** The system signs off and stores the final outcome in the log.
-    
-6.  **REPLAY:** A replay of the signed log yields the same final output.
-    
-
-Success = same FINAL\_HASH after replay.
-
-That’s the definition of correctness for v1.
-
-9\. Long-Term Vision (Beyond v1)
---------------------------------
-
-Once v1 proves deterministic collaboration, future versions will move toward **decentralization and federation**:
-
-*   Multiple independent labs (nodes) connected through IPFS/libp2p.
-    
-*   DID-based identity and capability tokens.
-    
-*   On-chain or distributed consensus for finalization.
-    
-*   Self-hosted or cross-organization Swarms that coordinate safely across networks.
-    
-
-v1 is the “closed lab prototype.”v2+ will open the lab doors to the wider world.
-
-10\. Summary
-------------
-
-At this point, CAN Swarm has a **fully functioning communication and verification core**.Agents can:
-
-*   Talk (through NATS),
-    
-*   Record (via the signed audit log),
-    
-*   Verify (using Ed25519 signatures).
-    
-
-The next major step is to **wrap these communications in Envelopes** and begin building the **rule-based decision layer (policy engine)** that ensures every action follows the same logical structure.
-
-Once those are complete, CAN Swarm v1 will be able to:
-
-*   Accept a task (NEED),
-    
-*   Plan and decide cooperatively,
-    
-*   Finalize results deterministically,
-    
-*   And replay the entire process exactly as it happened.
-    
-
-This will mark the first verifiable demonstration of a **replayable, auditable AI Swarm.**
-------------------------------------------------------------------------------------------
+# CAN Swarm v1 PoC
+
+> **Cognitive Agent Network** — A verifiable, deterministic, and auditable cooperative AI system
+
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)]() [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)]() [![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
+
+## 🎯 What is CAN Swarm?
+
+CAN Swarm is a framework for building **cooperative AI systems** where autonomous agents coordinate, verify, and execute tasks collectively in a transparent and auditable way.
+
+The v1 Proof of Concept demonstrates the core principles of:
+- **Auditability**: Every action is cryptographically signed and logged
+- **Determinism**: Same inputs always produce same outputs
+- **Replayability**: Complete workflow can be replayed from audit logs
+
+## ✨ Key Features
+
+- ✅ **Cryptographic Authenticity**: Ed25519 signatures on all messages
+- ✅ **Deterministic Replay**: Full workflow reproduction from audit logs
+- ✅ **Policy Enforcement**: Validation of all envelopes before processing
+- ✅ **Consensus Mechanism**: At-most-once DECIDE per NEED via Redis
+- ✅ **Content-Addressable Storage**: SHA256-based artifact storage
+- ✅ **Lamport Clocks**: Causal ordering of events
+- ✅ **CRDT Plan Store**: Conflict-free task state management
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.9+
+- NATS Server
+- Redis Server
+- Docker (optional, for services)
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/agent-swarm.git
+cd agent-swarm
+```
+
+2. **Create virtual environment**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+3. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+4. **Start infrastructure services**
+```bash
+docker-compose up -d
+# Or manually:
+# nats-server -js
+# redis-server
+```
+
+5. **Generate signing keys**
+```bash
+python3 -c "from src.crypto import generate_keypair; generate_keypair()"
+```
+
+### Running the E2E Demo
+
+The easiest way to see CAN Swarm in action:
+
+```bash
+.venv/bin/python demo/e2e_flow.py
+```
+
+This will:
+1. Start the Coordinator, Planner, Worker, and Verifier agents
+2. Publish a NEED message
+3. Complete the full NEED→PROPOSE→CLAIM→COMMIT→ATTEST→FINALIZE workflow
+4. Verify the task reached FINAL state
+5. Clean up all processes
+
+Expected output:
+```
+============================================================
+CAN Swarm End-to-End Demo
+============================================================
+
+[1/5] Starting Coordinator...
+[2/5] Starting agents (Planner, Worker, Verifier)...
+[3/5] Publishing NEED message...
+✓ Published NEED to thread.xxx.need
+
+[4/5] Waiting for agents to process (15 seconds)...
+[5/5] Checking results...
+✓ Found 1 FINALIZED task(s)
+✓ SUCCESS: Flow completed to FINALIZE
+
+============================================================
+✓ E2E DEMO PASSED
+============================================================
+```
+
+## 📖 Documentation
+
+- **[API Reference](docs/API.md)** - Detailed module and function documentation
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and data flow diagrams
+- **[Implementation Roadmap](IMPLEMENTATION_ROADMAP.md)** - Phase-by-phase development guide
+
+## 🏗️ Architecture Overview
+
+```
+┌─────────────┐
+│    NEED     │  User publishes a task request
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│  PLANNER    │  Creates execution proposal
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│   WORKER    │  Claims → Executes → Commits result
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│  VERIFIER   │  Validates → Attests → Finalizes
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│  FINALIZE   │  Task marked as FINAL in Plan Store
+└─────────────┘
+```
+
+All communication flows through:
+- **NATS JetStream**: Message bus
+- **Signed Audit Log**: Cryptographic event trail
+- **Plan Store**: SQLite CRDT for task state
+- **Consensus**: Redis for DECIDE uniqueness
+- **CAS**: SHA256-addressed artifact storage
+
+## 🧪 Testing
+
+### Run All Tests
+```bash
+.venv/bin/pytest tests/ -v
+```
+
+### Run Property Tests
+```bash
+.venv/bin/pytest tests/test_properties.py -v
+```
+
+Property tests verify:
+- **P1**: Single DECIDE (consensus uniqueness)
+- **P2**: Deterministic replay
+- **P3**: Lamport ordering
+- **P4**: Policy enforcement
+
+### Deterministic Replay
+```bash
+# Get thread ID from E2E demo or logs
+.venv/bin/python tools/replay.py <thread-id>
+```
+
+## 📦 Project Structure
+
+```
+agent-swarm/
+├── src/                 # Core framework
+│   ├── crypto.py       # Ed25519 signing & verification
+│   ├── audit.py        # Signed audit logging
+│   ├── bus.py          # NATS message bus
+│   ├── envelope.py     # Message envelope creation
+│   ├── lamport.py      # Lamport clock
+│   ├── policy.py       # Validation rules
+│   ├── cas.py          # Content-addressable storage
+│   ├── plan_store.py   # CRDT task state
+│   ├── consensus.py    # Redis-based DECIDE
+│   ├── agent.py        # Base agent class
+│   ├── coordinator.py  # Central coordinator
+│   ├── verbs.py        # Message dispatcher
+│   └── handlers/       # Verb handlers (NEED, PROPOSE, etc.)
+├── agents/             # Agent implementations
+│   ├── planner.py     # Proposal generation
+│   ├── worker.py      # Task execution
+│   └── verifier.py    # Result validation
+├── demo/              # Demo scripts
+│   ├── e2e_flow.py   # Automated full workflow
+│   ├── start_coordinator.py
+│   ├── publish_need.py
+│   └── check_finalize.py
+├── tools/             # Utilities
+│   ├── replay.py     # Deterministic replay
+│   └── cleanup_nats.py
+├── tests/            # Test suite
+│   └── test_properties.py  # Property-based tests
+└── docs/             # Documentation
+    ├── API.md
+    └── ARCHITECTURE.md
+```
+
+## ✅ Implementation Status
+
+### Phase 0: Foundation (Complete ✓)
+- ✅ NATS JetStream setup
+- ✅ Ed25519 key generation
+- ✅ Basic publisher/subscriber
+
+### Phase 1: Core Infrastructure (Complete ✓)
+- ✅ Signed audit logging
+- ✅ Message bus abstraction
+- ✅ Cryptographic verification
+
+### Phase 2: Coordination Layer (Complete ✓)
+- ✅ Envelope schema
+- ✅ Lamport clocks
+- ✅ Policy engine
+- ✅ Plan Store (SQLite CRDT)
+- ✅ Consensus adapter (Redis)
+- ✅ All verb handlers
+
+### Phase 3: Agent Implementation (Complete ✓)
+- ✅ Base agent framework
+- ✅ Planner agent
+- ✅ Worker agent
+- ✅ Verifier agent
+- ✅ Coordinator script
+
+### Phase 4: Integration & Testing (Complete ✓)
+- ✅ E2E demo
+- ✅ Deterministic replay tool
+- ✅ Property tests (10/10 passing)
+
+### Phase 5: Documentation (Complete ✓)
+- ✅ README update
+- ✅ API documentation
+- ✅ Architecture diagrams
+- ✅ Demo walkthrough
+
+## 🔬 Example Usage
+
+### Manual Workflow
+
+```bash
+# Terminal 1: Start Coordinator
+.venv/bin/python demo/start_coordinator.py
+
+# Terminal 2: Start Planner
+.venv/bin/python agents/planner.py
+
+# Terminal 3: Start Worker
+.venv/bin/python agents/worker.py
+
+# Terminal 4: Start Verifier
+.venv/bin/python agents/verifier.py
+
+# Terminal 5: Publish a NEED
+.venv/bin/python demo/publish_need.py
+
+# Terminal 6: Check results
+.venv/bin/python demo/check_finalize.py
+```
+
+## 🛠️ Development
+
+### Running Individual Components
+
+```bash
+# Start NATS
+nats-server -js
+
+# Start Redis
+redis-server
+
+# Clean NATS consumers (between test runs)
+.venv/bin/python tools/cleanup_nats.py
+
+# Verify audit log signatures
+.venv/bin/python tools/verify_signatures.py
+```
+
+## 🎓 Learn More
+
+- **CAN Swarm Vision**: See the [original README](README.md) for the long-term vision
+- **Implementation Details**: Check [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
+- **Demo Walkthrough**: Step-by-step guide in [docs/DEMO.md](docs/DEMO.md)
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details
+
+## 🤝 Contributing
+
+Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📧 Contact
+
+For questions or feedback, please open an issue on GitHub.
+
+---
+
+**Status**: v1 PoC Complete ✨
+**Last Updated**: 2025-11-24

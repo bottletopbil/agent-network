@@ -4,3 +4,7 @@ redis==5.0.0
 opentelemetry-api==1.21.0
 opentelemetry-sdk==1.21.0
 pytest==7.4.3
+
+# Web Interface
+flask==3.0.0
+flask-cors==4.0.0

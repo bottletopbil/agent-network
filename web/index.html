@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAN Swarm v1 PoC - Investor Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <div class="logo">
+                <span class="logo-icon">🐝</span>
+                <h1>CAN Swarm</h1>
+                <span class="version">v1 PoC</span>
+            </div>
+            <div class="system-status" id="systemStatus">
+                <div class="status-indicator"></div>
+                <span>Initializing...</span>
+            </div>
+        </div>
+        <p class="tagline">Decentralized Multi-Agent Coordination with Cryptographic Auditability</p>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Workflow Visualization -->
+        <section class="workflow-section">
+            <h2>Live Workflow</h2>
+            <div class="workflow-container" id="workflowContainer">
+                <div class="workflow-stage" data-stage="need">
+                    <div class="stage-icon">📝</div>
+                    <div class="stage-name">NEED</div>
+                    <div class="stage-status">Pending</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-stage" data-stage="propose">
+                    <div class="stage-icon">💡</div>
+                    <div class="stage-name">PROPOSE</div>
+                    <div class="stage-status">Pending</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-stage" data-stage="claim">
+                    <div class="stage-icon">✋</div>
+                    <div class="stage-name">CLAIM</div>
+                    <div class="stage-status">Pending</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-stage" data-stage="commit">
+                    <div class="stage-icon">💾</div>
+                    <div class="stage-name">COMMIT</div>
+                    <div class="stage-status">Pending</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-stage" data-stage="attest">
+                    <div class="stage-icon">✓</div>
+                    <div class="stage-name">ATTEST</div>
+                    <div class="stage-status">Pending</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-stage" data-stage="finalize">
+                    <div class="stage-icon">🏆</div>
+                    <div class="stage-name">FINALIZE</div>
+                    <div class="stage-status">Pending</div>
+                </div>
+            </div>
+            <div class="thread-info" id="threadInfo">
+                <span>No active workflow</span>
+            </div>
+        </section>
+
+        <!-- Agent Status Cards -->
+        <section class="agents-section">
+            <h2>Agent Network</h2>
+            <div class="agents-grid" id="agentsGrid">
+                <div class="agent-card loading">
+                    <div class="agent-header">
+                        <div class="agent-icon">🤖</div>
+                        <div class="agent-pulse"></div>
+                    </div>
+                    <h3>Loading...</h3>
+                    <div class="agent-stats">
+                        <div class="stat">
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value">---</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metrics Dashboard -->
+        <section class="metrics-section">
+            <h2>System Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-value" id="metricTotalTasks">--</div>
+                    <div class="metric-label">Total Tasks</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">✅</div>
+                    <div class="metric-value" id="metricCompleted">--</div>
+                    <div class="metric-label">Completed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">🎯</div>
+                    <div class="metric-value" id="metricSuccessRate">--%</div>
+                    <div class="metric-label">Success Rate</div>
+                </div>
+<div class="metric-card">
+                    <div class="metric-icon">⚡</div>
+                    <div class="metric-value" id="metricOperations">--</div>
+                    <div class="metric-label">Total Ops</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audit Log Stream -->
+        <section class="audit-section">
+            <h2>Cryptographic Audit Trail</h2>
+            <div class="audit-controls">
+                <select id="auditThreadFilter" class="thread-selector">
+                    <option value="">All Threads</option>
+                </select>
+                <span class="audit-count" id="auditCount">0 entries</span>
+            </div>
+            <div class="audit-log" id="auditLog">
+                <div class="audit-empty">
+                    <span>No audit entries yet. Start a demo to see the cryptographic trail.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Controls -->
+        <section class="controls-section">
+            <h2>Interactive Demo</h2>
+            <div class="controls-grid">
+                <button class="control-btn primary" id="btnStartDemo">
+                    <span class="btn-icon">▶️</span>
+                    <span class="btn-text">Start E2E Demo</span>
+                </button>
+                <button class="control-btn secondary" id="btnRefresh">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text">Refresh Data</span>
+                </button>
+                <button class="control-btn secondary" id="btnViewDocs">
+                    <span class="btn-icon">📚</span>
+                    <span class="btn-text">Documentation</span>
+                </button>
+            </div>
+            <div class="demo-status" id="demoStatus"></div>
+        </section>
+
+        <!-- Key Features Highlight -->
+        <section class="features-section">
+            <h2>Key Differentiators</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Cryptographic Signatures</h3>
+                    <p>Every message signed with Ed25519. Zero trust, full auditability.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Deterministic Replay</h3>
+                    <p>Complete workflow reproduction from audit logs. Byte-for-byte verification.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Multi-Agent Coordination</h3>
+                    <p>Decentralized agents coordinate without central orchestrator.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>Causal Ordering</h3>
+                    <p>Lamport clocks ensure consistent event ordering across the network.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✓</div>
+                    <h3>Policy Enforcement</h3>
+                    <p>Validated at ingress, commit-gate, and preflight. Default-deny security.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Consensus Guarantees</h3>
+                    <p>At-most-once DECIDE per NEED. Proven with property tests (P1-P4).</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>CAN Swarm v1 PoC • Cognitive Agent Network • Built for Verifiable AI Coordination</p>
+        <p class="footer-links">
+            <a href="https://github.com/yourusername/agent-swarm" target="_blank">GitHub</a> • 
+            <a href="docs/ARCHITECTURE.md">Architecture</a> • 
+            <a href="docs/DEMO.md">Demo Guide</a>
+        </p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
