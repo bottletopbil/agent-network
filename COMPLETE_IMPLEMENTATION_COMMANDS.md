@@ -101,10 +101,10 @@ Run: pytest tests/test_stake.py -v
 
 ---
 
-### Command 23: Verifier Pools 🔀
+### Command 23A: Verifier Pool Registration 🔀
 
 ```
-Implement Phase 6.3 - Verifier Pools:
+Implement Phase 6.3A - Verifier Pool Registration:
 
 1. Create src/economics/pools.py with:
    - VerifierPool class:
@@ -113,8 +113,30 @@ Implement Phase 6.3 - Verifier Pools:
      - get_pool_members()
      - get_active_verifiers(min_stake)
    - Metadata: org_id, asn, region, reputation
+   - SQLite backend for pool storage
 
-2. Create src/economics/selection.py with:
+2. Create tests/test_pools_registration.py with:
+   - test_pool_registration
+   - test_pool_deregistration
+   - test_get_pool_members
+   - test_get_active_verifiers
+   - test_stake_requirement
+
+Run: pytest tests/test_pools_registration.py -v
+```
+
+**Checkpoint:** Verifiers can register and join pools
+
+**Note:** 🔀 Can run in parallel with Command 24
+
+---
+
+### Command 23B: Committee Selection & Reputation 🔀
+
+```
+Implement Phase 6.3B - Committee Selection & Reputation:
+
+1. Create src/economics/selection.py with:
    - VerifierSelector class:
      - calculate_weight(verifier) # sqrt(stake) × reputation × recency
      - select_committee(k, diversity_constraints)
@@ -124,7 +146,7 @@ Implement Phase 6.3 - Verifier Pools:
      - Max 40% from same ASN
      - Max 50% from same region
 
-3. Create src/economics/reputation.py with:
+2. Create src/economics/reputation.py with:
    - ReputationTracker class:
      - record_attestation(verifier_id, task_id, verdict)
      - record_challenge(verifier_id, upheld)
@@ -133,18 +155,19 @@ Implement Phase 6.3 - Verifier Pools:
    - Boost: +0.1 for successful challenge
    - Penalty: -0.3 for failed attestation
 
-4. Create tests/test_pools.py with:
-   - test_pool_registration
+3. Create tests/test_pool_selection.py with:
    - test_committee_selection
    - test_diversity_enforcement
    - test_reputation_calculation
+   - test_weight_calculation
 
-Run: pytest tests/test_pools.py -v
+Run: pytest tests/test_pool_selection.py -v
 ```
 
-**Checkpoint:** Verifiers can join pools, committees selected with diversity
+**Checkpoint:** Committees selected with proper diversity constraints and reputation weighting
 
 **Note:** 🔀 Can run in parallel with Command 24
+
 
 ---
 
@@ -197,16 +220,60 @@ Run: pytest tests/test_bounties.py -v
 
 ## PHASE 7: MARKET-STYLE NEGOTIATION
 
-### Command 25: Extended Verb Handlers
+### Command 25A: Basic Negotiation Verbs
 
 ```
-Implement Phase 7.1 - Extended Verbs:
+Implement Phase 7.1A - Basic Negotiation Verbs:
 
 1. Update src/policy.py to add new verbs:
    ALLOWED_KINDS = {
      "NEED", "PROPOSE", "CLAIM", "COMMIT", "ATTEST", "DECIDE", "FINALIZE",
-     "YIELD", "RELEASE", "UPDATE_PLAN", "ATTEST_PLAN"
+     "YIELD", "RELEASE", "UPDATE_PLAN"
    }
+
+2. Create src/handlers/yield.py:
+   - handle_yield(envelope):
+     - Release lease
+     - Update task state to DRAFT
+     - Allow re-claiming
+   - Yield payload:
+     - task_id, reason
+
+3. Create src/handlers/release.py:
+   - handle_release(envelope):
+     - Expire lease (system-initiated)
+     - Scavenge task
+     - Notify coordinator
+   - Release payload:
+     - task_id, lease_id, reason (timeout/heartbeat_miss)
+
+4. Create src/handlers/update_plan.py:
+   - handle_update_plan(envelope):
+     - Validate plan update
+     - Apply to plan store
+     - Broadcast to peers
+   - Update_plan payload:
+     - thread_id, ops[]
+
+5. Create tests/test_basic_negotiation.py:
+   - test_yield_release_task
+   - test_release_on_timeout
+   - test_update_plan
+
+Run: pytest tests/test_basic_negotiation.py -v
+```
+
+**Checkpoint:** Basic negotiation verbs (YIELD, RELEASE, UPDATE_PLAN) work
+
+---
+
+### Command 25B: Extended Proposal & Claim Handlers
+
+```
+Implement Phase 7.1B - Extended Proposal & Claim Handlers:
+
+1. Update src/policy.py to add:
+   ALLOWED_KINDS.add("ATTEST_PLAN")
 
 2. Create src/handlers/propose_extended.py:
    - handle_propose_extended(envelope):
@@ -226,39 +293,31 @@ Implement Phase 7.1 - Extended Verbs:
    - Claim payload:
      - task_id, worker_id, lease_ttl, cost, eta, heartbeat_interval
 
-4. Create src/handlers/yield.py:
-   - handle_yield(envelope):
-     - Release lease
-     - Update task state to DRAFT
-     - Allow re-claiming
-   - Yield payload:
-     - task_id, reason
+4. Create src/handlers/attest_plan.py:
+   - handle_attest_plan(envelope):
+     - Validate verifier is in pool
+     - Record attestation for proposal
+     - Check if K_plan reached
+   - Attest_plan payload:
+     - need_id, proposal_id, verdict
 
-5. Create src/handlers/release.py:
-   - handle_release(envelope):
-     - Expire lease (system-initiated)
-     - Scavenge task
-     - Notify coordinator
-   - Release payload:
-     - task_id, lease_id, reason (timeout/heartbeat_miss)
-
-6. Create tests/test_negotiation_handlers.py:
+5. Create tests/test_extended_handlers.py:
    - test_propose_with_ballot
    - test_claim_with_lease
-   - test_yield_release_task
-   - test_release_on_timeout
+   - test_attest_plan
 
-Run: pytest tests/test_negotiation_handlers.py -v
+Run: pytest tests/test_extended_handlers.py -v
 ```
 
-**Checkpoint:** Extended negotiation verbs work
+**Checkpoint:** Extended proposal and claim handlers work with attestation
+
 
 ---
 
-### Command 26: Lease Management
+### Command 26A: Lease Core Management
 
 ```
-Implement Phase 7.2 - Lease Management:
+Implement Phase 7.2A - Lease Core:
 
 1. Create src/leases/__init__.py
 
@@ -269,48 +328,81 @@ Implement Phase 7.2 - Lease Management:
      - create_lease(task_id, worker_id, ttl, heartbeat_interval)
      - renew_lease(lease_id)
      - heartbeat(lease_id)
-     - check_expiry() # Background task
-     - scavenge_expired() # Trigger RELEASE
+     - check_expiry() # Check if expired
+     - get_lease(lease_id)
+     - get_leases_for_worker(worker_id)
 
 3. Create src/leases/heartbeat.py with:
    - HeartbeatProtocol class:
      - expect_heartbeat(lease_id, interval)
      - receive_heartbeat(lease_id)
      - check_missed_heartbeats()
-   - HEARTBEAT verb:
-     - payload: lease_id, worker_id, progress%
+     - get_next_expected_heartbeat(lease_id)
 
 4. Update src/handlers/heartbeat.py:
    - handle_heartbeat(envelope):
      - Validate lease exists
      - Update last_heartbeat timestamp
      - Record progress
+   - HEARTBEAT payload:
+     - lease_id, worker_id, progress%
 
-5. Create lease monitoring daemon:
-   - src/daemons/lease_monitor.py:
-     - Runs every 10 seconds
-     - Checks for expired leases
-     - Publishes RELEASE for timed-out leases
-     - Slashes workers for missed heartbeats
-
-6. Create tests/test_leases.py:
+5. Create tests/test_leases_core.py:
    - test_lease_creation
    - test_lease_renewal
    - test_heartbeat_updates
-   - test_lease_expiry
-   - test_scavenge_on_timeout
+   - test_lease_expiry_check
 
-Run: pytest tests/test_leases.py -v
+Run: pytest tests/test_leases_core.py -v
 ```
 
-**Checkpoint:** Leases enforce exclusivity, heartbeats prevent timeouts
+**Checkpoint:** Lease core system works with heartbeat tracking
 
 ---
 
-### Command 27: Auction Protocol
+### Command 26B: Lease Monitoring Daemon
 
 ```
-Implement Phase 7.3 - Auction Protocol:
+Implement Phase 7.2B - Lease Monitoring:
+
+1. Create src/daemons/__init__.py
+
+2. Create src/daemons/lease_monitor.py:
+   - LeaseMonitor class:
+     - start() # Start monitoring loop
+     - stop() # Stop monitoring
+     - check_expired_leases() # Check every 10 seconds
+     - handle_expired(lease_id) # Publish RELEASE
+     - handle_missed_heartbeat(lease_id) # Slash worker
+   - Background daemon that runs continuously
+
+3. Update src/leases/manager.py:
+   - Add scavenge_expired() method
+     - Returns list of expired lease_ids
+     - Called by daemon
+
+4. Integrate with coordinator:
+   - src/coordinator.py starts LeaseMonitor on init
+   - Monitor publishes RELEASE for expired leases
+
+5. Create tests/test_lease_monitor.py:
+   - test_monitor_detects_expired_lease
+   - test_monitor_publishes_release
+   - test_monitor_handles_missed_heartbeat
+   - test_scavenge_on_timeout
+
+Run: pytest tests/test_lease_monitor.py -v
+```
+
+**Checkpoint:** Lease monitoring daemon detects and handles expiry
+
+
+---
+
+### Command 27A: Auction Core System
+
+```
+Implement Phase 7.3A - Auction Core:
 
 1. Create src/auction/__init__.py
 
@@ -324,6 +416,7 @@ Implement Phase 7.3 - Auction Protocol:
      - accept_bid(need_id, agent_id, proposal)
      - close_auction(need_id) # Returns winner
      - timeout_auction(need_id) # No bids
+     - get_auction_status(need_id)
 
 3. Create src/auction/selection.py with:
    - BidEvaluator class:
@@ -331,34 +424,60 @@ Implement Phase 7.3 - Auction Protocol:
      - select_winner(bids[])
      - handle_ties(bids[]) # Use reputation as tiebreaker
 
-4. Add randomized backoff to prevent herds:
-   - src/auction/backoff.py:
-     - calculate_backoff(attempt) # Exponential with jitter
-     - RandomizedBackoff class
+4. Create src/auction/backoff.py:
+   - calculate_backoff(attempt) # Exponential with jitter
+   - RandomizedBackoff class
 
-5. Update src/handlers/need.py:
-   - Trigger auction instead of direct assignment
-   - Wait for bid window
-   - Select best proposal
-   - Emit DECIDE with winning proposal
-
-6. Update agents/planner.py:
-   - Listen for NEED
-   - Evaluate if can handle
-   - Submit PROPOSE with cost/ETA bid
-   - Implement backoff on rejection
-
-7. Create tests/test_auction.py:
+5. Create tests/test_auction_core.py:
    - test_auction_lifecycle
    - test_bid_evaluation
    - test_winner_selection
    - test_timeout_handling
    - test_randomized_backoff
 
-Run: pytest tests/test_auction.py -v
+Run: pytest tests/test_auction_core.py -v
 ```
 
-**Checkpoint:** Tasks are auctioned, agents bid, best proposal wins
+**Checkpoint:** Auction core system manages bidding and winner selection
+
+---
+
+### Command 27B: Agent Bidding Integration
+
+```
+Implement Phase 7.3B - Agent Bidding Integration:
+
+1. Update src/handlers/need.py:
+   - Import AuctionManager
+   - Trigger auction instead of direct assignment
+   - Wait for bid window
+   - Select best proposal via AuctionManager
+   - Emit DECIDE with winning proposal
+
+2. Update agents/planner.py:
+   - Listen for NEED messages
+   - Evaluate if can handle task
+   - Calculate cost and ETA
+   - Submit PROPOSE with bid (cost, ETA, capabilities)
+   - Implement randomized backoff on rejection
+   - Track bid history
+
+3. Create src/auction/agent_integration.py:
+   - Integration helpers for agents
+   - Bid submission utilities
+   - Cost/ETA calculation helpers
+
+4. Create tests/test_auction_integration.py:
+   - test_need_triggers_auction
+   - test_planner_submits_bid
+   - test_best_bid_wins
+   - test_rejected_bid_backoff
+
+Run: pytest tests/test_auction_integration.py -v
+```
+
+**Checkpoint:** NEEDs trigger auctions, agents bid, best proposal selected
+
 
 ---
 
@@ -513,10 +632,10 @@ Run: pytest tests/test_bonds.py -v
 
 ---
 
-### Command 31: Challenge Verification
+### Command 31A: Challenge Verification Core
 
 ```
-Implement Phase 8.3 - Challenge Verification:
+Implement Phase 8.3A - Challenge Verification Core:
 
 1. Create src/challenges/verification.py with:
    - ChallengeVerifier class:
@@ -527,35 +646,66 @@ Implement Phase 8.3 - Challenge Verification:
    - Gas-metered execution
    - Deterministic verification rules
 
-2. Create verification queue:
-   - src/challenges/queue.py:
-     - Add challenges to verification queue
-     - Priority: bond amount (higher = faster)
-     - Distributed verification (multiple verifiers)
+2. Create src/challenges/queue.py:
+   - ChallengeQueue class:
+     - add_challenge(challenge_id, proof)
+     - get_next_challenge()
+     - prioritize_by_bond() # Higher bond = faster
+     - mark_verified(challenge_id, result)
 
-3. Create automated verifiers:
-   - agents/challenge_verifier.py:
-     - Listens for CHALLENGE messages
-     - Runs verification logic
-     - Publishes verdict
-     - Stakes required to participate
+3. Create src/challenges/escalation.py:
+   - EscalationHandler class:
+     - escalate_if_disagree(challenge_id, verdicts[])
+     - create_human_review_task(challenge_id)
+     - governance_vote(challenge_id) # For complex cases
 
-4. Manual escalation:
-   - src/challenges/escalation.py:
-     - Escalate if automated verifiers disagree
-     - Human review queue
-     - Governance vote for complex cases
-
-5. Create tests/test_verification.py:
+4. Create tests/test_verification_core.py:
    - test_schema_violation_detection
    - test_citation_verification
-   - test_automated_verification
+   - test_queue_prioritization
    - test_escalation_path
 
-Run: pytest tests/test_verification.py -v
+Run: pytest tests/test_verification_core.py -v
 ```
 
-**Checkpoint:** Challenges are verified automatically
+**Checkpoint:** Challenge verification core logic works with escalation
+
+---
+
+### Command 31B: Challenge Verifier Agent
+
+```
+Implement Phase 8.3B - Challenge Verifier Agent:
+
+1. Create agents/challenge_verifier.py:
+   - ChallengeVerifierAgent class (extends BaseAgent)
+     - Listens for CHALLENGE messages
+     - Pulls from challenge queue
+     - Runs verification logic via ChallengeVerifier
+     - Publishes verdict (UPHOLD/REJECT)
+     - Requires stake to participate
+
+2. Add agent initialization:
+   - Register with verifier pool
+   - Stake minimum required amount
+   - Subscribe to challenge topics
+
+3. Integrate with verification queue:
+   - Agent claims challenges from queue
+   - Multiple verifiers can verify same challenge
+   - Consensus on verdict required
+
+4. Create tests/test_challenge_verifier_agent.py:
+   - test_agent_listens_for_challenges
+   - test_agent_verifies_challenge
+   - test_agent_publishes_verdict
+   - test_agent_requires_stake
+
+Run: pytest tests/test_challenge_verifier_agent.py -v
+```
+
+**Checkpoint:** Challenge verifier agents automatically process challenges
+
 
 ---
 
@@ -655,22 +805,29 @@ Run: pytest tests/test_raft_consensus.py -v
 ## Phase-by-Phase Summary
 
 The complete commands continue for:
-- **Phase 9**: Distributed Consensus (Commands 33-36)
-- **Phase 10**: Distributed CRDT (Commands 37-40)
-- **Phase 11**: WASM Policy (Commands 41-44)
-- **Phase 12**: IPFS CAS (Commands 45-48)
-- **Phase 13**: P2P Transport (Commands 49-54)
-- **Phase 14**: Intelligent Routing (Commands 55-59)
-- **Phase 15**: Cross-Shard (Commands 60-63)
-- **Phase 16**: GC & Checkpointing (Commands 64-67)
-- **Phase 17**: Identity & Attestation (Commands 68-71)
-- **Phase 18**: Observability (Commands 72-75)
-- **Phase 19**: Open Economy (Commands 76-80)
-- **Phase 20**: Production Hardening (Commands 81-85)
+- **Phase 6**: Economic Foundation (Commands 21, 22, 23A, 23B, 24) - 5 commands
+- **Phase 7**: Market Negotiation (Commands 25A, 25B, 26A, 26B, 27A, 27B, 28) - 7 commands
+- **Phase 8**: Challenge Protocol (Commands 29, 30, 31A, 31B, 32) - 5 commands
+- **Phase 9**: Distributed Consensus (Commands 33-36) - 4 commands (detailed)
+- **Phase 10**: Distributed CRDT (Commands 37-40) - 4 commands (to detail)
+- **Phase 11**: WASM Policy (Commands 41-44) - 4 commands (to detail)
+- **Phase 12**: IPFS CAS (Commands 45-48) - 4 commands (to detail)
+- **Phase 13**: P2P Transport (Commands 49-54) - 6 commands (to detail)
+- **Phase 14**: Intelligent Routing (Commands 55-59) - 5 commands (to detail)
+- **Phase 15**: Cross-Shard (Commands 60-63) - 4 commands (to detail)
+- **Phase 16**: GC & Checkpointing (Commands 64-67) - 4 commands (to detail)
+- **Phase 17**: Identity & Attestation (Commands 68-71) - 4 commands (to detail)
+- **Phase 18**: Observability (Commands 72-75) - 4 commands (to detail)
+- **Phase 19**: Open Economy (Commands 76-80) - 5 commands (to detail)
+- **Phase 20**: Production Hardening (Commands 81-85) - 5 commands (to detail)
 
-**Total Commands**: 85 implementation commands  
+**Total Commands**: 90 implementation commands (+5 from original 85)  
+**Detailed Commands (6-8)**: 18 commands (was 13)  
 **Timeline**: 6-12 months  
 **Team Size**: 2-5 engineers
+
+**Note**: Commands were sized for optimal implementation - each takes 1-2 hours and produces a clear checkpoint.
+
 
 ---
 
@@ -792,8 +949,9 @@ docker-compose up -d
 
 ---
 
-**Status**: Commands 21-32 Detailed (Phase 6-8)  
-**Remaining**: Commands 33-85 (Phase 9-20)  
+**Status**: Commands 21-33 Detailed (Phases 6-9)  
+**Detailed**: 18 commands fully specified  
+**Remaining**: Commands 34-90 (Phases 9-20) to be detailed  
 **Next**: Continue building the decentralized agent economy! 🚀🐝
 
 **Note**: This is a living document. As phases complete, we'll add:
@@ -801,3 +959,14 @@ docker-compose up -d
 - Performance tuning recommendations
 - Troubleshooting runbooks
 - Community contributions
+
+---
+
+## Command Sizing Update (2025-11-24)
+
+The commands were optimized for better implementation success:
+- **Original**: 85 total commands
+- **Optimized**: 90 total commands (+5 splits)
+- **Why**: 5 commands were too large (4-5 files each), risking errors and overwhelming complexity
+- **Result**: Each command now takes 1-2 hours, with 2-3 new files and clear checkpoints
+

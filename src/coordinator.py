@@ -13,6 +13,7 @@ from plan_store import PlanStore
 from consensus import ConsensusAdapter
 from bus import subscribe_envelopes
 from verbs import DISPATCHER
+from daemons import BootstrapMonitor
 
 # Import all handlers to trigger auto-registration
 import handlers.need
@@ -28,10 +29,16 @@ class Coordinator:
     def __init__(
         self,
         plan_store_path: Path = Path(".state/plan.db"),
-        redis_url: str = "redis://localhost:6379"
+        redis_url: str = "redis://localhost:6379",
+        verifier_pool = None
     ):
         """
         Initialize coordinator with plan store and consensus adapter.
+        
+        Args:
+            plan_store_path: Path to SQLite plan store
+            redis_url: Redis connection URL
+            verifier_pool: Optional VerifierPool instance for bootstrap monitoring
         """
         # Create plan store
         self.plan_store = PlanStore(plan_store_path)
@@ -47,6 +54,24 @@ class Coordinator:
         # Log registered verbs
         verbs = DISPATCHER.list_verbs()
         print(f"[COORDINATOR] Registered {len(verbs)} verb handlers: {', '.join(verbs)}")
+        
+        # Start bootstrap monitor if verifier pool is provided
+        self.bootstrap_monitor = None
+        if verifier_pool:
+            self._start_bootstrap_monitor(verifier_pool)
+    
+    def _start_bootstrap_monitor(self, verifier_pool):
+        """Initialize and start bootstrap monitor daemon"""
+        def get_active_verifier_count():
+            """Callback to get current active verifier count"""
+            return len(verifier_pool.get_active_verifiers(min_stake=1000))
+        
+        self.bootstrap_monitor = BootstrapMonitor(
+            get_active_verifiers_callback=get_active_verifier_count,
+            check_interval_seconds=3600  # Check every hour
+        )
+        self.bootstrap_monitor.start()
+        print(f"[COORDINATOR] Bootstrap monitor started")
     
     def _inject_dependencies(self):
         """Inject plan_store and consensus_adapter into handlers"""

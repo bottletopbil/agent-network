@@ -6,15 +6,20 @@ import uuid
 from plan_store import PlanStore, PlanOp, OpType, TaskState
 from verbs import DISPATCHER
 from consensus import ConsensusAdapter
+from consensus.raft_adapter import RaftConsensusAdapter
+from consensus.feature_flag import use_raft_consensus
 import time
 
 plan_store: PlanStore = None  # Injected at startup
-consensus_adapter: ConsensusAdapter = None  # Injected at startup
+consensus_adapter: ConsensusAdapter = None  # Injected at startup (Redis)
+raft_adapter: RaftConsensusAdapter = None  # Injected at startup (etcd)
 
 async def handle_decide(envelope: dict):
     """
     Process DECIDE envelope:
     1. Call consensus.try_decide() for atomic at-most-once semantics
+       - Uses Raft (etcd) if RAFT_CONSENSUS=true
+       - Falls back to Redis otherwise
     2. Update task state to DECIDED if consensus succeeds
     3. Record DECIDE metadata
     """
@@ -32,26 +37,46 @@ async def handle_decide(envelope: dict):
         print(f"[DECIDE] ERROR: Missing need_id or proposal_id")
         return
     
-    # Attempt atomic DECIDE via consensus
-    if not consensus_adapter:
-        print(f"[DECIDE] ERROR: No consensus adapter configured")
-        return
+    # Attempt atomic DECIDE via consensus (Raft or Redis)
+    if use_raft_consensus():
+        # Use Raft consensus via etcd
+        if not raft_adapter:
+            print(f"[DECIDE] ERROR: Raft adapter not configured (RAFT_CONSENSUS=true but no adapter)")
+            return
+        
+        decide_record = raft_adapter.try_decide(
+            need_id=need_id,
+            proposal_id=proposal_id,
+            epoch=epoch,
+            lamport=envelope["lamport"],
+            k_plan=k_plan,
+            decider_id=envelope["sender_pk_b64"],
+            timestamp_ns=time.time_ns()
+        )
+    else:
+        # Use Redis consensus (existing)
     
-    decide_record = consensus_adapter.try_decide(
-        need_id=need_id,
-        proposal_id=proposal_id,
-        epoch=epoch,
-        lamport=envelope["lamport"],
-        k_plan=k_plan,
-        decider_id=envelope["sender_pk_b64"],
-        timestamp_ns=time.time_ns()
-    )
+        if not consensus_adapter:
+            print(f"[DECIDE] ERROR: Redis adapter not configured")
+            return
+        
+        decide_record = consensus_adapter.try_decide(
+            need_id=need_id,
+            proposal_id=proposal_id,
+            epoch=epoch,
+            lamport=envelope["lamport"],
+            k_plan=k_plan,
+            decider_id=envelope["sender_pk_b64"],
+            timestamp_ns=time.time_ns()
+        )
     
     if decide_record is None:
-        print(f"[DECIDE] CONFLICT: DECIDE already exists for need {need_id}")
+        consensus_type = "Raft" if use_raft_consensus() else "Redis"
+        print(f"[DECIDE] CONFLICT ({consensus_type}): DECIDE already exists for need {need_id}")
         return
     
-    print(f"[DECIDE] ✓ Atomic DECIDE recorded for need {need_id} -> proposal {proposal_id}")
+    consensus_type = "Raft" if use_raft_consensus() else "Redis"
+    print(f"[DECIDE] ✓ Atomic DECIDE recorded ({consensus_type}) for need {need_id} -> proposal {proposal_id}")
     
     # Update task state to DECIDED (if task_id provided)
     if task_id:

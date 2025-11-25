@@ -1,10 +1,11 @@
 nats-py==2.9.0
 pynacl==1.5.0
 redis==5.0.0
+python-etcd3==0.1.6
 opentelemetry-api==1.21.0
 opentelemetry-sdk==1.21.0
 pytest==7.4.3
 
 # Web Interface
 flask==3.0.0
-flask-cors==4.0.0
+etcd3==0.12.0

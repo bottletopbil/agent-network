@@ -177,3 +177,37 @@ class PlanStore:
                 timestamp_ns=row[7]
             ))
         return ops
+    
+    def annotate_task(self, task_id: str, annotations: Dict[str, Any]) -> None:
+        """
+        Annotate a task with metadata.
+        
+        This creates an ANNOTATE operation which can be used to attach
+        additional metadata to tasks (e.g., invalidation status, K_result escalation).
+        
+        Args:
+            task_id: Task ID to annotate
+            annotations: Dictionary of annotations to apply
+        """
+        import uuid
+        import time
+        
+        # Get task to ensure it exists and get thread_id
+        task = self.get_task(task_id)
+        if not task:
+            raise ValueError(f"Task not found: {task_id}")
+        
+        # Create ANNOTATE op
+        op = PlanOp(
+            op_id=str(uuid.uuid4()),
+            thread_id=task["thread_id"],
+            lamport=int(time.time_ns() // 1000),  # Simple lamport based on timestamp
+            actor_id="system",  # System-generated annotation
+            op_type=OpType.ANNOTATE,
+            task_id=task_id,
+            payload=annotations,
+            timestamp_ns=time.time_ns()
+        )
+        
+        self.append_op(op)
+
