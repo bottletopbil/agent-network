@@ -30,7 +30,9 @@ class Coordinator:
         self,
         plan_store_path: Path = Path(".state/plan.db"),
         redis_url: str = "redis://localhost:6379",
-        verifier_pool = None
+        verifier_pool = None,
+        enable_fast_sync: bool = True,
+        checkpoint_dir: Path = None
     ):
         """
         Initialize coordinator with plan store and consensus adapter.
@@ -39,7 +41,13 @@ class Coordinator:
             plan_store_path: Path to SQLite plan store
             redis_url: Redis connection URL
             verifier_pool: Optional VerifierPool instance for bootstrap monitoring
+            enable_fast_sync: Enable fast sync from checkpoints
+            checkpoint_dir: Directory for checkpoints (default: .state/checkpoints)
         """
+        # Try fast sync if enabled
+        if enable_fast_sync:
+            self._attempt_fast_sync(checkpoint_dir)
+        
         # Create plan store
         self.plan_store = PlanStore(plan_store_path)
         print(f"[COORDINATOR] Plan store initialized at {plan_store_path}")
@@ -59,6 +67,38 @@ class Coordinator:
         self.bootstrap_monitor = None
         if verifier_pool:
             self._start_bootstrap_monitor(verifier_pool)
+    
+    def _attempt_fast_sync(self, checkpoint_dir: Path = None):
+        """Attempt to fast sync from checkpoint on startup."""
+        try:
+            from checkpoint.sync import FastSync
+            
+            fast_sync = FastSync(checkpoint_dir=checkpoint_dir)
+            
+            # Check if checkpoint is available
+            checkpoint = fast_sync.get_latest_checkpoint()
+            
+            if checkpoint:
+                # Estimate sync time
+                sync_time = fast_sync.estimate_sync_time(checkpoint)
+                
+                if sync_time < 60:  # Under 60 seconds
+                    print(
+                        f"[COORDINATOR] Fast sync available: "
+                        f"epoch {checkpoint.checkpoint.epoch}, "
+                        f"~{sync_time:.1f}s estimated"
+                    )
+                    # Would perform actual sync here in production
+                else:
+                    print(
+                        f"[COORDINATOR] Checkpoint available but sync time "
+                        f"~{sync_time:.1f}s exceeds threshold"
+                    )
+            else:
+                print("[COORDINATOR] No checkpoint available for fast sync")
+                
+        except Exception as e:
+            print(f"[COORDINATOR] Fast sync check failed: {e}")
     
     def _start_bootstrap_monitor(self, verifier_pool):
         """Initialize and start bootstrap monitor daemon"""

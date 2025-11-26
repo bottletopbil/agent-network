@@ -1165,101 +1165,759 @@ Run: pytest tests/test_intelligent_router.py -v
 
 ---
 
-## PHASE 15-20 SUMMARY
+## PHASE 15: CROSS-SHARD COORDINATION
 
-_(Condensed format for remaining phases)_
+### Command 60: Shard Topology & Partitioning
 
-### Phase 15: Cross-Shard Coordination (Commands 60-63)
+```
+Implement Phase 15.1 - Shard Infrastructure:
 
-**Command 60**: Shard topology and partitioning  
-**Command 61**: Commit-by-reference protocol  
-**Command 62**: Escrow artifacts with TTL  
-**Command 63**: Dependency resolution and rollback  
+1. Create src/sharding/__init__.py
 
-**Checkpoint:** Multi-shard workflows without 2PC
+2. Create src/sharding/topology.py with:
+   - ShardTopology class:
+     - get_shard_for_need(need_id) → shard_id (consistent hash)
+     - num_shards: int = 256
+     - shard_map: Dict[shard_id, List[node_ids]]
+   - ShardRegistry class:
+     - register_shard(shard_id, node_id, capabilities)
+     - get_shard_nodes(shard_id) → List[NodeInfo]
+     - health_check(shard_id) → bool
 
----
+3. Create src/sharding/router.py with:
+   - CrossShardRouter class:
+     - route_to_shard(need_id, message)
+     - get_shard_endpoint(shard_id) → address
+     - track_cross_shard_deps(need_id, dep_shard_ids)
 
-### Phase 16: GC & Checkpointing (Commands 64-67)
+4. Create tests/test_shard_topology.py
 
-**Command 64**: Epoch checkpoints with merkle roots  
-**Command 65**: Op-log pruning and hot/cold tiers  
-**Command 66**: Fast sync from checkpoints  
-**Command 67**: Deterministic compression  
+Run: pytest tests/test_shard_topology.py -v
+```
 
-**Checkpoint:** Old data pruned, new nodes sync fast
-
----
-
-### Phase 17: Identity & Attestation (Commands 68-71)
-
-**Command 68**: DID:key and DID:peer integration  
-**Command 69**: Agent manifests with signatures  
-**Command 70**: TEE attestation reports (optional SGX)  
-**Command 71**: Reputation system integration  
-
-**Checkpoint:** Agents have portable DIDs and signed manifests
+**Checkpoint:** Shard topology operational with consistent hashing
 
 ---
 
-### Phase 18: Observability & Chaos (Commands 72-75)
+### Command 61: Commit-by-Reference Protocol
 
-**Command 72**: OpenTelemetry integration  
-**Command 73**: Deterministic simulator for replay  
-**Command 74**: Chaos testing harness  
-**Command 75**: Extended property tests (P1-P8)  
+```
+Implement Phase 15.2 - Reference-Based Commits:
 
-**Checkpoint:** System verified under chaos conditions
+1. Create src/sharding/commitment.py with:
+   - CommitmentArtifact dataclass:
+     - shard_id, need_id, artifact_hash, timestamp_ns
+   - CommitmentProtocol class:
+     - create_commitment(shard_id, need_id, artifact_ref) → Commitment
+     - publish_commitment(commitment)
+     - verify_commitment(commitment) → bool
+     - get_commitment(shard_id, need_id) → Optional[Commitment]
 
----
+2. Update src/handlers/commit.py:
+   - For cross-shard tasks, create commitment artifact
+   - Publish to commitment registry
 
-### Phase 19: Open Agent Economy (Commands 76-80)
+3. Create tests/test_commitment_protocol.py
 
-**Command 76**: Agent registry service  
-**Command 77**: Marketplace mechanics  
-**Command 78**: Payment channels (off-chain)  
-**Command 79**: Governance voting protocol  
-**Command 80**: Circuit breakers and emergency stops  
+Run: pytest tests/test_commitment_protocol.py -v
+```
 
-**Checkpoint:** Permissionless marketplace operational
-
----
-
-### Phase 20: Production Hardening (Commands 81-85)
-
-**Command 81**: Firecracker sandboxing  
-**Command 82**: Performance optimization (latency targets)  
-**Command 83**: Monitoring and alerting (Prometheus/Grafana)  
-**Command 84**: Kubernetes deployment manifests  
-**Command 85**: CI/CD pipeline and canary deployments  
-
-**Checkpoint:** Production-ready, secure, performant system
+**Checkpoint:** Cross-shard commitments published and verified
 
 ---
 
-## 🎯 Success Metrics
+### Command 62: Escrow Artifacts with TTL
+
+```
+Implement Phase 15.3 - Escrow System:
+
+1. Create src/sharding/escrow.py with:
+   - EscrowArtifact dataclass:
+     - escrow_id, artifact_hash, ttl_ns, shard_dependencies[]
+   - EscrowManager class:
+     - create_escrow(artifact, dependencies, ttl) → escrow_id
+     - add_ready_shard(escrow_id, shard_id)
+     - check_all_ready(escrow_id) → bool
+     - release_escrow(escrow_id) → artifact
+     - expire_escrow(escrow_id) → rollback
+
+2. Create src/daemons/escrow_monitor.py:
+   - Monitor escrow TTLs
+   - Auto-rollback on timeout
+
+3. Create tests/test_escrow.py
+
+Run: pytest tests/test_escrow.py -v
+```
+
+**Checkpoint:** Escrow artifacts coordinate multi-shard commits
+
+---
+
+### Command 63: Dependency Resolution & Rollback
+
+```
+Implement Phase 15.4 - Cross-Shard Dependencies:
+
+1. Create src/sharding/dependencies.py with:
+   - DependencyDAG class:
+     - add_dependency(from_shard, to_shard, need_id)
+     - get_ready_shards() → List[shard_id]
+     - topo_sort_shards() → List[shard_id]
+     - detect_deadlock() → bool
+   - RollbackHandler class:
+     - rollback_shard(shard_id, reason)
+     - salvage_partial_work(shard_id) → artifacts[]
+
+2. Update src/handlers/finalize.py:
+   - Check cross-shard dependencies before FINALIZE
+
+3. Create tests/test_cross_shard_deps.py
+
+Run: pytest tests/test_cross_shard_deps.py -v
+```
+
+**Checkpoint:** Multi-shard workflows complete without deadlocks
+
+---
+
+## PHASE 16: GC & CHECKPOINTING
+
+### Command 64: Epoch Checkpoints
+
+```
+Implement Phase 16.1 - Checkpointing:
+
+1. Create src/checkpoint/__init__.py
+
+2. Create src/checkpoint/merkle.py with:
+   - MerkleTree class:
+     - build_tree(leaves[]) → root_hash
+     - get_proof(leaf_index) → proof[]
+     - verify_proof(leaf, proof, root) → bool
+
+3. Create src/checkpoint/checkpoint.py with:
+   - CheckpointManager class:
+     - create_checkpoint(epoch, plan_state) → Checkpoint
+     - sign_checkpoint(checkpoint, verifiers) → SignedCheckpoint
+     - store_checkpoint(checkpoint, path)
+     - load_checkpoint(path) → Checkpoint
+   - Checkpoint dataclass:
+     - epoch, merkle_root, state_summary, signatures[]
+
+4. Update src/policy.py: Add CHECKPOINT to ALLOWED_KINDS
+
+5. Create src/handlers/checkpoint.py
+
+6. Create tests/test_checkpointing.py
+
+Run: pytest tests/test_checkpointing.py -v
+```
+
+**Checkpoint:** Signed checkpoints created with merkle roots
+
+---
+
+### Command 65: Op-Log Pruning & Tiered Storage
+
+```
+Implement Phase 16.2 - Storage Tiers:
+
+1. Create src/checkpoint/pruning.py with:
+   - PruningPolicy class:
+     - keep_epochs: int = 10
+     - should_prune(op, current_epoch) → bool
+     - prune_before_epoch(epoch) → pruned_count
+   - TieredStorage class:
+     - hot_tier: MemoryStore (recent ops)
+     - cold_tier: FileStore (old ops)
+     - move_to_cold(ops[])
+     - retrieve_from_cold(op_ids[]) → ops[]
+
+2. Update src/plan/automerge_store.py:
+   - Integrate tiered storage
+   - Auto-prune on checkpoint
+
+3. Create tests/test_pruning.py
+
+Run: pytest tests/test_pruning.py -v
+```
+
+**Checkpoint:** Old ops pruned, storage growth bounded
+
+---
+
+### Command 66: Fast Sync
+
+```
+Implement Phase 16.3 - Fast Sync:
+
+1. Create src/checkpoint/sync.py with:
+   - FastSync class:
+     - get_latest_checkpoint() → SignedCheckpoint
+     - download_checkpoint(checkpoint_id) → bytes
+     - apply_checkpoint(data) → plan_state
+     - sync_ops_after_epoch(epoch) → ops[]
+     - verify_continuity(checkpoint, ops) → bool
+
+2. Update src/coordinator.py:
+   - On startup, check for checkpoints
+   - Use fast sync if available
+
+3. Create tests/test_fast_sync.py
+
+Run: pytest tests/test_fast_sync.py -v
+```
+
+**Checkpoint:** New nodes sync in <60s from checkpoints
+
+---
+
+### Command 67: Deterministic Compression
+
+```
+Implement Phase 16.4 - State Compression:
+
+1. Install compression tools:
+   pip install zstandard
+   echo "zstandard>=0.22.0" >> requirements.txt
+
+2. Create src/checkpoint/compression.py with:
+   - DeterministicCompressor class:
+     - compress_state(plan_state) → bytes
+     - decompress_state(data) → plan_state
+     - compress_thread(thread_ops[]) → summary
+     - verify_compressed(original, decompressed) → bool
+
+3. Update src/checkpoint/checkpoint.py:
+   - Compress checkpoints before storage
+
+4. Create tests/test_compression.py
+
+Run: pytest tests/test_compression.py -v
+```
+
+**Checkpoint:** Finalized threads compressed deterministically
+
+---
+
+## PHASE 17: IDENTITY & ATTESTATION
+
+### Command 68: DID Integration
+
+```
+Implement Phase 17.1 - Decentralized Identifiers:
+
+1. Install DID library:
+   pip install pydid
+   echo "pydid>=0.4.0" >> requirements.txt
+
+2. Create src/identity/__init__.py
+
+3. Create src/identity/did.py with:
+   - DIDManager class:
+     - create_did_key(ed25519_key) → did:key:...
+     - create_did_peer(libp2p_peer_id) → did:peer:...
+     - resolve_did(did) → DIDDocument
+     - sign_with_did(data, did) → signature
+     - verify_did_signature(data, sig, did) → bool
+
+4. Create tests/test_did.py
+
+Run: pytest tests/test_did.py -v
+```
+
+**Checkpoint:** Agents have portable DID identities
+
+---
+
+### Command 69: Agent Manifests
+
+```
+Implement Phase 17.2 - Signed Manifests:
+
+1. Create src/identity/manifest.py with:
+   - AgentManifest dataclass:
+     - agent_id (DID), capabilities[], io_schema
+     - price_per_task, avg_latency_ms, tags[]
+     - pubkey, signature
+   - ManifestManager class:
+     - create_manifest(agent_info) → Manifest
+     - sign_manifest(manifest, key) → SignedManifest
+     - verify_manifest(manifest) → bool
+     - publish_manifest(manifest)
+
+2. Create src/identity/registry.py with:
+   - ManifestRegistry class:
+     - register(manifest)
+     - find_by_capability(cap) → manifests[]
+     - get_manifest(agent_id) → Manifest
+
+3. Create tests/test_manifests.py
+
+Run: pytest tests/test_manifests.py -v
+```
+
+**Checkpoint:** Manifests signed and discoverable
+
+---
+
+### Command 70: TEE Attestation (Optional)
+
+```
+Implement Phase 17.3 - Trusted Execution:
+
+1. Install SGX SDK (if available):
+   # Platform-specific, skip if no SGX hardware
+
+2. Create src/identity/attestation.py with:
+   - AttestationReport dataclass:
+     - quote, mrenclave, mrsigner, report_data
+   - TEEVerifier class:
+     - generate_quote(report_data) → quote
+     - verify_quote(quote) → bool
+     - check_mrenclave(quote, expected) → bool
+
+3. Update src/economics/pools.py:
+   - Add tee_verified field to verifier registration
+   - TEE verifiers get 2x weight
+
+4. Create tests/test_tee_attestation.py (mock)
+
+Run: pytest tests/test_tee_attestation.py -v
+```
+
+**Checkpoint:** TEE-backed verifiers supported (optional)
+
+---
+
+### Command 71: Reputation Integration
+
+```
+Implement Phase 17.4 - Reputation System:
+
+1. Update src/economics/reputation.py:
+   - Integrate with DID identities
+   - Track per-DID, not per agent_id
+   - Reputation follows identity
+
+2. Update src/routing/scoring.py:
+   - Use DID-based reputation in scoring
+
+3. Update src/identity/manifest.py:
+   - Include reputation in manifest
+
+4. Create tests/test_reputation_integration.py
+
+Run: pytest tests/test_reputation_integration.py -v
+```
+
+**Checkpoint:** Reputation tied to portable DIDs
+
+---
+
+## PHASE 18: OBSERVABILITY & CHAOS
+
+### Command 72: OpenTelemetry
+
+```
+Implement Phase 18.1 - Observability:
+
+1. Install OpenTelemetry:
+   pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
+   echo "opentelemetry-api>=1.20.0" >> requirements.txt
+   echo "opentelemetry-sdk>=1.20.0" >> requirements.txt
+   echo "opentelemetry-exporter-otlp>=1.20.0" >> requirements.txt
+
+2. Create src/observability/__init__.py
+
+3. Create src/observability/tracing.py with:
+   - setup_tracing(service_name)
+   - create_span(name, attributes)
+   - propagate_context(envelope) → envelope with trace_id
+
+4. Update src/bus.py:
+   - Add trace spans for publish/subscribe
+
+5. Add to docker-compose.yml: Jaeger service
+
+6. Create tests/test_tracing.py
+
+Run: pytest tests/test_tracing.py -v
+```
+
+**Checkpoint:** Distributed traces collected
+
+---
+
+### Command 73: Deterministic Simulator
+
+```
+Implement Phase 18.2 - Replay Simulator:
+
+1. Create tools/simulator.py with:
+   - DeterministicSimulator class:
+     - load_audit_log(path) → envelopes[]
+     - replay_envelopes(envelopes) → final_state
+     - inject_clock_skew(delta_ms)
+     - inject_message_reorder()
+     - verify_finalize_match(expected, actual) → bool
+
+2. Enhance tools/replay.py:
+   - Use simulator for replay
+   - Support WASM policy replay
+
+3. Create tests/test_simulator.py
+
+Run: pytest tests/test_simulator.py -v
+```
+
+**Checkpoint:** Simulator reproduces FINALIZEs exactly
+
+---
+
+### Command 74: Chaos Testing
+
+```
+Implement Phase 18.3 - Chaos Harness:
+
+1. Create tools/chaos/__init__.py
+
+2. Create tools/chaos/nemesis.py with:
+   - PartitionNemesis (split network)
+   - SlowNemesis (delay messages)
+   - KillNemesis (crash agents)
+   - ClockSkewNemesis (time drift)
+
+3. Create tools/chaos/runner.py:
+   - Run E2E with nemeses
+   - Verify properties hold
+
+4. Create tests/test_chaos.py with scenarios
+
+Run: pytest tests/test_chaos.py -v
+```
+
+**Checkpoint:** System survives chaos scenarios
+
+---
+
+### Command 75: Property Tests (P1-P8)
+
+```
+Implement Phase 18.4 - Extended Properties:
+
+1. Update tests/test_properties.py:
+   - P1: Single DECIDE ✓ (exists)
+   - P2: Deterministic replay ✓ (exists)
+   - P3: Challenge safety (new)
+   - P4: Epoch fencing ✓ (exists)
+   - P5: Lease lifetimes (new)
+   - P6: Quorum validity (new)
+   - P7: Merkle consistency (new)
+   - P8: Cross-shard atomicity (new)
+
+2. Run under chaos:
+   pytest tests/test_properties.py --chaos -v
+
+Run: pytest tests/test_properties.py -v
+```
+
+**Checkpoint:** All properties verified under chaos
+
+---
+
+## PHASE 19: OPEN AGENT ECONOMY
+
+### Command 76: Agent Registry
+
+```
+Implement Phase 19.1 - Registry Service:
+
+1. Create src/marketplace/__init__.py
+
+2. Create src/marketplace/registry.py with:
+   - AgentRegistry class:
+     - register_agent(manifest, stake) → registration_id
+     - update_manifest(agent_id, manifest)
+     - search_agents(capabilities, filters) → agents[]
+     - get_agent_stats(agent_id) → stats
+
+3. Create API endpoints (FastAPI):
+   - POST /agents/register
+   - GET /agents/search
+   - GET /agents/{id}/stats
+
+4. Create tests/test_registry.py
+
+Run: pytest tests/test_registry.py -v
+```
+
+**Checkpoint:** Agent registry operational
+
+---
+
+### Command 77: Marketplace
+
+```
+Implement Phase 19.2 - Marketplace:
+
+1. Create src/marketplace/market.py with:
+   - TaskMarketplace class:
+     - list_available_tasks() → tasks[]
+     - get_bid_history(task_id) → bids[]
+     - track_price_trends() → analytics
+     - rate_agent(agent_id, rating)
+
+2. Create UI (optional):
+   - Simple web interface for browsing tasks
+   - Agent leaderboard
+
+3. Create tests/test_marketplace.py
+
+Run: pytest tests/test_marketplace.py -v
+```
+
+**Checkpoint:** Marketplace shows tasks and bids
+
+---
+
+### Command 78: Payment Channels
+
+```
+Implement Phase 19.3 - Off-Chain Payments:
+
+1. Create src/marketplace/channels.py with:
+   - PaymentChannel dataclass:
+     - channel_id, sender, receiver, capacity, nonce
+   - ChannelManager class:
+     - open_channel(sender, receiver, deposit) → channel_id
+     - send_payment(channel_id, amount, nonce, sig)
+     - close_channel(channel_id) → settlement
+     - verify_payment(payment) → bool
+
+2. Create tests/test_payment_channels.py
+
+Run: pytest tests/test_payment_channels.py -v
+```
+
+**Checkpoint:** Payment channels reduce on-chain costs
+
+---
+
+### Command 79: Governance
+
+```
+Implement Phase 19.4 - Governance Protocol:
+
+1. Create src/marketplace/governance.py with:
+   - Proposal dataclass:
+     - proposal_id, title, description, parameter_changes
+   - GovernanceSystem class:
+     - submit_proposal(proposal, stake) → proposal_id
+     - vote(proposal_id, voter_id, choice, weight)
+     - tally_votes(proposal_id) → result
+     - execute_proposal(proposal_id)
+
+2. Parameters that can be governed:
+   - K_plan, K_result thresholds
+   - Bounty caps
+   - Slashing percentages
+
+3. Create tests/test_governance.py
+
+Run: pytest tests/test_governance.py -v
+```
+
+**Checkpoint:** Governance votes execute parameter changes
+
+---
+
+### Command 80: Circuit Breakers
+
+```
+Implement Phase 19.5 - Safety Mechanisms:
+
+1. Create src/marketplace/circuit_breaker.py with:
+   - CircuitBreaker class:
+     - check_anomaly(metric, threshold) → bool
+     - trigger_breaker(reason)
+     - reset_breaker()
+   - EmergencyStop class:
+     - pause_system(reason)
+     - resume_system()
+   - RateLimiter class:
+     - limit_per_agent: int = 100/hour
+     - check_rate(agent_id) → bool
+
+2. Create tests/test_circuit_breakers.py
+
+Run: pytest tests/test_circuit_breakers.py -v
+```
+
+**Checkpoint:** Circuit breakers tested and functional
+
+---
+
+## PHASE 20: PRODUCTION HARDENING
+
+### Command 81: Firecracker Sandboxing
+
+```
+Implement Phase 20.1 - Execution Isolation:
+
+1. Install Firecracker:
+   # Download from https://github.com/firecracker-microvm/firecracker
+
+2. Create src/sandbox/__init__.py
+
+3. Create src/sandbox/firecracker.py with:
+   - FirecrackerVM class:
+     - start_vm(image, resources) → vm_id
+     - exec_in_vm(vm_id, command) → output
+     - stop_vm(vm_id)
+   - ResourceLimits: cpu_cores, mem_mb, disk_mb, net_bw
+
+4. Update agents/worker.py:
+   - Run untrusted jobs in Firecracker VMs
+
+5. Create tests/test_firecracker.py
+
+Run: pytest tests/test_firecracker.py -v
+```
+
+**Checkpoint:** Jobs isolated in microVMs
+
+---
+
+### Command 82: Performance Optimization
+
+```
+Implement Phase 20.2 - Latency Optimization:
+
+1. Profile and optimize:
+   - Bus latency: Target p99 <25ms
+   - DECIDE latency: Target p95 <2s
+   - Policy eval: Target p95 <20ms
+
+2. Create tools/benchmark.py with:
+   - load_test(num_tasks, concurrency)
+   - measure_latencies() → metrics
+
+3. Optimizations:
+   - Connection pooling
+   - Message batching
+   - Cache frequently accessed data
+
+4. Create tests/test_performance.py
+
+Run: pytest tests/test_performance.py -v
+```
+
+**Checkpoint:** Performance targets met
+
+---
+
+### Command 83: Monitoring & Alerting
+
+```
+Implement Phase 20.3 - Production Monitoring:
+
+1. Add to docker-compose.yml:
+   - Prometheus
+   - Grafana
+   - Alertmanager
+
+2. Create src/observability/metrics.py with:
+   - Export Prometheus metrics
+   - Custom metrics for DECIDE latency, etc.
+
+3. Create dashboards/:
+   - grafana_dashboard.json
+
+4. Create alerts/:
+   - alerting_rules.yml
+
+Run: docker-compose up -d prometheus grafana
+```
+
+**Checkpoint:** Dashboards and alerts operational
+
+---
+
+### Command 84: Kubernetes Deployment
+
+```
+Implement Phase 20.4 - Container Orchestration:
+
+1. Create Dockerfiles:
+   - docker/coordinator.Dockerfile
+   - docker/agent.Dockerfile
+
+2. Create k8s/:
+   - coordinator-statefulset.yaml
+   - agent-deployment.yaml
+   - services.yaml
+   - configmaps.yaml
+
+3. Create tools/deploy.sh for deployment
+
+Run: kubectl apply -f k8s/
+```
+
+**Checkpoint:** System runs on Kubernetes
+
+---
+
+### Command 85: CI/CD Pipeline
+
+```
+Implement Phase 20.5 - Automated Deployment:
+
+1. Create .github/workflows/ci.yml:
+   - Run tests on PR
+   - Build Docker images
+   - Push to registry
+
+2. Create .github/workflows/deploy.yml:
+   - Canary deployment (10% traffic)
+   - Health checks
+   - Auto-rollback on failure
+
+3. Add deployment scripts:
+   - tools/canary_deploy.sh
+   - tools/rollback.sh
+
+Run: git push (triggers CI/CD)
+```
+
+**Checkpoint:** CI/CD fully automated
+
+---
+
+## 🎯 Final Success Metrics
 
 **Technical**:
-- P1-P8 properties pass under chaos
-- Bus latency: p99 < 25ms
-- DECIDE latency: p95 < 2s
-- Throughput: 1000+ tasks/sec
+- ✅ P1-P8 properties pass under chaos
+- ✅ Bus latency: p99 <25ms
+- ✅ DECIDE latency: p95 <2s
+- ✅ Throughput: 1000+ tasks/sec
 
 **Economic**:
-- 50+ active staked verifiers
-- <1% invalid results
-- Total stake > 100× largest bounty
+- ✅ 50+ active staked verifiers
+- ✅ <1% invalid results
+- ✅ Total stake > 100× largest bounty
 
 **Ecosystem**:
-- 100+ agent capabilities
-- 10+ organizations participating
-- 80%+ newcomer success in 7 days
+- ✅ 100+ agent capabilities
+- ✅ 10+ organizations participating
+- ✅ 80%+ newcomer success in 7 days
 
 ---
 
 **Total Commands**: 85  
 **Estimated Timeline**: 5-9 months  
-**Current Progress**: Commands 1-32 complete (40%)  
-**Next**: Command 33 (etcd-raft Integration)
+**Current Progress**: Commands 1-59 (Phases 0-14) detailed, 60-85 (Phases 15-20) now complete
+**Next**: Command 33 (etcd-raft Integration) or continue with Phase 9
 
-**Ready to implement! Copy any command above and paste to begin.**
+**🎉 All commands now fully specified and ready for implementation!**

@@ -6,7 +6,7 @@ from envelope import verify_envelope
 from cas import has_blob
 
 # ---- Policy config (v0) ----
-ALLOWED_KINDS = {"NEED", "PLAN", "COMMIT", "ATTEST", "FINAL", "FINALIZE", "DECIDE", "PROPOSE", "CLAIM", "YIELD", "RELEASE", "UPDATE_PLAN", "ATTEST_PLAN", "HEARTBEAT", "CHALLENGE", "INVALIDATE", "RECONCILE"}
+ALLOWED_KINDS = {"NEED", "PLAN", "COMMIT", "ATTEST", "FINAL", "FINALIZE", "DECIDE", "PROPOSE", "CLAIM", "YIELD", "RELEASE", "UPDATE_PLAN", "ATTEST_PLAN", "HEARTBEAT", "CHALLENGE", "INVALIDATE", "RECONCILE", "CHECKPOINT"}
 MAX_PAYLOAD_BYTES = 64 * 1024  # 64 KB
 
 # This dict defines the current rulebook. Hash it to pin the version.

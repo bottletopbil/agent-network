@@ -16,7 +16,7 @@ from economics.pools import VerifierPool
 class ReputationEvent:
     """Record of reputation change event"""
     event_id: str
-    verifier_id: str
+    did: str                 # DID of the verifier/agent (portable identity)
     event_type: str          # ATTESTATION, CHALLENGE_SUCCESS, CHALLENGE_FAIL
     delta: float             # Reputation change
     timestamp: int           # Nanosecond timestamp
@@ -56,40 +56,42 @@ class ReputationTracker:
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS reputation_events (
                     event_id TEXT PRIMARY KEY,
-                    verifier_id TEXT NOT NULL,
+                    did TEXT NOT NULL,
                     event_type TEXT NOT NULL,
                     delta REAL NOT NULL,
-                    timestamp_ns INTEGER NOT NULL
+                    timestamp_ns INTEGER NOT NULL,
+                    verifier_id TEXT  -- Deprecated, kept for backward compatibility
                 )
             """)
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_rep_did ON reputation_events(did)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_rep_verifier ON reputation_events(verifier_id)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_rep_timestamp ON reputation_events(timestamp_ns)")
     
-    def record_attestation(self, verifier_id: str, task_id: str, verdict: bool) -> None:
+    def record_attestation(self, did: str, task_id: str, verdict: bool) -> None:
         """
         Record an attestation result.
         
         Args:
-            verifier_id: Verifier who made attestation
+            did: DID of verifier who made attestation
             task_id: Task that was attested
             verdict: True if attestation was correct, False if failed
         """
         if not verdict:
             # Failed attestation gets penalty
-            self._apply_delta(verifier_id, "ATTESTATION_FAILED", self.FAILED_ATTESTATION_PENALTY)
+            self._apply_delta(did, "ATTESTATION_FAILED", self.FAILED_ATTESTATION_PENALTY)
         # Successful attestations don't change reputation (maintaining is expected)
     
-    def record_challenge(self, verifier_id: str, upheld: bool) -> None:
+    def record_challenge(self, did: str, upheld: bool) -> None:
         """
         Record a challenge result.
         
         Args:
-            verifier_id: Verifier who issued the challenge
+            did: DID of verifier who issued the challenge
             upheld: True if challenge was upheld (verifier was right)
         """
         if upheld:
             # Successful challenge gets boost
-            self._apply_delta(verifier_id, "CHALLENGE_SUCCESS", self.SUCCESSFUL_CHALLENGE_BOOST)
+            self._apply_delta(did, "CHALLENGE_SUCCESS", self.SUCCESSFUL_CHALLENGE_BOOST)
         # Failed challenges don't change reputation here (challenger gets penalized elsewhere)
     
     def _apply_delta(self, verifier_id: str, event_type: str, delta: float) -> None:

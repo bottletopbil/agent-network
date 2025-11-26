@@ -36,7 +36,20 @@ services:
     volumes:
       - etcd-data:/etcd-data
 
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    container_name: ipfs
+    ports:
+      - "5001:5001" # IPFS API
+      - "8080:8080" # IPFS Gateway
+      - "4001:4001" # IPFS Swarm
+    volumes:
+      - ipfs-data:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+
 volumes:
   nats-data:
   redis-data:
   etcd-data:
+  ipfs-data:

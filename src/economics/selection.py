@@ -45,8 +45,9 @@ class VerifierSelector:
         """
         Calculate selection weight for a verifier.
         
-        Formula: sqrt(stake) × reputation × recency_factor
+        Formula: sqrt(stake) × reputation × recency_factor × tee_multiplier
         - recency_factor = 1.0 - (age_days / 365) × 0.2 (20% decay over a year)
+        - tee_multiplier = 2.0 if TEE-verified, else 1.0
         
         Args:
             verifier: VerifierRecord to calculate weight for
@@ -65,7 +66,10 @@ class VerifierSelector:
         age_days = age_ns / (24 * 3600 * 1e9)
         recency_factor = 1.0 - min((age_days / 365.0) * 0.2, 0.2)  # Max 20% decay
         
-        return stake_weight * reputation * recency_factor
+        # TEE verification bonus (2x weight for TEE-verified verifiers)
+        tee_multiplier = 2.0 if verifier.metadata.tee_verified else 1.0
+        
+        return stake_weight * reputation * recency_factor * tee_multiplier
     
     def select_committee(
         self,

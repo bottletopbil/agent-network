@@ -20,6 +20,7 @@ class VerifierMetadata:
     asn: str             # Autonomous System Number
     region: str          # Geographic region
     reputation: float    # 0.0-1.0 reputation score
+    tee_verified: bool = False  # TEE attestation verified
 
 
 @dataclass
@@ -66,7 +67,8 @@ class VerifierPool:
                     region TEXT NOT NULL,
                     reputation REAL NOT NULL,
                     registered_at INTEGER NOT NULL,
-                    active BOOLEAN NOT NULL DEFAULT 1
+                    active BOOLEAN NOT NULL DEFAULT 1,
+                    tee_verified BOOLEAN NOT NULL DEFAULT 0
                 )
             """)
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_verifiers_active ON verifiers(active)")
@@ -107,8 +109,8 @@ class VerifierPool:
                 # Insert or replace (allows re-registration)
                 self.conn.execute("""
                     INSERT OR REPLACE INTO verifiers 
-                    (verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+                    (verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active, tee_verified)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
                 """, (
                     verifier_id,
                     stake,
@@ -117,7 +119,8 @@ class VerifierPool:
                     metadata.asn,
                     metadata.region,
                     metadata.reputation,
-                    time.time_ns()
+                    time.time_ns(),
+                    metadata.tee_verified
                 ))
     
     def deregister(self, verifier_id: str) -> None:
@@ -156,14 +159,14 @@ class VerifierPool:
         """
         if active_only:
             cursor = self.conn.execute("""
-                SELECT verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active
+                SELECT verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active, tee_verified
                 FROM verifiers
                 WHERE active = 1
                 ORDER BY registered_at DESC
             """)
         else:
             cursor = self.conn.execute("""
-                SELECT verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active
+                SELECT verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active, tee_verified
                 FROM verifiers
                 ORDER BY registered_at DESC
             """)
@@ -178,7 +181,8 @@ class VerifierPool:
                     org_id=row[3],
                     asn=row[4],
                     region=row[5],
-                    reputation=row[6]
+                    reputation=row[6],
+                    tee_verified=bool(row[9])
                 ),
                 registered_at=row[7],
                 active=bool(row[8])
@@ -222,7 +226,7 @@ class VerifierPool:
             VerifierRecord or None if not found
         """
         cursor = self.conn.execute("""
-            SELECT verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active
+            SELECT verifier_id, stake, capabilities_json, org_id, asn, region, reputation, registered_at, active, tee_verified
             FROM verifiers
             WHERE verifier_id = ?
         """, (verifier_id,))
@@ -239,7 +243,8 @@ class VerifierPool:
                 org_id=row[3],
                 asn=row[4],
                 region=row[5],
-                reputation=row[6]
+                reputation=row[6],
+                tee_verified=bool(row[9])
             ),
             registered_at=row[7],
             active=bool(row[8])

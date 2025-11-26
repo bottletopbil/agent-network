@@ -20,6 +20,8 @@ def make_envelope(
     sender_pk_b64: str,   # who is sending (their public key)
     payload: Dict[str, Any],
     policy_engine_hash: Optional[str] = None,
+    policy_capsule_hash: Optional[str] = None,      # Hash of the policy capsule
+    policy_eval_digest: Optional[str] = None,       # Digest of policy evaluation
     nonce: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
@@ -29,7 +31,7 @@ def make_envelope(
     from policy import current_policy_hash
     
     lamport = CLOCK.tick()
-    return {
+    envelope = {
         "v": 1,
         "id": str(uuid.uuid4()),
         "thread_id": thread_id,
@@ -42,6 +44,14 @@ def make_envelope(
         "policy_engine_hash": policy_engine_hash or current_policy_hash(),
         "nonce": nonce or str(uuid.uuid4()),
     }
+    
+    # Add optional policy fields if provided
+    if policy_capsule_hash:
+        envelope["policy_capsule_hash"] = policy_capsule_hash
+    if policy_eval_digest:
+        envelope["policy_eval_digest"] = policy_eval_digest
+    
+    return envelope
 
 SIGN_FIELDS_EXCLUDE = {"sig_pk_b64", "sig_b64"}  # ensure sig covers everything else
 
@@ -67,3 +77,33 @@ def observe_envelope(env: Dict[str, Any]) -> None:
     lam = int(env.get("lamport", 0))
     if lam > 0:
         CLOCK.observe(lam)
+
+
+def to_ipld(envelope: Dict[str, Any], cas_store=None) -> Dict[str, Any]:
+    """
+    Convert envelope to IPLD DAG format.
+    
+    Args:
+        envelope: Envelope dictionary
+        cas_store: Optional CAS store for storing payload content
+        
+    Returns:
+        IPLD-formatted dictionary with CID links
+    """
+    from cas.ipld_format import EnvelopeIPLD
+    return EnvelopeIPLD.to_ipld(envelope, cas_store)
+
+
+def from_ipld(ipld_data: Dict[str, Any], cas_store=None) -> Dict[str, Any]:
+    """
+    Reconstruct envelope from IPLD DAG format.
+    
+    Args:
+        ipld_data: IPLD-formatted dictionary
+        cas_store: CAS store for resolving CID links
+        
+    Returns:
+        Reconstructed envelope dictionary
+    """
+    from cas.ipld_format import EnvelopeIPLD
+    return EnvelopeIPLD.from_ipld(ipld_data, cas_store)

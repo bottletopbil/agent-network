@@ -15,6 +15,7 @@ import copy
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, asdict
 from plan_store import OpType, TaskState, PlanOp
+from plan.views import TaskView, GraphView
 
 
 @dataclass
@@ -37,10 +38,24 @@ class AutomergePlanStore:
     - Monotonic state updates (higher lamport wins)
     - LWW semantics for annotations
     - Save/load/merge functionality
+    - Tiered storage with automatic pruning
     """
     
-    def __init__(self):
-        """Initialize empty Automerge document"""
+    def __init__(self, enable_tiered_storage: bool = False):
+        """
+        Initialize empty Automerge document.
+        
+        Args:
+            enable_tiered_storage: Enable automatic tiering and pruning
+        """
+        self.enable_tiered_storage = enable_tiered_storage
+        self.tiered_storage = None
+        self.current_epoch = 0
+        
+        if enable_tiered_storage:
+            from checkpoint.pruning import TieredStorage
+            self.tiered_storage = TieredStorage()
+        
         self._init_schema()
     
     def _init_schema(self):
@@ -53,6 +68,16 @@ class AutomergePlanStore:
             version=0
         )
         self._op_ids: Set[str] = set()  # Track op IDs for deduplication
+        
+        # Initialize views
+        self.task_view: Optional[TaskView] = None
+        self.graph_view: Optional[GraphView] = None
+        self._update_views()
+    
+    def _update_views(self):
+        """Update materialized views after state changes"""
+        self.task_view = TaskView(self.doc.tasks)
+        self.graph_view = GraphView(self.doc.edges)
     
     def append_op(self, op: PlanOp) -> None:
         """
@@ -85,6 +110,9 @@ class AutomergePlanStore:
         
         # Apply to derived state
         self._apply_to_state(self.doc, op)
+        
+        # Update views
+        self._update_views()
     
     def _apply_to_state(self, doc: CRDTDocument, op: PlanOp) -> None:
         """
@@ -279,6 +307,9 @@ class AutomergePlanStore:
         # Rebuild state from scratch by replaying all ops
         self._rebuild_state_from_ops()
         
+        # Update views
+        self._update_views()
+        
         self.doc.version += 1
     
     def _rebuild_state_from_ops(self) -> None:
@@ -331,3 +362,41 @@ class AutomergePlanStore:
             if task:
                 tasks.append(task)
         return tasks
+    
+    def checkpoint_and_prune(self, epoch: int) -> Optional[dict]:
+        """
+        Create checkpoint and prune old operations.
+        
+        Args:
+            epoch: Current epoch number
+            
+        Returns:
+            Pruning stats if tiered storage enabled, None otherwise
+        """
+        if not self.enable_tiered_storage or not self.tiered_storage:
+            return None
+        
+        from checkpoint.pruning import PruningManager, PruningPolicy
+        
+        # Update current epoch
+        self.current_epoch = epoch
+        
+        # Create pruning manager
+        manager = PruningManager(
+            policy=PruningPolicy(keep_epochs=10),
+            storage=self.tiered_storage
+        )
+        
+        # Add epoch to ops for pruning
+        ops_with_epoch = []
+        for op_dict in self.doc.ops:
+            op_with_epoch = op_dict.copy()
+            # Estimate epoch from timestamp or use current
+            op_with_epoch["epoch"] = epoch - 1  # Assume recent
+            ops_with_epoch.append(op_with_epoch)
+        
+        # Prune old ops
+        moved, kept = manager.prune_before_epoch(ops_with_epoch, epoch)
+        
+        return manager.get_stats()
+

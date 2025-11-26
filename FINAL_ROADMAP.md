@@ -262,7 +262,362 @@ When complete (Phases 9-20), CAN Swarm will be:
 
 ---
 
+## 🗺️ PHASE 15: CROSS-SHARD COORDINATION
+
+**Priority**: HIGH - Enables parallel workflows across shards  
+**Estimated Duration**: 3-4 weeks  
+**Commands**: 60-63
+
+### Objectives
+
+Enable tasks to span multiple shards without classical 2PC, using commit-by-reference with escrow and TTL-based coordination.
+
+### Command 60: Shard Topology & Partitioning
+
+**Create shard infrastructure**:
+- Define shard topology (consistent hashing by need_id)
+- Shard registry and discovery
+- Cross-shard routing layer
+- Shard health monitoring
+
+### Command 61: Commit-by-Reference Protocol
+
+**Implement reference-based commits**:
+- Commitment artifacts (hash-based refs)
+- Cross-shard reference validation
+- Dependency tracking between shards
+- Optimistic commit protocol
+
+### Command 62: Escrow Artifacts with TTL
+
+**Create escrow system**:
+- TTL-based artifact escrow
+- Multi-shard escrow coordination
+- Timeout and rollback handling
+- Escrow release on all-ready
+
+### Command 63: Dependency Resolution & Rollback
+
+**Build dependency management**:
+- Cross-shard dependency DAG
+- Rollback protocol for failed commits
+- Salvage mechanism for partial work
+- Deterministic cleanup
+
+### Success Criteria
+
+- [ ] Multi-shard workflows complete without 2PC
+- [ ] Rollback works correctly on timeout
+- [ ] Escrow artifacts garbage collected
+- [ ] No cross-shard deadlocks under load
+- [ ] Tests: `pytest tests/test_cross_shard_* -v` pass
+
+---
+
+## 🗺️ PHASE 16: GARBAGE COLLECTION & CHECKPOINTING
+
+**Priority**: HIGH - Required for long-running production  
+**Estimated Duration**: 3-4 weeks  
+**Commands**: 64-67
+
+### Objectives
+
+Prevent unbounded growth of op-logs through epoch-based checkpointing and deterministic compression.
+
+### Command 64: Epoch Checkpoints with Merkle Roots
+
+**Create checkpoint system**:
+- CHECKPOINT verb and handler
+- Merkle root calculation for epoch state
+- Verifier quorum for checkpoint signing
+- Checkpoint storage and distribution
+
+### Command 65: Op-Log Pruning & Hot/Cold Tiers
+
+**Implement tiered storage**:
+- Hot tier (recent ops) in memory/SSD
+- Cold tier (old ops) in cheap storage
+- Pruning policy (keep last N epochs)
+- Archive access for replay
+
+### Command 66: Fast Sync from Checkpoints
+
+**Enable fast node bootstrap**:
+- Download latest signed checkpoint
+- Apply checkpoint state
+- Sync only ops after checkpoint
+- Verify merkle root consistency
+
+### Command 67: Deterministic Compression
+
+**Create compression system**:
+- Deterministic state summarization
+- Compress finalized threads
+- Merkle proof retention
+- Decompression for replay
+
+### Success Criteria
+
+- [ ] Old ops pruned after checkpoints
+- [ ] New nodes sync in <60s for 10k tasks
+- [ ] Replay still works from checkpoints
+- [ ] Storage growth bounded to window size
+- [ ] Tests: `pytest tests/test_gc_* -v` pass
+
+---
+
+## 🗺️ PHASE 17: IDENTITY & ATTESTATION
+
+**Priority**: MEDIUM - Enables open ecosystem  
+**Estimated Duration**: 3-4 weeks  
+**Commands**: 68-71
+
+### Objectives
+
+Portable agent identities using DIDs, signed manifests, and optional TEE attestation for high-trust verifiers.
+
+### Command 68: DID:key and DID:peer Integration
+
+**Implement DID system**:
+- Generate DID:key from Ed25519 keys
+- DID:peer from libp2p peer IDs
+- DID resolution and verification
+- DID document publishing
+
+### Command 69: Agent Manifests with Signatures
+
+**Create manifest system**:
+- AgentManifest schema (capabilities, I/O, price)
+- Sign manifests with DID keys
+- Manifest registry and discovery
+- Manifest versioning
+
+### Command 70: TEE Attestation Reports (Optional SGX)
+
+**Add TEE support**:
+- SGX attestation report generation
+- Remote attestation verification
+- Quote validation
+- TEE-backed verifier premium tier
+
+### Command 71: Reputation System Integration
+
+**Build reputation tracking**:
+- Reputation score calculation
+- Success/failure tracking
+- Decay and boost mechanisms
+- Reputation-based weighting
+
+### Success Criteria
+
+- [ ] Agents have portable DIDs
+- [ ] Manifests signed and verified
+- [ ] TEE verifiers earn premium
+- [ ] Reputation affects routing weight
+- [ ] Tests: `pytest tests/test_identity_* -v` pass
+
+---
+
+## 🗺️ PHASE 18: OBSERVABILITY & CHAOS TESTING
+
+**Priority**: CRITICAL - Validates correctness  
+**Estimated Duration**: 4-5 weeks  
+**Commands**: 72-75
+
+### Objectives
+
+Comprehensive observability, deterministic replay simulation, and chaos testing to verify system properties.
+
+### Command 72: OpenTelemetry Integration
+
+**Add observability**:
+- OTLP exporter for traces/metrics
+- Envelope/thread ID propagation
+- Custom metrics (DECIDE latency, etc.)
+- Grafana/Jaeger integration
+
+### Command 73: Deterministic Simulator for Replay
+
+**Build simulator**:
+- Replay signed JSONL audit logs
+- Re-execute policy WASM by hash
+- Verify FINALIZE byte-for-byte
+- Clock skew and message reordering
+
+### Command 74: Chaos Testing Harness
+
+**Create chaos framework**:
+- Partition injection (split-brain)
+- Message loss and duplication
+- Slow/killed verifiers
+- Clock skew and lease expiry
+- Back-pressure scenarios
+
+### Command 75: Extended Property Tests (P1-P8)
+
+**Implement property tests**:
+- P1: Single DECIDE per NEED
+- P2: Deterministic replay
+- P3: Challenge safety
+- P4: Epoch fencing
+- P5: Lease lifetimes
+- P6: Quorum validity
+- P7: Merkle consistency
+- P8: Cross-shard atomicity
+
+### Success Criteria
+
+- [ ] All P1-P8 properties pass under chaos
+- [ ] Simulator reproduces FINALIZEs exactly
+- [ ] Traces collected in production
+- [ ] Partition recovery tested
+- [ ] Tests: `pytest tests/test_properties.py -v` all pass
+
+---
+
+## 🗺️ PHASE 19: OPEN AGENT ECONOMY
+
+**Priority**: HIGH - Unlocks ecosystem growth  
+**Estimated Duration**: 4-5 weeks  
+**Commands**: 76-80
+
+### Objectives
+
+Permissionless marketplace where agents register, compete, earn credits, and participate in governance.
+
+### Command 76: Agent Registry Service
+
+**Build registry**:
+- Agent registration with stake
+- Capability indexing
+- Search and filter API
+- Agent reputation display
+
+### Command 77: Marketplace Mechanics
+
+**Create marketplace**:
+- Task marketplace UI/API
+- Bid history and analytics
+- Price discovery mechanism
+- Quality ratings
+
+### Command 78: Payment Channels (Off-Chain)
+
+**Implement payment channels**:
+- Channel opening/closing
+- Off-chain credit transfers
+- Batch settlement on-chain
+- Fraud proof mechanism
+
+### Command 79: Governance Voting Protocol
+
+**Add governance**:
+- Proposal submission (stake-weighted)
+- Voting mechanism
+- Parameter updates (K_plan, bounties, etc.)
+- Emergency pause authority
+
+### Command 80: Circuit Breakers & Emergency Stops
+
+**Build safety mechanisms**:
+- Circuit breaker on anomalies
+- Emergency stop for coordinators
+- Rate limiting per agent
+- Automatic rollback triggers
+
+### Success Criteria
+
+- [ ] 10+ agents registered
+- [ ] Marketplace functional
+- [ ] Payment channels reduce settlement costs
+- [ ] Governance votes execute
+- [ ] Circuit breakers tested
+- [ ] Tests: `pytest tests/test_marketplace_* -v` pass
+
+---
+
+## 🗺️ PHASE 20: PRODUCTION HARDENING
+
+**Priority**: CRITICAL - For production deployment  
+**Estimated Duration**: 5-6 weeks  
+**Commands**: 81-85
+
+### Objectives
+
+Production-ready system with sandboxing, performance optimization, monitoring, and deployment automation.
+
+### Command 81: Firecracker Sandboxing
+
+**Add execution sandboxing**:
+- Firecracker microVM integration
+- Untrusted job isolation
+- Resource limits (CPU/mem/net)
+- Outbound-only network relays
+
+### Command 82: Performance Optimization
+
+**Optimize for latency targets**:
+- Bus latency: p99 <25ms
+- DECIDE latency: p95 <2s
+- Policy eval: p95 <20ms
+- Throughput: 1000+ tasks/sec
+
+### Command 83: Monitoring & Alerting
+
+**Production monitoring**:
+- Prometheus metrics
+- Grafana dashboards
+- PagerDuty/Slack alerts
+- SLO tracking and alerts
+
+### Command 84: Kubernetes Deployment Manifests
+
+**Containerize and orchestrate**:
+- Docker images for all components
+- K8s StatefulSets for consensus
+- Service mesh (optional)
+- Auto-scaling policies
+
+### Command 85: CI/CD Pipeline & Canary Deployments
+
+**Automate deployment**:
+- GitHub Actions CI
+- Automated tests on PR
+- Canary deployment strategy
+- Rollback automation
+
+### Success Criteria
+
+- [ ] All jobs run in Firecracker VMs
+- [ ] Performance targets met
+- [ ] Alerts firing correctly
+- [ ] K8s deployment working
+- [ ] CI/CD pipeline operational
+- [ ] Production load tested
+
+---
+
+## 📊 Final Progress Summary
+
+| Phase | Status | Commands | Progress |
+|-------|--------|----------|----------|
+| 0-8 | ✅ Complete | 1-32 | 100% |
+| 9 | ❌ Pending | 33-36 | 0% |
+| 10 | ❌ Pending | 37-40 | 0% |
+| 11 | ❌ Pending | 41-44 | 0% |
+| 12 | ❌ Pending | 45-48 | 0% |
+| 13 | ❌ Pending | 49-54 | 0% |
+| 14 | ❌ Pending | 55-59 | 0% |
+| 15 | ❌ Pending | 60-63 | 0% |
+| 16 | ❌ Pending | 64-67 | 0% |
+| 17 | ❌ Pending | 68-71 | 0% |
+| 18 | ❌ Pending | 72-75 | 0% |
+| 19 | ❌ Pending | 76-80 | 0% |
+| 20 | ❌ Pending | 81-85 | 0% |
+
+---
+
 **Status**: Phase 8 Complete ✅  
 **Next**: Command 33 (etcd-raft Integration)  
-**Timeline**: 5-9 months to completion  
-**Progress**: 40% done
+**Timeline**: 5-9 months to full completion  
+**Progress**: 40% complete (8/20 phases done)

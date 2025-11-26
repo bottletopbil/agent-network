@@ -10,7 +10,7 @@ import logging
 from typing import Optional
 from threading import Thread, Event
 
-from src.consensus.bootstrap import bootstrap_manager
+from consensus.bootstrap import bootstrap_manager
 
 logger = logging.getLogger(__name__)
 
