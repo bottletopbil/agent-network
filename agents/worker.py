@@ -95,24 +95,35 @@ class WorkerAgent(BaseAgent):
             print(f"[WORKER] Observed CLAIM for {task_id} by {claimer}")
             self.claimed_tasks.add(task_id)
 
-    async def execute_task(self, thread_id: str, task: dict):
-        """Execute the task and publish result"""
+    async def execute_task(self, thread_id: str, task: dict, use_sandbox: bool = False):
+        """
+        Execute the task and publish result.
+        
+        Args:
+            thread_id: Thread ID
+            task: Task to execute
+            use_sandbox: If True, execute in Firecracker sandbox (for untrusted code)
+        """
         task_id = task["task_id"]
         input_data = task.get("input", {})
         
-        print(f"[WORKER] Executing task {task_id}...")
+        print(f"[WORKER] Executing task {task_id}{'in sandbox' if use_sandbox else ''}...")
         
-        # Mock work simulation
-        await asyncio.sleep(1)
-        
-        # Create result
-        result = {
-            "status": "success",
-            "task_id": task_id,
-            "worker_id": self.agent_id,
-            "output": f"Processed: {input_data}",
-            "timestamp": time.time()
-        }
+        if use_sandbox:
+            # Execute in sandboxed VM
+            result = await self._execute_sandboxed(task_id, input_data)
+        else:
+            # Mock work simulation (trusted execution)
+            await asyncio.sleep(1)
+            
+            # Create result
+            result = {
+                "status": "success",
+                "task_id": task_id,
+                "worker_id": self.agent_id,
+                "output": f"Processed: {input_data}",
+                "timestamp": time.time()
+            }
         
         # Store in CAS
         artifact_hash = cas.put_json(result)
@@ -120,6 +131,69 @@ class WorkerAgent(BaseAgent):
         
         # Publish COMMIT
         await self.publish_commit(thread_id, task_id, artifact_hash)
+    
+    async def _execute_sandboxed(self, task_id: str, input_data: dict) -> dict:
+        """
+        Execute task in Firecracker sandbox.
+        
+        This provides isolation for untrusted code execution.
+        """
+        try:
+            from sandbox import SandboxedExecutor, ResourceLimits
+            
+            # Configure sandbox
+            executor = SandboxedExecutor(
+                default_image="/path/to/rootfs.img",  # Would be real path in production
+                mock_mode=True  # Auto-detect in production
+            )
+            
+            # Define resource limits
+            limits = ResourceLimits(
+                cpu_cores=1,
+                mem_mb=256,
+                disk_mb=1024,
+                net_bw_mbps=10  # Limited network for untrusted code
+            )
+            
+            # Create command to execute
+            # In production, this would be actual user code
+            command = f"echo 'Processing: {input_data}'"
+            
+            # Execute in sandbox
+            exec_result = executor.execute_sandboxed(
+                command=command,
+                resources=limits,
+                timeout=30
+            )
+            
+            # Cleanup
+            executor.cleanup()
+            
+            # Convert to task result
+            result = {
+                "status": "success" if exec_result["exit_code"] == 0 else "failed",
+                "task_id": task_id,
+                "worker_id": self.agent_id,
+                "output": exec_result["stdout"],
+                "stderr": exec_result["stderr"],
+                "exit_code": exec_result["exit_code"],
+                "execution_time": exec_result["execution_time"],
+                "sandboxed": True,
+                "timestamp": time.time()
+            }
+            
+            return result
+            
+        except Exception as e:
+            print(f"[WORKER] Sandbox execution failed: {e}")
+            return {
+                "status": "error",
+                "task_id": task_id,
+                "worker_id": self.agent_id,
+                "error": str(e),
+                "sandboxed": True,
+                "timestamp": time.time()
+            }
         
     async def publish_commit(self, thread_id: str, task_id: str, artifact_hash: str):
         """Publish COMMIT envelope with artifact hash"""

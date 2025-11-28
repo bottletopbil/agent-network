@@ -1,0 +1,253 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planner-agents
+  namespace: agent-swarm
+  labels:
+    app: agent
+    agent-type: planner
+    component: agents
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: agent
+      agent-type: planner
+  template:
+    metadata:
+      labels:
+        app: agent
+        agent-type: planner
+        component: agents
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: agent-swarm
+      terminationGracePeriodSeconds: 30
+      
+      containers:
+        - name: planner
+          image: agent-swarm/agent:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "agents/planner.py"]
+          
+          ports:
+            - name: metrics
+              containerPort: 8001
+              protocol: TCP
+          
+          envFrom:
+            - configMapRef:
+                name: agent-swarm-config
+            - configMapRef:
+                name: agent-config
+          
+          env:
+            - name: AGENT_TYPE
+              value: "planner"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          
+          livenessProbe:
+            exec:
+              command:
+                - pgrep
+                - -f
+                - "python.*planner"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          readinessProbe:
+            exec:
+              command:
+                - pgrep
+                - -f
+                - "python.*planner"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-agents
+  namespace: agent-swarm
+  labels:
+    app: agent
+    agent-type: worker
+    component: agents
+spec:
+  replicas: 10  # More workers than planners
+  selector:
+    matchLabels:
+      app: agent
+      agent-type: worker
+  template:
+    metadata:
+      labels:
+        app: agent
+        agent-type: worker
+        component: agents
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+    spec:
+      serviceAccountName: agent-swarm
+      terminationGracePeriodSeconds: 30
+      
+      containers:
+        - name: worker
+          image: agent-swarm/agent:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "agents/worker.py"]
+          
+          ports:
+            - name: metrics
+              containerPort: 8001
+          
+          envFrom:
+            - configMapRef:
+                name: agent-swarm-config
+            - configMapRef:
+                name: agent-config
+          
+          env:
+            - name: AGENT_TYPE
+              value: "worker"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          
+          livenessProbe:
+            exec:
+              command:
+                - pgrep
+                - -f
+                - "python.*worker"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: verifier-agents
+  namespace: agent-swarm
+  labels:
+    app: agent
+    agent-type: verifier
+    component: agents
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      app: agent
+      agent-type: verifier
+  template:
+    metadata:
+      labels:
+        app: agent
+        agent-type: verifier
+        component: agents
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+    spec:
+      serviceAccountName: agent-swarm
+      terminationGracePeriodSeconds: 30
+      
+      containers:
+        - name: verifier
+          image: agent-swarm/agent:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "agents/verifier.py"]
+          
+          ports:
+            - name: metrics
+              containerPort: 8001
+          
+          envFrom:
+            - configMapRef:
+                name: agent-swarm-config
+            - configMapRef:
+                name: agent-config
+          
+          env:
+            - name: AGENT_TYPE
+              value: "verifier"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          
+          livenessProbe:
+            exec:
+              command:
+                - pgrep
+                - -f
+                - "python.*verifier"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: worker-agents-hpa
+  namespace: agent-swarm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: worker-agents
+  minReplicas: 5
+  maxReplicas: 50
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80

@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-swarm-config
+  namespace: agent-swarm
+data:
+  # NATS configuration
+  NATS_URL: "nats://nats:4222"
+  
+  # Redis configuration
+  REDIS_URL: "redis://redis:6379"
+  
+  # etcd configuration
+  ETCD_ENDPOINTS: "http://etcd:2379"
+  
+  # IPFS configuration
+  IPFS_API: "http://ipfs:5001"
+  
+  # Jaeger configuration
+  JAEGER_AGENT_HOST: "jaeger"
+  JAEGER_AGENT_PORT: "6831"
+  
+  # Prometheus configuration
+  PROMETHEUS_PORT: "8000"
+  
+  # Performance targets
+  BUS_LATENCY_TARGET_MS: "25"
+  DECIDE_LATENCY_TARGET_MS: "2000"
+  POLICY_EVAL_LATENCY_TARGET_MS: "20"
+  
+  # Economic parameters (can be overridden by governance)
+  K_PLAN: "3"
+  K_RESULT: "5"
+  BOUNTY_CAP: "1000"
+  SLASHING_PERCENTAGE: "0.1"
+  
+  # Logging
+  LOG_LEVEL: "INFO"
+  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coordinator-config
+  namespace: agent-swarm
+data:
+  # Coordinator-specific settings
+  MAX_THREAD_WORKERS: "100"
+  THREAD_TIMEOUT_SECONDS: "3600"
+  CHECKPOINT_INTERVAL_SECONDS: "300"
+  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-config
+  namespace: agent-swarm
+data:
+  # Agent-specific settings
+  HEARTBEAT_INTERVAL_SECONDS: "30"
+  TASK_CLAIM_TIMEOUT_SECONDS: "60"
+  MAX_CONCURRENT_TASKS: "10"

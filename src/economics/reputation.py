@@ -94,54 +94,56 @@ class ReputationTracker:
             self._apply_delta(did, "CHALLENGE_SUCCESS", self.SUCCESSFUL_CHALLENGE_BOOST)
         # Failed challenges don't change reputation here (challenger gets penalized elsewhere)
     
-    def _apply_delta(self, verifier_id: str, event_type: str, delta: float) -> None:
+    def _apply_delta(self, did: str, event_type: str, delta: float) -> None:
         """
         Apply reputation delta and record event.
         
         Args:
-            verifier_id: Verifier to update
+            did: DID to update reputation for
             event_type: Type of event
             delta: Reputation change
         """
         with self.lock:
-            # Get current reputation
-            verifier = self.pool.get_verifier(verifier_id)
+            # Get current reputation from pool (DIDs mapped to verifiers)
+            # For now, we look up by DID as verifier_id for compatibility
+            verifier = self.pool.get_verifier(did)
             if not verifier:
-                raise ValueError(f"Verifier not found: {verifier_id}")
+                raise ValueError(f"Verifier not found for DID: {did}")
             
             current_rep = verifier.metadata.reputation
             new_rep = self._clamp(current_rep + delta)
             
             with self.conn:
                 # Update pool
-                self.pool.update_reputation(verifier_id, new_rep)
+                self.pool.update_reputation(did, new_rep)
                 
                 # Record event
                 import uuid
                 event_id = str(uuid.uuid4())
                 self.conn.execute("""
-                    INSERT INTO reputation_events (event_id, verifier_id, event_type, delta, timestamp_ns)
-                    VALUES (?, ?, ?, ?, ?)
-                """, (event_id, verifier_id, event_type, delta, time.time_ns()))
+                    INSERT INTO reputation_events (event_id, did, event_type, delta, timestamp_ns, verifier_id)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (event_id, did, event_type, delta, time.time_ns(), did))
     
-    def get_reputation(self, verifier_id: str) -> float:
+    def get_reputation(self, did: str) -> float:
         """
         Get current reputation with decay applied.
         
         Args:
-            verifier_id: Verifier to query
+            did: DID to query reputation for
         
         Returns:
             Current reputation (0.0-1.0)
         """
-        verifier = self.pool.get_verifier(verifier_id)
+        verifier = self.pool.get_verifier(did)
         if not verifier:
             return 0.0
         
-        # Get last activity
+        # Get last activity (check both did and verifier_id for compatibility)
         cursor = self.conn.execute("""
-            SELECT MAX(timestamp_ns) FROM reputation_events WHERE verifier_id = ?
-        """, (verifier_id,))
+            SELECT MAX(timestamp_ns) FROM reputation_events 
+            WHERE did = ? OR verifier_id = ?
+        """, (did, did))
         row = cursor.fetchone()
         last_activity = row[0] if row[0] else verifier.registered_at
         
@@ -156,53 +158,53 @@ class ReputationTracker:
         
         return verifier.metadata.reputation
     
-    def apply_decay(self, verifier_id: str) -> float:
+    def apply_decay(self, did: str) -> float:
         """
         Explicitly apply decay and update stored reputation.
         
         Args:
-            verifier_id: Verifier to apply decay to
+            did: DID to apply decay to
         
         Returns:
             New reputation after decay
         """
-        current_rep = self.get_reputation(verifier_id)
+        current_rep = self.get_reputation(did)
         
         # Get stored reputation
-        verifier = self.pool.get_verifier(verifier_id)
+        verifier = self.pool.get_verifier(did)
         if not verifier:
             return 0.0
         
         # If different, update
         if abs(current_rep - verifier.metadata.reputation) > 0.001:
-            self.pool.update_reputation(verifier_id, current_rep)
+            self.pool.update_reputation(did, current_rep)
         
         return current_rep
     
-    def get_reputation_history(self, verifier_id: str, limit: int = 10) -> List[ReputationEvent]:
+    def get_reputation_history(self, did: str, limit: int = 10) -> List[ReputationEvent]:
         """
         Get reputation event history.
         
         Args:
-            verifier_id: Verifier to query
+            did: DID to query reputation history for
             limit: Maximum events to return
         
         Returns:
             List of ReputationEvent objects (newest first)
         """
         cursor = self.conn.execute("""
-            SELECT event_id, verifier_id, event_type, delta, timestamp_ns
+            SELECT event_id, did, event_type, delta, timestamp_ns
             FROM reputation_events
-            WHERE verifier_id = ?
+            WHERE did = ? OR verifier_id = ?
             ORDER BY timestamp_ns DESC
             LIMIT ?
-        """, (verifier_id, limit))
+        """, (did, did, limit))
         
         events = []
         for row in cursor:
             events.append(ReputationEvent(
                 event_id=row[0],
-                verifier_id=row[1],
+                did=row[1],
                 event_type=row[2],
                 delta=row[3],
                 timestamp=row[4]

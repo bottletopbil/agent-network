@@ -1,0 +1,228 @@
+name: Continuous Deployment
+
+on:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
+    branches: [main]
+
+env:
+  KUBECONFIG_PATH: ~/.kube/config
+  NAMESPACE: agent-swarm
+  CANARY_PERCENTAGE: 10
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment:
+      name: staging
+      url: https://staging.agent-swarm.example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to staging
+        run: |
+          ./tools/deploy.sh deploy
+          kubectl set image statefulset/coordinator -n ${{ env.NAMESPACE }} \
+            coordinator=ghcr.io/${{ github.repository }}/coordinator:${{ github.sha }}
+          kubectl set image deployment/planner-agents -n ${{ env.NAMESPACE }} \
+            planner=ghcr.io/${{ github.repository }}/agent:${{ github.sha }}
+          kubectl set image deployment/worker-agents -n ${{ env.NAMESPACE }} \
+            worker=ghcr.io/${{ github.repository }}/agent:${{ github.sha }}
+          kubectl set image deployment/verifier-agents -n ${{ env.NAMESPACE }} \
+            verifier=ghcr.io/${{ github.repository }}/agent:${{ github.sha }}
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status statefulset/coordinator -n ${{ env.NAMESPACE }} --timeout=300s
+          kubectl rollout status deployment/planner-agents -n ${{ env.NAMESPACE }} --timeout=300s
+          kubectl rollout status deployment/worker-agents -n ${{ env.NAMESPACE }} --timeout=300s
+          kubectl rollout status deployment/verifier-agents -n ${{ env.NAMESPACE }} --timeout=300s
+
+      - name: Smoke tests
+        run: |
+          # Wait for pods to be ready
+          sleep 30
+          
+          # Test coordinator health
+          kubectl run curl-test --image=curlimages/curl:latest --rm -it --restart=Never -n ${{ env.NAMESPACE }} -- \
+            curl -f http://coordinator:8000/health || exit 1
+          
+          echo "Staging deployment successful!"
+
+  canary-deploy:
+    name: Canary Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    environment:
+      name: production-canary
+      url: https://agent-swarm.example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Create canary resources
+        run: |
+          # Create canary deployments with 10% of replicas
+          export CANARY_TAG="${{ github.sha }}"
+          export CANARY_PERCENTAGE=${{ env.CANARY_PERCENTAGE }}
+          ./tools/canary_deploy.sh create
+
+      - name: Wait for canary pods
+        run: |
+          kubectl wait --for=condition=ready pod \
+            -l version=canary \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=300s
+
+      - name: Monitor canary health
+        id: canary-health
+        run: |
+          ./tools/canary_deploy.sh monitor
+        continue-on-error: true
+
+      - name: Rollback on failure
+        if: steps.canary-health.outcome == 'failure'
+        run: |
+          echo "Canary health check failed! Rolling back..."
+          ./tools/rollback.sh canary
+          exit 1
+
+      - name: Promote canary
+        if: steps.canary-health.outcome == 'success'
+        run: |
+          echo "Canary healthy! Waiting for manual approval..."
+
+  promote-production:
+    name: Promote to Full Production
+    runs-on: ubuntu-latest
+    needs: [canary-deploy]
+    environment:
+      name: production
+      url: https://agent-swarm.example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Promote canary to production
+        run: |
+          export NEW_TAG="${{ github.sha }}"
+          ./tools/canary_deploy.sh promote
+
+      - name: Wait for full rollout
+        run: |
+          kubectl rollout status statefulset/coordinator -n ${{ env.NAMESPACE }} --timeout=600s
+          kubectl rollout status deployment/planner-agents -n ${{ env.NAMESPACE }} --timeout=600s
+          kubectl rollout status deployment/worker-agents -n ${{ env.NAMESPACE }} --timeout=600s
+          kubectl rollout status deployment/verifier-agents -n ${{ env.NAMESPACE }} --timeout=600s
+
+      - name: Health check
+        id: prod-health
+        run: |
+          # Run comprehensive health checks
+          sleep 30
+          
+          # Check all pods are healthy
+          UNHEALTHY=$(kubectl get pods -n ${{ env.NAMESPACE }} | grep -v Running | grep -v Completed | wc -l)
+          if [ $UNHEALTHY -gt 1 ]; then
+            echo "Found unhealthy pods!"
+            kubectl get pods -n ${{ env.NAMESPACE }}
+            exit 1
+          fi
+          
+          # Check metrics endpoint
+          kubectl run curl-test --image=curlimages/curl:latest --rm -it --restart=Never -n ${{ env.NAMESPACE }} -- \
+            curl -f http://coordinator:8000/metrics || exit 1
+          
+          echo "Production deployment successful!"
+        continue-on-error: true
+
+      - name: Rollback production on failure
+        if: steps.prod-health.outcome == 'failure'
+        run: |
+          echo "Production health check failed! Rolling back..."
+          ./tools/rollback.sh production
+          exit 1
+
+      - name: Cleanup canary
+        if: steps.prod-health.outcome == 'success'
+        run: |
+          ./tools/canary_deploy.sh cleanup
+
+      - name: Notify success
+        if: steps.prod-health.outcome == 'success'
+        run: |
+          echo "🎉 Deployment to production successful!"
+          echo "Version: ${{ github.sha }}"
+          echo "Deploy time: $(date)"
+
+  rollback-on-failure:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [canary-deploy, promote-production]
+    if: failure()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Execute rollback
+        run: |
+          ./tools/rollback.sh production
+          echo "Rollback completed!"
+
+      - name: Notify failure
+        run: |
+          echo "❌ Deployment failed and was rolled back!"
+          echo "Failed at: $(date)"

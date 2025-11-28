@@ -97,7 +97,12 @@ class AgentScorer:
         scores = {}
         
         # 1. Reputation (0.0 - 1.0, higher is better)
-        scores["reputation"] = agent_manifest.success_rate
+        # Prefer DID-based reputation if available (identity manifests),
+        # fallback to success_rate (routing manifests) for compatibility
+        reputation = getattr(agent_manifest, 'reputation', None)
+        if reputation is None:
+            reputation = getattr(agent_manifest, 'success_rate', 0.8)
+        scores["reputation"] = reputation
         
         # 2. Price (0.0 - 1.0, lower price is better)
         max_price = need.get("max_price", 100.0)

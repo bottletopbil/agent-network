@@ -9,6 +9,14 @@ from envelope import observe_envelope
 # from policy import validate_envelope  # ✅ Rule book v0 gate
 from policy.gates import GateEnforcer, PolicyGate
 
+# OpenTelemetry tracing
+try:
+    from observability.tracing import create_span, propagate_context, extract_context, start_span_from_context
+    from opentelemetry.trace import SpanKind
+    TRACING_ENABLED = True
+except ImportError:
+    TRACING_ENABLED = False
+
 logger = logging.getLogger(__name__)
 
 # Global gate enforcer instance
@@ -60,20 +68,44 @@ async def publish(thread_id: str, subject: str, message: dict):
 async def publish_envelope(thread_id: str, subject: str, envelope: dict):
     """
     High-level: publish a SIGNED ENVELOPE only if it passes the rule book locally.
-    Now includes PREFLIGHT gate validation.
+    Now includes PREFLIGHT gate validation and distributed tracing.
     """
-    # ✅ Original policy check (sig/lamport/payload/CAS)
-    validate_envelope(envelope)
-    
-    # ✅ PREFLIGHT gate: Fast check before publishing
-    gate_enforcer = get_gate_enforcer()
-    decision = gate_enforcer.preflight_validate(envelope)
-    if not decision.allowed:
-        logger.error(f"Preflight validation failed: {decision.reason}")
-        raise ValueError(f"Preflight validation failed: {decision.reason}")
-    
-    logger.debug(f"Preflight passed for {envelope.get('operation')}")
-    await publish_raw(thread_id, subject, envelope)
+    # Create span for publish operation
+    if TRACING_ENABLED:
+        with create_span(
+            "bus.publish_envelope",
+            attributes={
+                "thread_id": thread_id,
+                "subject": subject,
+                "operation": envelope.get("operation", "unknown")
+            },
+            kind=SpanKind.PRODUCER
+        ):
+            # ✅ Original policy check (sig/lamport/payload/CAS)
+            validate_envelope(envelope)
+            
+            # ✅ PREFLIGHT gate: Fast check before publishing
+            gate_enforcer = get_gate_enforcer()
+            decision = gate_enforcer.preflight_validate(envelope)
+            if not decision.allowed:
+                logger.error(f"Preflight validation failed: {decision.reason}")
+                raise ValueError(f"Preflight validation failed: {decision.reason}")
+            
+            # Inject trace context into envelope
+            propagate_context(envelope)
+            
+            logger.debug(f"Preflight passed for {envelope.get('operation')}")
+            await publish_raw(thread_id, subject, envelope)
+    else:
+        # No tracing available
+        validate_envelope(envelope)
+        gate_enforcer = get_gate_enforcer()
+        decision = gate_enforcer.preflight_validate(envelope)
+        if not decision.allowed:
+            logger.error(f"Preflight validation failed: {decision.reason}")
+            raise ValueError(f"Preflight validation failed: {decision.reason}")
+        logger.debug(f"Preflight passed for {envelope.get('operation')}")
+        await publish_raw(thread_id, subject, envelope)
 
 async def subscribe_envelopes(
     thread_id: str,
@@ -123,7 +155,22 @@ async def subscribe_envelopes(
             # Update local Lamport clock from the verified envelope
             observe_envelope(env)
 
-            await handler(env)
+            # Extract trace context and continue distributed trace
+            if TRACING_ENABLED:
+                with start_span_from_context(
+                    "bus.handle_envelope",
+                    env,
+                    attributes={
+                        "thread_id": thread_id,
+                        "subject": subject,
+                        "operation": env.get("operation", "unknown")
+                    },
+                    kind=SpanKind.CONSUMER
+                ):
+                    await handler(env)
+            else:
+                await handler(env)
+            
             await msg.ack()
 
     try:

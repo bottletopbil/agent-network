@@ -1,0 +1,157 @@
+# Alerting Rules for Agent Swarm
+
+groups:
+  - name: agent_swarm_alerts
+    interval: 30s
+    rules:
+      # Performance alerts
+      - alert: HighBusLatency
+        expr: histogram_quantile(0.99, rate(agent_swarm_bus_publish_latency_seconds_bucket[5m])) > 0.025
+        for: 2m
+        labels:
+          severity: warning
+          component: bus
+        annotations:
+          summary: "High bus publish latency detected"
+          description: "P99 bus latency is {{ $value }}s, exceeding 25ms threshold"
+
+      - alert: CriticalBusLatency
+        expr: histogram_quantile(0.99, rate(agent_swarm_bus_publish_latency_seconds_bucket[5m])) > 0.050
+        for: 1m
+        labels:
+          severity: critical
+          component: bus
+        annotations:
+          summary: "Critical bus publish latency detected"
+          description: "P99 bus latency is {{ $value }}s, far exceeding threshold"
+
+      - alert: SlowDecideProcessing
+        expr: histogram_quantile(0.95, rate(agent_swarm_decide_latency_seconds_bucket[5m])) > 2.0
+        for: 3m
+        labels:
+          severity: warning
+          component: coordinator
+        annotations:
+          summary: "DECIDE processing is slow"
+          description: "P95 DECIDE latency is {{ $value }}s, exceeding 2s threshold"
+
+      - alert: SlowPolicyEvaluation
+        expr: histogram_quantile(0.95, rate(agent_swarm_policy_eval_latency_seconds_bucket[5m])) > 0.020
+        for: 2m
+        labels:
+          severity: warning
+          component: policy
+        annotations:
+          summary: "Policy evaluation is slow"
+          description: "P95 policy eval latency is {{ $value }}s, exceeding 20ms threshold"
+
+      # Message failures
+      - alert: HighMessageFailureRate
+        expr: rate(agent_swarm_messages_failed_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: bus
+        annotations:
+          summary: "High message failure rate"
+          description: "Message failures at {{ $value }} per second"
+
+      - alert: CriticalMessageFailures
+        expr: rate(agent_swarm_messages_failed_total[5m]) > 50
+        for: 1m
+        labels:
+          severity: critical
+          component: bus
+        annotations:
+          summary: "Critical message failure rate"
+          description: "Message failures at {{ $value }} per second - system may be degraded"
+
+      # Agent health
+      - alert: NoActiveAgents
+        expr: sum(agent_swarm_active_agents) == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: agents
+        annotations:
+          summary: "No active agents detected"
+          description: "System has no active agents - no work can be processed"
+
+      - alert: HighAgentErrorRate
+        expr: rate(agent_swarm_agent_errors_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: agents
+        annotations:
+          summary: "High agent error rate"
+          description: "Agent errors at {{ $value }} per second"
+
+      # Task backlog
+      - alert: HighTaskBacklog
+        expr: agent_swarm_active_tasks > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: tasks
+        annotations:
+          summary: "High number of active tasks"
+          description: "{{ $value }} active tasks - may indicate processing bottleneck"
+
+      # Economic alerts
+      - alert: HighSlashingRate
+        expr: rate(agent_swarm_slashed_tokens_total[1h]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: economics
+        annotations:
+          summary: "High token slashing rate"
+          description: "{{ $value }} tokens slashed per second - possible attack or system issues"
+
+      - alert: LowStakedTokens
+        expr: sum(agent_swarm_staked_tokens) < 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: economics
+        annotations:
+          summary: "Low total staked tokens"
+          description: "Only {{ $value }} tokens staked - security may be compromised"
+
+      # System health
+      - alert: SystemDown
+        expr: up{job="agent-swarm"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Agent Swarm system is down"
+          description: "Cannot reach agent-swarm metrics endpoint"
+
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: monitoring
+        annotations:
+          summary: "Prometheus is down"
+          description: "Monitoring system is unavailable"
+
+      # Cache performance (if using cache)
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            rate(agent_swarm_cache_operations_total{operation="get",result="hit"}[5m])
+            /
+            rate(agent_swarm_cache_operations_total{operation="get"}[5m])
+          ) < 0.5
+        for: 5m
+        labels:
+          severity: info
+          component: cache
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} - consider tuning cache size"

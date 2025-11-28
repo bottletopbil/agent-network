@@ -30,6 +30,7 @@ class AgentManifest:
     avg_latency_ms: int  # Average latency in milliseconds
     tags: List[str]  # Additional tags for discovery
     pubkey: str  # Base58-encoded public key
+    reputation: float = 0.8  # DID-based reputation (0.0-1.0), portable across instances
     signature: str = ""  # Hex-encoded signature
     timestamp_ns: int = 0  # Manifest creation timestamp
     version: str = "1.0"  # Manifest version
@@ -80,14 +81,16 @@ class ManifestManager:
     - Manifest publishing to registry
     """
     
-    def __init__(self, did_manager: Optional[DIDManager] = None):
+    def __init__(self, did_manager: Optional[DIDManager] = None, reputation_tracker: Optional['ReputationTracker'] = None):
         """
         Initialize manifest manager.
         
         Args:
             did_manager: Optional DIDManager for signing/verification
+            reputation_tracker: Optional ReputationTracker for DID-based reputation
         """
         self.did_manager = did_manager or DIDManager()
+        self.reputation_tracker = reputation_tracker
     
     def create_manifest(
         self,
@@ -119,6 +122,13 @@ class ManifestManager:
         if not doc:
             raise ValueError(f"Cannot resolve agent DID: {agent_id}")
         
+        # Get reputation from tracker if available
+        reputation = 0.8  # Default initial reputation
+        if self.reputation_tracker:
+            reputation = self.reputation_tracker.get_reputation(agent_id)
+            if reputation == 0.0:  # No history, use default
+                reputation = 0.8
+        
         # Create manifest
         manifest = AgentManifest(
             agent_id=agent_id,
@@ -128,13 +138,14 @@ class ManifestManager:
             avg_latency_ms=avg_latency_ms,
             tags=tags or [],
             pubkey=doc.public_key,
+            reputation=reputation,
             timestamp_ns=int(time.time() * 1_000_000_000),
             metadata=metadata or {}
         )
         
         logger.info(
             f"Created manifest for agent {agent_id[:30]}... "
-            f"with {len(capabilities)} capabilities"
+            f"with {len(capabilities)} capabilities and reputation {reputation:.2f}"
         )
         
         return manifest
