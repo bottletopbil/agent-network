@@ -90,7 +90,7 @@ async def handle_decide(envelope: dict):
             payload={"state": TaskState.DECIDED.value},
             timestamp_ns=time.time_ns()
         )
-        plan_store.append_op(state_op)
+        await plan_store.append_op(state_op)
         print(f"[DECIDE] Updated task {task_id} state to DECIDED")
     
     # Record DECIDE metadata as annotation
@@ -112,7 +112,7 @@ async def handle_decide(envelope: dict):
         },
         timestamp_ns=time.time_ns()
     )
-    plan_store.append_op(decide_op)
+    await plan_store.append_op(decide_op)
 
 # Register with dispatcher
 DISPATCHER.register("DECIDE", handle_decide)

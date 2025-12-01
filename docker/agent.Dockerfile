@@ -19,19 +19,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy Python dependencies from builder
-COPY --from=builder /root/.local /root/.local
+# Create non-root user first
+RUN useradd -m -u 1000 swarm
+
+# Copy Python dependencies from builder to swarm's home
+COPY --from=builder --chown=swarm:swarm /root/.local /home/swarm/.local
 
 # Make sure scripts in .local are usable
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH=/home/swarm/.local/bin:$PATH
 
 # Copy application code
-COPY src/ ./src/
-COPY agents/ ./agents/
-
-# Create non-root user
-RUN useradd -m -u 1000 swarm && \
-    chown -R swarm:swarm /app
+COPY --chown=swarm:swarm src/ ./src/
+COPY --chown=swarm:swarm agents/ ./agents/
 
 USER swarm
 

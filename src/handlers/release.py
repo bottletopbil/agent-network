@@ -56,7 +56,7 @@ async def handle_release(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     
     # Scavenge task by updating state to DRAFT
     state_op = PlanOp(
@@ -70,7 +70,7 @@ async def handle_release(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(state_op)
+    await plan_store.append_op(state_op)
     print(f"[RELEASE] Lease {lease_id} released for task {task_id} (reason: {reason})")
 
 # Register with dispatcher

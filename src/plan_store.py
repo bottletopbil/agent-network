@@ -9,7 +9,7 @@ Tables:
 
 import sqlite3
 import json
-import threading
+import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
@@ -49,7 +49,7 @@ class PlanStore:
     def __init__(self, db_path: Path):
         self.db_path = db_path
         self.conn = sqlite3.connect(str(db_path), check_same_thread=False)
-        self.lock = threading.Lock()
+        self.lock = asyncio.Lock()
         self._init_schema()
     
     def _init_schema(self):
@@ -91,9 +91,9 @@ class PlanStore:
                 )
             """)
     
-    def append_op(self, op: PlanOp) -> None:
+    async def append_op(self, op: PlanOp) -> None:
         """Append operation and update derived views"""
-        with self.lock:
+        async with self.lock:
             with self.conn:
                 # Insert op
                 self.conn.execute("""
@@ -139,7 +139,7 @@ class PlanStore:
                 VALUES (?, ?)
             """, (parent, child))
     
-    def get_task(self, task_id: str) -> Optional[Dict]:
+    async def get_task(self, task_id: str) -> Optional[Dict]:
         """Get current task state"""
         cursor = self.conn.execute("""
             SELECT task_id, thread_id, task_type, state
@@ -155,7 +155,7 @@ class PlanStore:
             "state": row[3]
         }
     
-    def get_ops_for_thread(self, thread_id: str) -> List[PlanOp]:
+    async def get_ops_for_thread(self, thread_id: str) -> List[PlanOp]:
         """Get all ops for a thread, ordered by lamport"""
         cursor = self.conn.execute("""
             SELECT op_id, thread_id, lamport, actor_id, op_type, task_id, payload_json, timestamp_ns
@@ -178,7 +178,7 @@ class PlanStore:
             ))
         return ops
     
-    def annotate_task(self, task_id: str, annotations: Dict[str, Any]) -> None:
+    async def annotate_task(self, task_id: str, annotations: Dict[str, Any]) -> None:
         """
         Annotate a task with metadata.
         
@@ -193,7 +193,7 @@ class PlanStore:
         import time
         
         # Get task to ensure it exists and get thread_id
-        task = self.get_task(task_id)
+        task = await self.get_task(task_id)
         if not task:
             raise ValueError(f"Task not found: {task_id}")
         
@@ -209,5 +209,5 @@ class PlanStore:
             timestamp_ns=time.time_ns()
         )
         
-        self.append_op(op)
+        await self.append_op(op)
 

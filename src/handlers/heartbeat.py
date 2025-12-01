@@ -86,7 +86,7 @@ async def handle_heartbeat(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     print(f"[HEARTBEAT] Received from {worker_id[:8]}... for lease {lease_id} (progress: {progress}%)")
 
 # Register with dispatcher

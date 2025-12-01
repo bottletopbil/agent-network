@@ -1,12 +1,13 @@
 """
 COMMIT Handler: records task completion with artifact validation.
 
-Enhanced with cross-shard commitment protocol for distributed coordination.
+Enhanced with cross-shard commitment protocol and THREE-GATE policy enforcement.
 """
 
 import uuid
 from plan_store import PlanStore, PlanOp, OpType
 from verbs import DISPATCHER
+from bus import get_gate_enforcer  # For commit_gate validation
 import cas
 import time
 import logging
@@ -21,12 +22,29 @@ commitment_protocol = None
 async def handle_commit(envelope: dict):
     """
     Process COMMIT envelope:
-    1. Validate artifact_hash exists in CAS
-    2. Record commit in plan store if validation passes
-    3. For cross-shard tasks, create and publish commitment artifact
+    1. Validate with commit_gate (compare claimed vs actual resources)
+    2. Validate artifact_hash exists in CAS
+    3. Record commit in plan store if validation passes
+    4. For cross-shard tasks, create and publish commitment artifact
     """
     thread_id = envelope["thread_id"]
     payload = envelope["payload"]
+    
+    # Extract telemetry data for commit_gate validation
+    telemetry = payload.get("telemetry", {})
+    
+    # ✅ COMMIT_GATE: Validate actual execution against claimed resources
+    gate_enforcer = get_gate_enforcer()
+    decision = gate_enforcer.commit_gate_validate(envelope, telemetry)
+    
+    if not decision.allowed:
+        logger.error(
+            f"[COMMIT] Commit gate validation failed for task {payload.get('task_id')}: "
+            f"{decision.reason}"
+        )
+        return  # Reject the commit
+    
+    logger.debug(f"[COMMIT] Commit gate passed (gas: {decision.gas_used})")
     
     # Extract commit details
     task_id = payload.get("task_id")
@@ -60,12 +78,13 @@ async def handle_commit(envelope: dict):
             "commit_id": commit_id,
             "artifact_hash": artifact_hash,
             "committer": envelope["sender_pk_b64"],
-            "committed_at": time.time_ns()
+            "committed_at": time.time_ns(),
+            "telemetry": telemetry  # Include telemetry in commit record
         },
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     logger.info(
         f"[COMMIT] Recorded commit {commit_id} for task {task_id} "
         f"with artifact {artifact_hash[:8]}..."

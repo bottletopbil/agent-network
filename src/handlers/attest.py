@@ -93,7 +93,7 @@ async def handle_attest(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     logger.info(f"[ATTEST] Recorded attestation {attestation_id} for commit {commit_id} (verdict: {verdict})")
     
     # Check K_plan threshold

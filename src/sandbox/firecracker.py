@@ -98,6 +98,16 @@ class FirecrackerVM:
                 "with KVM support, or enable mock_mode for development."
             )
     
+    def production_ready(self) -> bool:
+        """
+        Check if the system is ready for production deployment with real Firecracker.
+        
+        Returns:
+            True if Firecracker is available and system is NOT in mock mode,
+            False otherwise (development/testing mode)
+        """
+        return not self.mock_mode and self._is_firecracker_available()
+    
     def _is_firecracker_available(self) -> bool:
         """Check if Firecracker is available on this system."""
         # Check if on Linux

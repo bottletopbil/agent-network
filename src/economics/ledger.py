@@ -51,6 +51,10 @@ class CreditLedger:
     Thread-safe operations with full audit logging.
     """
     
+    # Authorization constants
+    SYSTEM_ACCOUNT_ID = "system"  # Only this account can mint credits
+    MAX_SUPPLY = 1_000_000_000_000  # 1 trillion maximum credits
+    
     def __init__(self, db_path: Path):
         self.db_path = db_path
         self.conn = sqlite3.connect(str(db_path), check_same_thread=False)
@@ -64,9 +68,9 @@ class CreditLedger:
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS accounts (
                     account_id TEXT PRIMARY KEY,
-                    balance INTEGER NOT NULL DEFAULT 0,
-                    locked INTEGER NOT NULL DEFAULT 0,
-                    unbonding INTEGER NOT NULL DEFAULT 0
+                    balance INTEGER NOT NULL DEFAULT 0 CHECK(balance >= 0),
+                    locked INTEGER NOT NULL DEFAULT 0 CHECK(locked >= 0),
+                    unbonding INTEGER NOT NULL DEFAULT 0 CHECK(unbonding >= 0)
                 )
             """)
             
@@ -94,27 +98,50 @@ class CreditLedger:
                 )
             """)
             
+            # Supply tracking table
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS supply_tracking (
+                    id INTEGER PRIMARY KEY CHECK(id = 1),
+                    total_supply INTEGER NOT NULL DEFAULT 0 CHECK(total_supply >= 0)
+                )
+            """)
+            
+            # Initialize supply tracking if not exists
+            self.conn.execute("INSERT OR IGNORE INTO supply_tracking (id, total_supply) VALUES (1, 0)")
+            
             # Indexes
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ops_account ON operations(account_id)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ops_timestamp ON operations(timestamp_ns)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ops_type ON operations(op_type)")
             self.conn.execute("CREATE INDEX IF NOT EXISTS idx_escrows_account ON escrows(account_id)")
     
-    def create_account(self, account_id: str, initial_balance: int = 0) -> None:
+    def create_account(self, account_id: str, initial_balance: int = 0, minter_id: str = None) -> None:
         """
         Create a new account with initial balance.
         
         Args:
             account_id: Unique account identifier
             initial_balance: Starting balance (default 0)
+            minter_id: Account authorizing the mint (defaults to SYSTEM_ACCOUNT_ID)
         
         Raises:
             AccountExistsError: If account already exists
-            ValueError: If initial_balance is negative
+            ValueError: If initial_balance is negative or minter not authorized
         """
         validate_account_id(account_id)
         if initial_balance < 0:
             raise ValueError(f"Initial balance cannot be negative: {initial_balance}")
+        
+        # Default minter to system
+        if minter_id is None:
+            minter_id = self.SYSTEM_ACCOUNT_ID
+        
+        # Check mint authorization: only system can mint credits
+        if initial_balance > 0 and minter_id != self.SYSTEM_ACCOUNT_ID:
+            raise ValueError(
+                f"Only '{self.SYSTEM_ACCOUNT_ID}' account is authorized to mint credits. "
+                f"Account '{minter_id}' is not authorized."
+            )
         
         with self.lock:
             # Check if account exists
@@ -125,6 +152,15 @@ class CreditLedger:
             if cursor.fetchone():
                 raise AccountExistsError(f"Account already exists: {account_id}")
             
+            # Check max supply if minting
+            if initial_balance > 0:
+                current_supply = self._get_total_supply_unsafe()  # Use unsafe version - we already hold lock
+                if current_supply + initial_balance > self.MAX_SUPPLY:
+                    raise ValueError(
+                        f"Minting {initial_balance} would exceed MAX_SUPPLY "
+                        f"(current: {current_supply}, max: {self.MAX_SUPPLY})"
+                    )
+            
             with self.conn:
                 # Create account
                 self.conn.execute(
@@ -132,7 +168,7 @@ class CreditLedger:
                     (account_id, initial_balance)
                 )
                 
-                # Record MINT operation if initial balance > 0
+                # Record MINT operation and update supply if initial balance > 0
                 if initial_balance > 0:
                     op_id = str(uuid.uuid4())
                     self.conn.execute("""
@@ -144,8 +180,14 @@ class CreditLedger:
                         OpType.MINT.value,
                         initial_balance,
                         time.time_ns(),
-                        json.dumps({"reason": "initial_balance"})
+                        json.dumps({"reason": "initial_balance", "minter": minter_id})
                     ))
+                    
+                    # Update total supply
+                    self.conn.execute(
+                        "UPDATE supply_tracking SET total_supply = total_supply + ? WHERE id = 1",
+                        (initial_balance,)
+                    )
     
     def get_balance(self, account_id: str) -> int:
         """
@@ -188,25 +230,45 @@ class CreditLedger:
             unbonding=row[3]
         )
     
-    def transfer(self, from_id: str, to_id: str, amount: int) -> str:
+    def get_total_supply(self) -> int:
+        """
+        Get the total supply of minted credits.
+        
+        Returns:
+            Total supply in smallest credit unit
+        """
+        with self.lock:
+            return self._get_total_supply_unsafe()
+    
+    def _get_total_supply_unsafe(self) -> int:
+        """Internal: Get total supply without acquiring lock. Used when lock already held."""
+        cursor = self.conn.execute("SELECT total_supply FROM supply_tracking WHERE id = 1")
+        row = cursor.fetchone()
+        return row[0] if row else 0
+
+    def transfer(self, from_id: str, to_id: str, amount: int, allow_create_recipient: bool = False) -> str:
         """
         Transfer credits between accounts.
-        
+
         Args:
             from_id: Source account
             to_id: Destination account
             amount: Amount to transfer
-        
+            allow_create_recipient: If True, auto-create recipient account if it doesn't exist.
+                                   If False (default), raise ValueError for non-existent recipients.
+                                   Recommended: explicitly create accounts before transferring.
+
         Returns:
             Operation ID
-        
+
         Raises:
             InsufficientBalanceError: If source has insufficient balance
+            ValueError: If recipient account does not exist (and allow_create_recipient=False)
         """
         validate_account_id(from_id)
         validate_account_id(to_id)
         validate_amount(amount)
-        
+
         with self.lock:
             # Check source balance
             from_balance = self.get_balance(from_id)
@@ -214,15 +276,35 @@ class CreditLedger:
                 raise InsufficientBalanceError(
                     f"Insufficient balance: {from_balance} < {amount}"
                 )
-            
+
+            # Check if recipient exists
+            cursor = self.conn.execute(
+                "SELECT account_id FROM accounts WHERE account_id = ?",
+                (to_id,)
+            )
+            recipient_exists = cursor.fetchone() is not None
+
+            if not recipient_exists:
+                if allow_create_recipient:
+                    # Auto-create recipient (backward compatibility mode)
+                    self.conn.execute(
+                        "INSERT INTO accounts (account_id, balance, locked, unbonding) VALUES (?, 0, 0, 0)",
+                        (to_id,)
+                    )
+                else:
+                    # Reject transfer to prevent accidental fund loss from typos
+                    raise ValueError(
+                        f"Recipient account does not exist: {to_id}. "
+                        "Create account first or use allow_create_recipient=True"
+                    )
+
+            # Perform transfer using integer arithmetic
             with self.conn:
-                # Deduct from source
+                # Debit source
                 self.conn.execute(
                     "UPDATE accounts SET balance = balance - ? WHERE account_id = ?",
                     (amount, from_id)
                 )
-                
-                # Add to destination (create account if needed)
                 cursor = self.conn.execute(
                     "SELECT account_id FROM accounts WHERE account_id = ?",
                     (to_id,)
@@ -334,20 +416,20 @@ class CreditLedger:
         validate_account_id(to_id)
         
         with self.lock:
-            # Get escrow details
-            cursor = self.conn.execute(
-                "SELECT account_id, amount, released FROM escrows WHERE escrow_id = ?",
-                (escrow_id,)
-            )
-            row = cursor.fetchone()
-            if not row:
-                raise EscrowNotFoundError(f"Escrow not found: {escrow_id}")
-            
-            from_id, amount, released = row
-            if released:
-                raise EscrowAlreadyReleasedError(f"Escrow already released: {escrow_id}")
-            
             with self.conn:
+                # ATOMIC: Get escrow details and check released status inside transaction
+                cursor = self.conn.execute(
+                    "SELECT account_id, amount, released FROM escrows WHERE escrow_id = ?",
+                    (escrow_id,)
+                )
+                row = cursor.fetchone()
+                if not row:
+                    raise EscrowNotFoundError(f"Escrow not found: {escrow_id}")
+                
+                from_id, amount, released = row
+                if released:
+                    raise EscrowAlreadyReleasedError(f"Escrow already released: {escrow_id}")
+                
                 # Unlock from source account
                 self.conn.execute(
                     "UPDATE accounts SET locked = locked - ? WHERE account_id = ?",

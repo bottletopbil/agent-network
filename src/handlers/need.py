@@ -41,7 +41,7 @@ async def handle_need(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     print(f"[NEED] Created task {task_id} in thread {thread_id}")
     
     # Start auction if auction_manager available

@@ -110,7 +110,7 @@ async def handle_attest_plan(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     
     # Get current attestation count
     attestation_count = quorum_tracker.get_attestation_count(need_id, proposal_id)

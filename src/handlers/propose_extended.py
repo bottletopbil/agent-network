@@ -109,7 +109,7 @@ async def handle_propose_extended(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     print(f"[PROPOSE_EXTENDED] Recorded proposal {proposal_id} with ballot '{ballot}' (cost: {cost}, eta: {eta}s)")
 
 # Register with dispatcher

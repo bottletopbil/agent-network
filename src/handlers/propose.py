@@ -39,7 +39,7 @@ async def handle_propose(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     print(f"[PROPOSE] Stored proposal {proposal_id} in thread {thread_id}")
 
 # Register with dispatcher

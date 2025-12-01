@@ -46,17 +46,87 @@ async def connect() -> tuple[NATS, JetStreamContext]:
     await _ensure_stream(js)
     return nc, js
 
+
+class ConnectionPool:
+    """
+    Connection pool for NATS connections.
+    
+    Maintains a pool of reusable connections to avoid overhead
+    of creating new connections for each publish.
+    """
+    
+    def __init__(self, max_size: int = 10):
+        self.max_size = max_size
+        self._pool: list[tuple[NATS, JetStreamContext]] = []
+        self._in_use: set[tuple[NATS, JetStreamContext]] = set()
+        self._lock = asyncio.Lock()
+    
+    async def get(self) -> tuple[NATS, JetStreamContext]:
+        """Get a connection from the pool."""
+        async with self._lock:
+            # Try to reuse existing connection
+            if self._pool:
+                conn = self._pool.pop()
+                self._in_use.add(conn)
+                return conn
+            
+            # Create new if under limit
+            if len(self._in_use) < self.max_size:
+                conn = await connect()
+                self._in_use.add(conn)
+                return conn
+            
+            # Wait and retry if at limit
+            # (In production, might want to wait for release or raise)
+            await asyncio.sleep(0.01)
+            return await self.get()
+    
+    async def release(self, conn: tuple[NATS, JetStreamContext]):
+        """Return a connection to the pool."""
+        async with self._lock:
+            if conn in self._in_use:
+                self._in_use.remove(conn)
+                self._pool.append(conn)
+    
+    async def close_all(self):
+        """Close all connections in the pool."""
+        async with self._lock:
+            # Close all pooled connections
+            for nc, _ in self._pool:
+                try:
+                    await nc.drain()
+                except Exception:
+                    pass
+            
+            # Close all in-use connections
+            for nc, _ in self._in_use:
+                try:
+                    await nc.drain()
+                except Exception:
+                    pass
+            
+            self._pool.clear()
+            self._in_use.clear()
+
+
+# Global connection pool
+_connection_pool = ConnectionPool(max_size=10)
+
+
 async def publish_raw(thread_id: str, subject: str, message: dict):
     """
     Kept for low-level use; still logs BUS.PUBLISH.
+    
+    Now uses connection pooling for better performance.
     """
-    nc, js = await connect()
+    nc, js = await _connection_pool.get()
     try:
         data = json.dumps(message).encode()
         await js.publish(subject, data)
         log_event(thread_id=thread_id, subject=subject, kind="BUS.PUBLISH", payload=message)
     finally:
-        await nc.drain()
+        # Return connection to pool instead of draining
+        await _connection_pool.release((nc, js))
 
 async def publish(thread_id: str, subject: str, message: dict):
     """

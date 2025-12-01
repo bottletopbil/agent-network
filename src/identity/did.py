@@ -7,10 +7,12 @@ for portable agent identities using did:key and did:peer methods.
 import base58
 import hashlib
 import logging
-from typing import Optional, Dict, Any
+import time
+from typing import Optional, Dict, Any, List
 from dataclasses import dataclass, field
 import nacl.signing
 import nacl.encoding
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -45,30 +47,73 @@ class DIDManager:
     - did:key method (self-contained, no registry)
     - did:peer method (peer-to-peer identifiers)
     - Signature creation and verification
+    - Sybil resistance via stake and/or proof-of-work
     """
     
-    def __init__(self):
-        """Initialize DID manager."""
+    # Sybil resistance constants
+    MIN_DID_STAKE = 1000  # Minimum stake required to create DID
+    DEFAULT_POW_DIFFICULTY = 2  # Number of leading zero bits required
+    DEFAULT_RATE_LIMIT = 10  # Max DIDs per hour per account
+    
+    def __init__(self, ledger=None, pow_difficulty: int = None, rate_limit_per_hour: int = None):
+        """
+        Initialize DID manager.
+        
+        Args:
+            ledger: Optional CreditLedger for stake-based sybil resistance
+            pow_difficulty: Number of leading zero bits required for PoW (default 2)
+            rate_limit_per_hour: Max DIDs per hour per account (default 10)
+        """
         # Cache of resolved DID documents
         self.did_cache: Dict[str, DIDDocument] = {}
         
         # Map DIDs to their signing keys
         self.signing_keys: Dict[str, nacl.signing.SigningKey] = {}
+        
+        # Sybil resistance
+        self.ledger = ledger
+        self.pow_difficulty = pow_difficulty if pow_difficulty is not None else self.DEFAULT_POW_DIFFICULTY
+        self.rate_limit_per_hour = rate_limit_per_hour if rate_limit_per_hour is not None else self.DEFAULT_RATE_LIMIT
+        
+        # Rate limiting: track DID creation timestamps per account
+        self.creation_timestamps: Dict[str, List[float]] = defaultdict(list)
     
-    def create_did_key(self, ed25519_key: Optional[bytes] = None) -> str:
+    def create_did_key(self, ed25519_key: Optional[bytes] = None, account_id: Optional[str] = None) -> str:
         """
         Create a did:key identifier from Ed25519 key.
         
         The did:key method embeds the public key in the DID itself,
         making it self-contained and requiring no registry.
         
+        Sybil Resistance:
+        - If ledger provided, requires MIN_DID_STAKE to be locked
+        - If no ledger, requires proof-of-work
+        - Rate limited to rate_limit_per_hour DIDs per hour per account
+        
         Args:
             ed25519_key: Optional 32-byte Ed25519 private key seed.
                         If None, generates a new key.
+            account_id: Account ID for stake/rate limiting (required if ledger provided)
         
         Returns:
             DID string (did:key:z...)
+        
+        Raises:
+            ValueError: If sybil resistance requirements not met
         """
+        # Check rate limiting
+        if account_id and self.rate_limit_per_hour > 0:
+            self._check_rate_limit(account_id)
+        
+        # Sybil resistance: stake or PoW
+        if self.ledger:
+            if not account_id:
+                raise ValueError("account_id required when ledger is provided")
+            self._require_stake(account_id)
+        else:
+            # No ledger: require proof-of-work
+            self._require_proof_of_work()
+        
         # Create or use provided signing key
         if ed25519_key:
             signing_key = nacl.signing.SigningKey(ed25519_key)
@@ -107,9 +152,98 @@ class DIDManager:
         )
         self.did_cache[did] = doc
         
+        # Track creation time for rate limiting
+        if account_id:
+            self.creation_timestamps[account_id].append(time.time())
+        
         logger.info(f"Created did:key: {did[:50]}...")
         
         return did
+    
+    def _require_stake(self, account_id: str) -> None:
+        """
+        Require minimum stake to create DID.
+        
+        Locks MIN_DID_STAKE credits from the account.
+        
+        Raises:
+            ValueError: If account has insufficient balance
+        """
+        if not self.ledger:
+            return
+        
+        # Check balance
+        try:
+            balance = self.ledger.get_balance(account_id)
+        except:
+            raise ValueError(f"Account {account_id} not found in ledger")
+        
+        if balance < self.MIN_DID_STAKE:
+            raise ValueError(
+                f"Insufficient balance for DID creation. Required: {self.MIN_DID_STAKE}, "
+                f"Available: {balance}"
+            )
+        
+        # Lock stake (escrow)
+        escrow_id = f"did_stake_{account_id}_{int(time.time()*1000)}"
+        try:
+            self.ledger.escrow(account_id, self.MIN_DID_STAKE, escrow_id)
+        except Exception as e:
+            raise ValueError(f"Failed to lock stake: {e}")
+    
+    def _require_proof_of_work(self) -> None:
+        """
+        Require proof-of-work to create DID.
+        
+        Finds a nonce such that hash(timestamp + nonce) has required leading zero bits.
+        """
+        timestamp = str(time.time()).encode()
+        nonce = 0
+        target_zeros = self.pow_difficulty
+        
+        while True:
+            data = timestamp + str(nonce).encode()
+            hash_result = hashlib.sha256(data).digest()
+            
+            # Check if hash has required leading zero bits
+            leading_zeros = 0
+            for byte in hash_result:
+                if byte == 0:
+                    leading_zeros += 8
+                else:
+                    # Count leading zeros in this byte
+                    leading_zeros += (8 - byte.bit_length())
+                    break
+            
+            if leading_zeros >= target_zeros:
+                break
+            
+            nonce += 1
+            
+            # Prevent infinite loop
+            if nonce > 1_000_000:
+                raise ValueError("PoW failed after 1M attempts")
+    
+    def _check_rate_limit(self, account_id: str) -> None:
+        """
+        Check if account has exceeded rate limit for DID creation.
+        
+        Raises:
+            ValueError: If rate limit exceeded
+        """
+        # Clean old timestamps (older than 1 hour)
+        cutoff_time = time.time() - 3600  # 1 hour ago
+        self.creation_timestamps[account_id] = [
+            ts for ts in self.creation_timestamps[account_id]
+            if ts > cutoff_time
+        ]
+        
+        # Check limit
+        if len(self.creation_timestamps[account_id]) >= self.rate_limit_per_hour:
+            raise ValueError(
+                f"Rate limit exceeded: maximum {self.rate_limit_per_hour} DIDs per hour. "
+                f"Try again later."
+            )
     
     def create_did_peer(self, peer_id: str) -> str:
         """

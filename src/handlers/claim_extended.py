@@ -100,21 +100,21 @@ async def handle_claim_extended(envelope: dict):
         timestamp_ns=current_time
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     
-    # Update task state to CLAIMED
+    # Update task state to DECIDED
     state_op = PlanOp(
         op_id=str(uuid.uuid4()),
         thread_id=thread_id,
         lamport=envelope["lamport"] + 1,
-        actor_id=sender,
+        actor_id=envelope["sender_pk_b64"],
         op_type=OpType.STATE,
         task_id=task_id,
-        payload={"state": "CLAIMED"},  # Using string instead of enum for now
-        timestamp_ns=current_time
+        payload={"state": TaskState.DECIDED.value},
+        timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(state_op)
+    await plan_store.append_op(state_op)
     
     print(f"[CLAIM_EXTENDED] Lease {lease_id} created for task {task_id} by {worker_id[:8]}... (TTL: {lease_ttl}s, HB: {heartbeat_interval}s)")
 

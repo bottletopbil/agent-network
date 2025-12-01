@@ -4,8 +4,11 @@ Auction Bidding: Auction lifecycle and bid management.
 
 import time
 import threading
+import logging
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -98,6 +101,36 @@ class AuctionManager:
             if cost > auction["budget"]:
                 print(f"[AUCTION] Bid cost {cost} exceeds budget {auction['budget']}")
                 return False
+            
+            # Anti-sniping: Check if bid is in final 5 seconds
+            time_until_close = self.config.bid_window - elapsed_seconds
+            
+            if time_until_close < 5.0:
+                # Initialize extensions counter if not present
+                if "extensions" not in auction:
+                    auction["extensions"] = 0
+                
+                # Check if we can still extend
+                max_extensions = 3
+                if auction["extensions"] < max_extensions:
+                    # Extend auction by 5 seconds
+                    extension_ns = 5 * 1_000_000_000
+                    auction["start_time"] -= extension_ns  # Move start back = extend deadline
+                    auction["extensions"] += 1
+                    
+                    logger.info(
+                        f"[AUCTION] Bid window extended for {need_id} due to late bid "
+                        f"(extension {auction['extensions']}/{max_extensions})"
+                    )
+                    print(
+                        f"[AUCTION] Bid window extended by 5s for {need_id} "
+                        f"(extension {auction['extensions']}/{max_extensions})"
+                    )
+                else:
+                    logger.warning(
+                        f"[AUCTION] Max extensions ({max_extensions}) reached for {need_id}, "
+                        "no further extensions allowed"
+                    )
             
             # Create bid record
             bid = {

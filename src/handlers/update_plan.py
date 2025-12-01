@@ -111,7 +111,7 @@ async def handle_update_plan(envelope: dict):
             timestamp_ns=time.time_ns()
         )
         
-        plan_store.append_op(op)
+        await plan_store.append_op(op)
         applied_count += 1
         current_lamport += 1
     

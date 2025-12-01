@@ -46,7 +46,7 @@ async def handle_claim(envelope: dict):
         timestamp_ns=time.time_ns()
     )
     
-    plan_store.append_op(op)
+    await plan_store.append_op(op)
     print(f"[CLAIM] Recorded claim {claim_id} for task {task_id} by {envelope['sender_pk_b64'][:8]}... (lease: {lease_ttl}s)")
 
 # Register with dispatcher

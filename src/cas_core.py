@@ -61,7 +61,9 @@ def get_cas_store(base_path: Optional[Path] = None):
         base_path: Base path for FileCAS (ignored for IPFS)
         
     Returns:
-        CAS store instance (FileCAS or IPFSContentStore)
+        Tuple of (cas_instance, is_ipfs: bool)
+        - cas_instance: FileCAS or IPFSContentStore instance
+        - is_ipfs: True if using IPFS, False if using FileCAS (including fallback)
     """
     # Import here to avoid circular dependencies
     from cas.feature_flag import use_ipfs_cas
@@ -72,15 +74,40 @@ def get_cas_store(base_path: Optional[Path] = None):
             from cas.ipfs_store import IPFSContentStore
             
             logger.info("Using IPFS-backed CAS")
-            return IPFSContentStore()
+            return (IPFSContentStore(), True)
         except Exception as e:
-            logger.error(f"Failed to initialize IPFS CAS: {e}")
-            logger.warning("Falling back to file-based CAS")
-            return FileCAS(base_path)
+            logger.error(f"Failed to initialize IPFS CAS: {e}. Falling back to file-based CAS.")
+            return (FileCAS(base_path), False)
     else:
         # Use file-based CAS
         logger.info("Using file-based CAS")
-        return FileCAS(base_path)
+        return (FileCAS(base_path), False)
+
+
+def get_cas_health_status() -> dict:
+    """
+    Get health status of CAS backend.
+    
+    Returns:
+        Dict with backend information:
+        - backend: "ipfs" or "file"
+        - is_ipfs: boolean flag
+        - status: "healthy" or error message
+    """
+    try:
+        cas, is_ipfs = get_cas_store()
+        
+        return {
+            "backend": "ipfs" if is_ipfs else "file",
+            "is_ipfs": is_ipfs,
+            "status": "healthy"
+        }
+    except Exception as e:
+        return {
+            "backend": "unknown",
+            "is_ipfs": False,
+            "status": f"error: {str(e)}"
+        }
 
 
 # Backwards compatibility

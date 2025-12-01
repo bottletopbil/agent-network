@@ -54,7 +54,7 @@ async def handle_finalize(envelope: dict):
         payload={"state": TaskState.FINAL.value},
         timestamp_ns=time.time_ns()
     )
-    plan_store.append_op(state_op)
+    await plan_store.append_op(state_op)
     
     logger.info(f"[FINALIZE] Updated task {task_id} state to FINAL")
     
@@ -74,7 +74,7 @@ async def handle_finalize(envelope: dict):
         },
         timestamp_ns=time.time_ns()
     )
-    plan_store.append_op(finalize_op)
+    await plan_store.append_op(finalize_op)
     
     logger.info(f"[FINALIZE] Task {task_id} marked as complete")
     

@@ -208,7 +208,8 @@ class SlashingRules:
         challenge_evidence: str,
         challenger: str,
         honest_verifiers: List[str] = None,
-        timestamp_ns: int = None
+        timestamp_ns: int = None,
+        attestation_log: List[dict] = None
     ) -> dict:
         """
         Slash multiple verifiers and distribute slashed amounts.
@@ -222,8 +223,9 @@ class SlashingRules:
             verifiers: List of verifier account IDs to slash
             challenge_evidence: CAS hash of challenge evidence
             challenger: Account ID of challenger
-            honest_verifiers: Optional list of honest verifier account IDs
+            honest_verifiers: Optional list of claimed honest verifier account IDs
             timestamp_ns: Optional timestamp (defaults to current time)
+            attestation_log: Optional list of ATTEST records to verify honest_verifiers
         
         Returns:
             dict with:
@@ -232,6 +234,7 @@ class SlashingRules:
                 - honest_payout: Total amount sent to honest verifiers
                 - burned: Amount burned
                 - events: List of SlashEvent objects
+                - honest_rewards: Dict mapping verifier_id to reward amount
         """
         if timestamp_ns is None:
             timestamp_ns = time.time_ns()
@@ -242,10 +245,44 @@ class SlashingRules:
                 "challenger_payout": 0,
                 "honest_payout": 0,
                 "burned": 0,
-                "events": []
+                "events": [],
+                "honest_rewards": {}
             }
         
         honest_verifiers = honest_verifiers or []
+        attestation_log = attestation_log or []
+        
+        # Verify honest_verifiers actually attested
+        if honest_verifiers and attestation_log:
+            # Extract set of verifiers who actually attested
+            actual_attestors = {
+                record["verifier_id"] 
+                for record in attestation_log 
+                if "verifier_id" in record
+            }
+            
+            # Filter honest_verifiers to only include verified attestors
+            verified_honest = [
+                v for v in honest_verifiers 
+                if v in actual_attestors
+            ]
+            
+            # Log warning if claimed honest contains non-attestors
+            non_attestors = set(honest_verifiers) - actual_attestors
+            if non_attestors:
+                logger.warning(
+                    f"Honest verifier list contains {len(non_attestors)} non-attestors "
+                    f"(free-riders): {non_attestors}. These will not receive rewards."
+                )
+            
+            # Use only verified honest verifiers
+            honest_verifiers = verified_honest
+        elif honest_verifiers and not attestation_log:
+            # No attestation log provided - log warning but allow for backward compatibility
+            logger.warning(
+                f"No attestation log provided for {len(honest_verifiers)} claimed honest verifiers. "
+                "Cannot verify attestations - they will receive rewards without verification."
+            )
         
         # Calculate slashes (50% of each verifier's stake)
         events = []
@@ -272,10 +309,15 @@ class SlashingRules:
             events.append(event)
             total_slashed += slash_amount
         
-        # Distribute slashed amounts
-        challenger_payout = int(total_slashed * 0.50)
-        honest_total = int(total_slashed * 0.40)
-        burned = total_slashed - challenger_payout - honest_total
+        # Distribute slashed amounts using INTEGER arithmetic to avoid precision loss
+        # 50% to challenger, 40% to honest verifiers, 10% + remainder burned
+        challenger_payout = (total_slashed * 50) // 100
+        honest_total = (total_slashed * 40) // 100
+        burned = total_slashed - challenger_payout - honest_total  # Remainder goes to burned
+        
+        # Verify exact distribution (no precision loss)
+        assert challenger_payout + honest_total + burned == total_slashed, \
+            "Distribution must sum to total_slashed exactly"
         
         with self.lock:
             with self.conn:
