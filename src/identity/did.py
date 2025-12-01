@@ -35,9 +35,7 @@ class DIDDocument:
         return {
             "@context": ["https://www.w3.org/ns/did/v1"],
             "id": self.id,
-            "verificationMethod": (
-                [self.verification_method] if self.verification_method else []
-            ),
+            "verificationMethod": ([self.verification_method] if self.verification_method else []),
             "authentication": (
                 self.authentication if self.authentication else [self.id + "#key-1"]
             ),
@@ -60,9 +58,7 @@ class DIDManager:
     DEFAULT_POW_DIFFICULTY = 2  # Number of leading zero bits required
     DEFAULT_RATE_LIMIT = 10  # Max DIDs per hour per account
 
-    def __init__(
-        self, ledger=None, pow_difficulty: int = None, rate_limit_per_hour: int = None
-    ):
+    def __init__(self, ledger=None, pow_difficulty: int = None, rate_limit_per_hour: int = None):
         """
         Initialize DID manager.
 
@@ -80,14 +76,10 @@ class DIDManager:
         # Sybil resistance
         self.ledger = ledger
         self.pow_difficulty = (
-            pow_difficulty
-            if pow_difficulty is not None
-            else self.DEFAULT_POW_DIFFICULTY
+            pow_difficulty if pow_difficulty is not None else self.DEFAULT_POW_DIFFICULTY
         )
         self.rate_limit_per_hour = (
-            rate_limit_per_hour
-            if rate_limit_per_hour is not None
-            else self.DEFAULT_RATE_LIMIT
+            rate_limit_per_hour if rate_limit_per_hour is not None else self.DEFAULT_RATE_LIMIT
         )
 
         # Rate limiting: track DID creation timestamps per account

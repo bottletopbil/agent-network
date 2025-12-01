@@ -46,9 +46,7 @@ async def handle_attest_plan(envelope: dict):
 
     # Validate verdict value
     if verdict not in ["approve", "reject"]:
-        print(
-            f"[ATTEST_PLAN] ERROR: Invalid verdict '{verdict}', must be 'approve' or 'reject'"
-        )
+        print(f"[ATTEST_PLAN] ERROR: Invalid verdict '{verdict}', must be 'approve' or 'reject'")
         return
 
     # Skip if not approve (only approvals count toward quorum)
@@ -83,9 +81,7 @@ async def handle_attest_plan(envelope: dict):
         active_verifiers = 10
 
     # Calculate K_plan dynamically based on active verifiers
-    k_plan = quorum_tracker.get_k_plan(
-        active_verifiers=active_verifiers, alpha=0.3, k_target=5
-    )
+    k_plan = quorum_tracker.get_k_plan(active_verifiers=active_verifiers, alpha=0.3, k_target=5)
 
     # Record attestation in QuorumTracker
     quorum_reached = quorum_tracker.record_attestation(

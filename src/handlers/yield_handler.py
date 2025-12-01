@@ -35,31 +35,23 @@ async def handle_yield(envelope: dict):
 
         payload = envelope.get("payload")
         if not payload:
-            logger.error(
-                f"[YIELD] ERROR: Missing payload in envelope for thread {thread_id}"
-            )
+            logger.error(f"[YIELD] ERROR: Missing payload in envelope for thread {thread_id}")
             return
 
         sender = envelope.get("sender_pk_b64")
         if not sender:
-            logger.error(
-                f"[YIELD] ERROR: Missing sender_pk_b64 in envelope for thread {thread_id}"
-            )
+            logger.error(f"[YIELD] ERROR: Missing sender_pk_b64 in envelope for thread {thread_id}")
             return
 
         lamport = envelope.get("lamport")
         if lamport is None:
-            logger.error(
-                f"[YIELD] ERROR: Missing lamport in envelope for thread {thread_id}"
-            )
+            logger.error(f"[YIELD] ERROR: Missing lamport in envelope for thread {thread_id}")
             return
 
         # Extract yield details
         task_id = payload.get("task_id")
         if not task_id:
-            logger.error(
-                f"[YIELD] ERROR: No task_id in yield payload for thread {thread_id}"
-            )
+            logger.error(f"[YIELD] ERROR: No task_id in yield payload for thread {thread_id}")
             return
 
         reason = payload.get("reason", "voluntary_yield")

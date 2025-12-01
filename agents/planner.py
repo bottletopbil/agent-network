@@ -77,9 +77,7 @@ class PlannerAgent(BaseAgent):
             "reputation": bid["reputation"],
             "capabilities": bid["capabilities"],
             "proposal_id": bid["proposal_id"],
-            "plan": [
-                {"task_id": str(uuid.uuid4()), "type": "worker", "input": need_payload}
-            ],
+            "plan": [{"task_id": str(uuid.uuid4()), "type": "worker", "input": need_payload}],
         }
 
         # Submit bid directly to auction manager if available

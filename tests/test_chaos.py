@@ -214,9 +214,7 @@ class TestChaosRunner:
         # Simple property
         properties = {"data_exists": lambda ctx: "data" in ctx}
 
-        result = runner.run(
-            workload, properties, duration_sec=0.5, chaos_interval_sec=0.1
-        )
+        result = runner.run(workload, properties, duration_sec=0.5, chaos_interval_sec=0.1)
 
         assert result.success
         assert call_count[0] >= 4  # Should have run multiple times
@@ -236,9 +234,7 @@ class TestChaosRunner:
 
         properties = {"agents_exist": lambda ctx: len(ctx.get("agents", [])) > 0}
 
-        result = runner.run(
-            workload, properties, duration_sec=0.5, chaos_interval_sec=0.1
-        )
+        result = runner.run(workload, properties, duration_sec=0.5, chaos_interval_sec=0.1)
 
         # Should complete successfully
         assert len(result.errors) == 0
@@ -256,13 +252,9 @@ class TestChaosRunner:
             context["value"] = 0
             return True
 
-        properties = {
-            "value_is_positive": lambda ctx: ctx.get("value", 0) > 0  # Will fail
-        }
+        properties = {"value_is_positive": lambda ctx: ctx.get("value", 0) > 0}  # Will fail
 
-        result = runner.run(
-            workload, properties, duration_sec=0.2, chaos_interval_sec=0.1
-        )
+        result = runner.run(workload, properties, duration_sec=0.2, chaos_interval_sec=0.1)
 
         assert not result.success  # Property failed
         assert not result.property_checks["value_is_positive"]
@@ -277,9 +269,7 @@ class TestChaosRunner:
 
         properties = {}
 
-        result = runner.run(
-            failing_workload, properties, duration_sec=0.2, chaos_interval_sec=0.1
-        )
+        result = runner.run(failing_workload, properties, duration_sec=0.2, chaos_interval_sec=0.1)
 
         # Should record errors
         assert len(result.errors) > 0
@@ -305,13 +295,9 @@ class TestChaosScenarios:
             return True
 
         # Properties
-        properties = {
-            "state_progresses": lambda ctx: ctx.get("state", {}).get("counter", 0) > 0
-        }
+        properties = {"state_progresses": lambda ctx: ctx.get("state", {}).get("counter", 0) > 0}
 
-        result = runner.run(
-            workload, properties, duration_sec=1.0, chaos_interval_sec=0.2
-        )
+        result = runner.run(workload, properties, duration_sec=1.0, chaos_interval_sec=0.2)
 
         # Despite partitions, some progress should be made
         assert result.property_checks["state_progresses"]
@@ -330,9 +316,7 @@ class TestChaosScenarios:
 
         properties = {"messages_sent": lambda ctx: len(ctx.get("messages", [])) > 0}
 
-        result = runner.run(
-            workload, properties, duration_sec=0.5, chaos_interval_sec=0.1
-        )
+        result = runner.run(workload, properties, duration_sec=0.5, chaos_interval_sec=0.1)
 
         # Even with slow network, messages should be sent
         assert result.property_checks["messages_sent"]
@@ -362,9 +346,7 @@ class TestChaosScenarios:
 
         properties = {"has_agents": lambda ctx: len(ctx.get("agents", [])) > 0}
 
-        result = runner.run(
-            workload, properties, duration_sec=1.0, chaos_interval_sec=0.2
-        )
+        result = runner.run(workload, properties, duration_sec=1.0, chaos_interval_sec=0.2)
 
         # Should complete
         assert len(result.errors) == 0
@@ -389,9 +371,7 @@ class TestPropertyVerification:
 
     def test_property_decide_uniqueness(self):
         """Test DECIDE uniqueness property"""
-        context = {
-            "decides": {"need1": [{"agent": "agent1"}], "need2": [{"agent": "agent2"}]}
-        }
+        context = {"decides": {"need1": [{"agent": "agent1"}], "need2": [{"agent": "agent2"}]}}
 
         assert property_decide_uniqueness(context)
 

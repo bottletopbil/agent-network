@@ -186,9 +186,7 @@ class DomainFitCalculator:
         """Get performance tracking statistics"""
         return {
             "domains_tracked": len(self.performance_history),
-            "total_agents": sum(
-                len(agents) for agents in self.performance_history.values()
-            ),
+            "total_agents": sum(len(agents) for agents in self.performance_history.values()),
         }
 
 

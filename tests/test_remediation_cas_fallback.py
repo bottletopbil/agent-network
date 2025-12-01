@@ -99,9 +99,7 @@ def test_ipfs_failure_logs_error():
                 # Should log error about fallback
                 assert mock_logger.error.called, "Should log error on IPFS failure"
                 error_call = mock_logger.error.call_args
-                assert (
-                    "IPFS" in str(error_call) or "fallback" in str(error_call).lower()
-                )
+                assert "IPFS" in str(error_call) or "fallback" in str(error_call).lower()
 
 
 def test_return_type_is_tuple():

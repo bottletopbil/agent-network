@@ -70,9 +70,7 @@ class ContextualBandit:
     - UCB1 (Upper Confidence Bound)
     """
 
-    def __init__(
-        self, arms: Optional[List[str]] = None, exploration_bonus: float = 2.0
-    ):
+    def __init__(self, arms: Optional[List[str]] = None, exploration_bonus: float = 2.0):
         """
         Initialize contextual bandit.
 
@@ -176,9 +174,7 @@ class ContextualBandit:
             mean_reward = stats.mean_reward
 
             # Exploration bonus
-            bonus = exploration_bonus * math.sqrt(
-                math.log(self.total_pulls) / stats.pulls
-            )
+            bonus = exploration_bonus * math.sqrt(math.log(self.total_pulls) / stats.pulls)
 
             ucb = mean_reward + bonus
             ucb_values[arm_id] = ucb
@@ -190,9 +186,7 @@ class ContextualBandit:
 
         return selected
 
-    def update(
-        self, agent_id: str, reward: float, context: Optional[List[float]] = None
-    ) -> None:
+    def update(self, agent_id: str, reward: float, context: Optional[List[float]] = None) -> None:
         """
         Update arm statistics with observed reward.
 
@@ -239,9 +233,7 @@ class ContextualBandit:
         return {
             "total_pulls": self.total_pulls,
             "num_arms": len(self.arms),
-            "arm_stats": {
-                arm_id: stats.to_dict() for arm_id, stats in self.arms.items()
-            },
+            "arm_stats": {arm_id: stats.to_dict() for arm_id, stats in self.arms.items()},
         }
 
     def get_best_arm(self) -> Optional[str]:
@@ -282,9 +274,7 @@ def get_bandit(
     """Get or create global bandit"""
     global _global_bandit
     if _global_bandit is None:
-        _global_bandit = ContextualBandit(
-            arms=arms, exploration_bonus=exploration_bonus
-        )
+        _global_bandit = ContextualBandit(arms=arms, exploration_bonus=exploration_bonus)
     return _global_bandit
 
 

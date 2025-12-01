@@ -21,7 +21,6 @@ class GasExceededError(Exception):
     """Raised when gas limit is exceeded"""
 
 
-
 @dataclass
 class GasMetrics:
     """Gas usage metrics"""

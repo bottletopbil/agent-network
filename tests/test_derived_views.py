@@ -55,15 +55,9 @@ class TestTasksByState:
         store.append_op(create_test_op(OpType.ADD_TASK, "task-2", 2))
         store.append_op(create_test_op(OpType.ADD_TASK, "task-3", 3))
 
-        store.append_op(
-            create_test_op(OpType.STATE, "task-1", 4, payload={"state": "DECIDED"})
-        )
-        store.append_op(
-            create_test_op(OpType.STATE, "task-2", 5, payload={"state": "DECIDED"})
-        )
-        store.append_op(
-            create_test_op(OpType.STATE, "task-3", 6, payload={"state": "VERIFIED"})
-        )
+        store.append_op(create_test_op(OpType.STATE, "task-1", 4, payload={"state": "DECIDED"}))
+        store.append_op(create_test_op(OpType.STATE, "task-2", 5, payload={"state": "DECIDED"}))
+        store.append_op(create_test_op(OpType.STATE, "task-3", 6, payload={"state": "VERIFIED"}))
 
         # Query by state
         draft_tasks = store.task_view.get_tasks_by_state("DRAFT")
@@ -123,9 +117,7 @@ class TestReadyTasks:
         )
 
         # task-1 is VERIFIED (finished), task-2 is DRAFT
-        store.append_op(
-            create_test_op(OpType.STATE, "task-1", 4, payload={"state": "VERIFIED"})
-        )
+        store.append_op(create_test_op(OpType.STATE, "task-1", 4, payload={"state": "VERIFIED"}))
 
         ready = store.task_view.get_ready_tasks(store.graph_view)
 
@@ -513,9 +505,7 @@ class TestViewUpdates:
         assert len(draft_tasks) == 1
 
         # Change state
-        store.append_op(
-            create_test_op(OpType.STATE, "task-1", 2, payload={"state": "DECIDED"})
-        )
+        store.append_op(create_test_op(OpType.STATE, "task-1", 2, payload={"state": "DECIDED"}))
 
         # Should now appear in DECIDED
         draft_tasks = store.task_view.get_tasks_by_state("DRAFT")

@@ -72,8 +72,7 @@ class TestDeterministicCompressor:
         # Create large state
         state = {
             "tasks": [
-                {"id": f"task-{i}", "status": "completed", "data": "x" * 100}
-                for i in range(100)
+                {"id": f"task-{i}", "status": "completed", "data": "x" * 100} for i in range(100)
             ]
         }
 
@@ -135,8 +134,7 @@ class TestDeterministicCompressor:
         compressor = DeterministicCompressor()
 
         original_ops = [
-            {"op_id": f"op-{i}", "thread_id": "thread-1", "lamport": i}
-            for i in range(10)
+            {"op_id": f"op-{i}", "thread_id": "thread-1", "lamport": i} for i in range(10)
         ]
 
         # Compress
@@ -248,9 +246,7 @@ class TestIntegration:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create manager with compression enabled
-            manager = CheckpointManager(
-                Path(tmpdir), enable_compression=True, compression_level=3
-            )
+            manager = CheckpointManager(Path(tmpdir), enable_compression=True, compression_level=3)
 
             # Create large state
             large_state = {"tasks": [{"id": i, "data": "x" * 100} for i in range(100)]}
@@ -280,8 +276,7 @@ class TestIntegration:
         with tempfile.TemporaryDirectory() as tmpdir:
             large_state = {
                 "tasks": [
-                    {"id": i, "status": "completed", "result": "success" * 10}
-                    for i in range(500)
+                    {"id": i, "status": "completed", "result": "success" * 10} for i in range(500)
                 ]
             }
 

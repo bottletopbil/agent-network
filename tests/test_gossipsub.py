@@ -105,13 +105,9 @@ class TestGossipsubMessage:
 
     def test_message_id_deterministic(self):
         """Message ID is deterministic"""
-        msg1 = GossipsubMessage.create(
-            topic="/test", data=b"data", from_peer="peer1", sequence=1
-        )
+        msg1 = GossipsubMessage.create(topic="/test", data=b"data", from_peer="peer1", sequence=1)
 
-        msg2 = GossipsubMessage.create(
-            topic="/test", data=b"data", from_peer="peer1", sequence=1
-        )
+        msg2 = GossipsubMessage.create(topic="/test", data=b"data", from_peer="peer1", sequence=1)
 
         assert msg1.msg_id == msg2.msg_id
 

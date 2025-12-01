@@ -59,9 +59,7 @@ class MigrationMetrics:
         avg_success = (nats_success + p2p_success) / 2.0
 
         # Penalty for divergence
-        total_messages = max(
-            self.nats_stats.messages_sent + self.p2p_stats.messages_sent, 1
-        )
+        total_messages = max(self.nats_stats.messages_sent + self.p2p_stats.messages_sent, 1)
         divergence_rate = self.divergence_count / total_messages
 
         # Health = success - divergence penalty

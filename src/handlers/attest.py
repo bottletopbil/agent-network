@@ -129,9 +129,7 @@ async def handle_attest(envelope: dict):
         )
 
         if decide_record:
-            print(
-                f"[ATTEST] ✓ DECIDE triggered for need {need_id} -> proposal {proposal_id}"
-            )
+            print(f"[ATTEST] ✓ DECIDE triggered for need {need_id} -> proposal {proposal_id}")
         else:
             print(f"[ATTEST] DECIDE already exists for need {need_id}")
 

@@ -101,9 +101,7 @@ class VerifierSelector:
         candidates = self.pool.get_active_verifiers(min_stake=min_stake)
 
         if len(candidates) < k:
-            raise ValueError(
-                f"Insufficient qualified verifiers: need {k}, have {len(candidates)}"
-            )
+            raise ValueError(f"Insufficient qualified verifiers: need {k}, have {len(candidates)}")
 
         # Calculate weights
         weights = [self.calculate_weight(v) for v in candidates]
@@ -120,9 +118,7 @@ class VerifierSelector:
 
         # If we failed to find diverse committee, fall back to deterministic selection
         # Sort by weight and greedily select diverse verifiers
-        sorted_candidates = sorted(
-            zip(candidates, weights), key=lambda x: x[1], reverse=True
-        )
+        sorted_candidates = sorted(zip(candidates, weights), key=lambda x: x[1], reverse=True)
 
         committee = []
         for candidate, _ in sorted_candidates:
@@ -165,32 +161,24 @@ class VerifierSelector:
             return False
 
         # Check region diversity
-        if not self._check_region_diversity(
-            committee, constraints.max_region_percentage
-        ):
+        if not self._check_region_diversity(committee, constraints.max_region_percentage):
             return False
 
         return True
 
-    def _check_org_diversity(
-        self, committee: List[VerifierRecord], max_pct: float
-    ) -> bool:
+    def _check_org_diversity(self, committee: List[VerifierRecord], max_pct: float) -> bool:
         """Check organization diversity constraint"""
         org_counts = Counter(v.metadata.org_id for v in committee)
         max_allowed = math.ceil(len(committee) * max_pct)
         return all(count <= max_allowed for count in org_counts.values())
 
-    def _check_asn_diversity(
-        self, committee: List[VerifierRecord], max_pct: float
-    ) -> bool:
+    def _check_asn_diversity(self, committee: List[VerifierRecord], max_pct: float) -> bool:
         """Check ASN diversity constraint"""
         asn_counts = Counter(v.metadata.asn for v in committee)
         max_allowed = math.ceil(len(committee) * max_pct)
         return all(count <= max_allowed for count in asn_counts.values())
 
-    def _check_region_diversity(
-        self, committee: List[VerifierRecord], max_pct: float
-    ) -> bool:
+    def _check_region_diversity(self, committee: List[VerifierRecord], max_pct: float) -> bool:
         """Check region diversity constraint"""
         region_counts = Counter(v.metadata.region for v in committee)
         max_allowed = math.ceil(len(committee) * max_pct)

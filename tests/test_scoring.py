@@ -89,9 +89,7 @@ def recency_weighter():
 @pytest.fixture
 def scorer(domain_fit_calc, recency_weighter):
     """Fresh agent scorer with default weights"""
-    return AgentScorer(
-        domain_fit_calculator=domain_fit_calc, recency_weighter=recency_weighter
-    )
+    return AgentScorer(domain_fit_calculator=domain_fit_calc, recency_weighter=recency_weighter)
 
 
 # Domain Fit Tests
@@ -320,10 +318,7 @@ class TestScoreCalculation:
         scored_cheap = scorer.score_agent(cheap, need)
         scored_expensive = scorer.score_agent(expensive, need)
 
-        assert (
-            scored_cheap.score_breakdown["price"]
-            > scored_expensive.score_breakdown["price"]
-        )
+        assert scored_cheap.score_breakdown["price"] > scored_expensive.score_breakdown["price"]
 
     def test_faster_scores_better(self, scorer):
         """Faster agent gets better latency score"""
@@ -352,10 +347,7 @@ class TestScoreCalculation:
         scored_fast = scorer.score_agent(fast, need)
         scored_slow = scorer.score_agent(slow, need)
 
-        assert (
-            scored_fast.score_breakdown["latency"]
-            > scored_slow.score_breakdown["latency"]
-        )
+        assert scored_fast.score_breakdown["latency"] > scored_slow.score_breakdown["latency"]
 
     def test_custom_weights(self, domain_fit_calc, recency_weighter):
         """Can use custom scoring weights"""

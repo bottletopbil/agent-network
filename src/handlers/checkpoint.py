@@ -77,9 +77,7 @@ def _store_checkpoint(payload: dict):
         )
 
         # Create signed checkpoint
-        signed = SignedCheckpoint(
-            checkpoint=checkpoint, signatures=payload.get("signatures", [])
-        )
+        signed = SignedCheckpoint(checkpoint=checkpoint, signatures=payload.get("signatures", []))
 
         # Store to disk
         checkpoint_manager.store_checkpoint(signed)

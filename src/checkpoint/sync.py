@@ -124,9 +124,7 @@ class FastSync:
             logger.error(f"Failed to apply checkpoint: {e}")
             return None
 
-    def sync_ops_after_epoch(
-        self, epoch: int, op_source: Optional[callable] = None
-    ) -> List[Dict]:
+    def sync_ops_after_epoch(self, epoch: int, op_source: Optional[callable] = None) -> List[Dict]:
         """
         Sync operations after a checkpoint epoch.
 
@@ -175,8 +173,7 @@ class FastSync:
             op_epoch = op.get("epoch", 0)
             if op_epoch <= checkpoint_epoch:
                 logger.warning(
-                    f"Operation epoch {op_epoch} not after "
-                    f"checkpoint epoch {checkpoint_epoch}"
+                    f"Operation epoch {op_epoch} not after " f"checkpoint epoch {checkpoint_epoch}"
                 )
                 return False
 
@@ -186,10 +183,7 @@ class FastSync:
             logger.warning("Lamport clocks not monotonic in synced ops")
             return False
 
-        logger.info(
-            f"Verified continuity: checkpoint epoch {checkpoint_epoch}, "
-            f"{len(ops)} ops"
-        )
+        logger.info(f"Verified continuity: checkpoint epoch {checkpoint_epoch}, " f"{len(ops)} ops")
 
         return True
 
@@ -278,9 +272,7 @@ class FastSync:
 
         return sync_time
 
-    def should_use_fast_sync(
-        self, full_sync_op_count: int, checkpoint_available: bool
-    ) -> bool:
+    def should_use_fast_sync(self, full_sync_op_count: int, checkpoint_available: bool) -> bool:
         """
         Determine if fast sync should be used.
 

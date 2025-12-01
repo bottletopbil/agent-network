@@ -21,6 +21,4 @@ class BaseAgent(ABC):
         # Create unique durable name for this agent
         safe_subject = subject.replace(".", "_").replace("*", "ALL").replace(">", "ALL")
         durable = f"{self.agent_id}_{safe_subject}"
-        await subscribe_envelopes(
-            thread_id, subject, self.on_envelope, durable_name=durable
-        )
+        await subscribe_envelopes(thread_id, subject, self.on_envelope, durable_name=durable)

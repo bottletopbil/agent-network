@@ -70,9 +70,7 @@ class TestMicroTaskCreation:
         need = {
             "task_type": "data_analysis",
             "description": "Analyze data",
-            "test_cases": [
-                {"input": {"data": [1, 2, 3]}, "expected_output": {"mean": 2.0}}
-            ],
+            "test_cases": [{"input": {"data": [1, 2, 3]}, "expected_output": {"mean": 2.0}}],
         }
 
         canary_test = canary_runner.create_micro_task(need)
@@ -250,9 +248,7 @@ class TestTimeoutHandling:
 
         assert result.error is None
         assert result.passed or result.quality_score > 0
-        assert (
-            result.latency_ms < 200
-        )  # Should be reasonably fast (accounting for overhead)
+        assert result.latency_ms < 200  # Should be reasonably fast (accounting for overhead)
 
 
 # Winner Selection Tests

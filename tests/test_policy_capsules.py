@@ -60,9 +60,7 @@ class TestCapsuleCreation:
         assert capsule.signature is None  # Not signed yet
         assert capsule.metadata["author"] == "test"
 
-    def test_create_capsule_with_wasm(
-        self, capsule_manager, sample_tests_passed, tmp_path
-    ):
+    def test_create_capsule_with_wasm(self, capsule_manager, sample_tests_passed, tmp_path):
         """Can create capsule from WASM file"""
         # Create a fake WASM file
         wasm_file = tmp_path / "policy.wasm"
@@ -80,9 +78,7 @@ class TestCapsuleCreation:
 
     def test_capsule_to_dict(self, capsule_manager, sample_tests_passed):
         """Can convert capsule to dict"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         capsule_dict = capsule.to_dict()
 
@@ -92,9 +88,7 @@ class TestCapsuleCreation:
 
     def test_capsule_to_json(self, capsule_manager, sample_tests_passed):
         """Can convert capsule to JSON"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         json_str = capsule.to_json()
 
@@ -104,9 +98,7 @@ class TestCapsuleCreation:
 
     def test_capsule_from_dict(self, capsule_manager, sample_tests_passed):
         """Can create capsule from dict"""
-        original = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        original = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         capsule_dict = original.to_dict()
         restored = PolicyCapsule.from_dict(capsule_dict)
@@ -121,9 +113,7 @@ class TestCapsuleSigning:
 
     def test_sign_capsule(self, capsule_manager, sample_tests_passed):
         """Can sign a capsule"""
-        unsigned = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        unsigned = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         signed = capsule_manager.sign_capsule(unsigned, signer_key="test-key")
 
@@ -133,44 +123,32 @@ class TestCapsuleSigning:
 
     def test_verify_capsule_valid(self, capsule_manager, sample_tests_passed):
         """Can verify a valid capsule signature"""
-        unsigned = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        unsigned = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         signed = capsule_manager.sign_capsule(unsigned, signer_key="test-key")
 
-        is_valid = capsule_manager.verify_capsule(
-            signed, expected_signer_key="test-key"
-        )
+        is_valid = capsule_manager.verify_capsule(signed, expected_signer_key="test-key")
         assert is_valid is True
 
     def test_verify_capsule_invalid_key(self, capsule_manager, sample_tests_passed):
         """Detects invalid signer key"""
-        unsigned = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        unsigned = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         signed = capsule_manager.sign_capsule(unsigned, signer_key="test-key")
 
-        is_valid = capsule_manager.verify_capsule(
-            signed, expected_signer_key="wrong-key"
-        )
+        is_valid = capsule_manager.verify_capsule(signed, expected_signer_key="wrong-key")
         assert is_valid is False
 
     def test_verify_capsule_no_signature(self, capsule_manager, sample_tests_passed):
         """Detects missing signature"""
-        unsigned = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        unsigned = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         is_valid = capsule_manager.verify_capsule(unsigned)
         assert is_valid is False
 
     def test_get_canonical_bytes(self, capsule_manager, sample_tests_passed):
         """Canonical bytes are deterministic"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         bytes1 = capsule.get_canonical_bytes()
         bytes2 = capsule.get_canonical_bytes()
@@ -187,9 +165,7 @@ class TestCapsuleDistribution:
         mock_nats = AsyncMock()
         capsule_manager.nats_client = mock_nats
 
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
         signed = capsule_manager.sign_capsule(capsule, signer_key="test-key")
 
         await capsule_manager.distribute_capsule(signed)
@@ -203,9 +179,7 @@ class TestCapsuleDistribution:
     @pytest.mark.asyncio
     async def test_distribute_without_nats(self, capsule_manager, sample_tests_passed):
         """Handle missing NATS client gracefully"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         # Should not raise exception
         await capsule_manager.distribute_capsule(capsule)
@@ -213,9 +187,7 @@ class TestCapsuleDistribution:
     @pytest.mark.asyncio
     async def test_receive_capsule_valid(self, capsule_manager, sample_tests_passed):
         """Can receive and accept valid capsule"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
         signed = capsule_manager.sign_capsule(capsule, signer_key="test-key")
 
         # Mock conformance checker
@@ -230,13 +202,9 @@ class TestCapsuleDistribution:
         assert signed.policy_engine_hash in capsule_manager.received_capsules
 
     @pytest.mark.asyncio
-    async def test_receive_capsule_invalid_signature(
-        self, capsule_manager, sample_tests_passed
-    ):
+    async def test_receive_capsule_invalid_signature(self, capsule_manager, sample_tests_passed):
         """Reject capsule with invalid signature"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
         signed = capsule_manager.sign_capsule(capsule, signer_key="test-key")
 
         accepted = await capsule_manager.receive_capsule(signed, signer_key="wrong-key")
@@ -244,13 +212,9 @@ class TestCapsuleDistribution:
         assert accepted is False
 
     @pytest.mark.asyncio
-    async def test_receive_capsule_fails_conformance(
-        self, capsule_manager, sample_tests_passed
-    ):
+    async def test_receive_capsule_fails_conformance(self, capsule_manager, sample_tests_passed):
         """Reject capsule that fails conformance"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
         signed = capsule_manager.sign_capsule(capsule, signer_key="test-key")
 
         # Mock conformance checker that fails
@@ -279,24 +243,18 @@ class TestConformanceValidation:
 
     def test_validate_conformance_passing(self, conformance_checker, capsule_manager):
         """Validate capsule with all required tests"""
-        all_tests = (
-            conformance_checker.REQUIRED_TESTS + conformance_checker.OPTIONAL_TESTS
-        )
+        all_tests = conformance_checker.REQUIRED_TESTS + conformance_checker.OPTIONAL_TESTS
 
         capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=all_tests)
 
         is_conformant = conformance_checker.validate_conformance(capsule)
         assert is_conformant is True
 
-    def test_validate_conformance_missing_required(
-        self, conformance_checker, capsule_manager
-    ):
+    def test_validate_conformance_missing_required(self, conformance_checker, capsule_manager):
         """Reject capsule missing required tests"""
         incomplete_tests = ["test_valid_message_kinds"]  # Missing other required tests
 
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=incomplete_tests
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=incomplete_tests)
 
         is_conformant = conformance_checker.validate_conformance(capsule)
         assert is_conformant is False
@@ -323,9 +281,7 @@ class TestCapsuleManager:
 
     def test_get_capsule(self, capsule_manager, sample_tests_passed):
         """Can retrieve stored capsule"""
-        capsule = capsule_manager.create_capsule(
-            wasm_path=None, tests_passed=sample_tests_passed
-        )
+        capsule = capsule_manager.create_capsule(wasm_path=None, tests_passed=sample_tests_passed)
 
         capsule_manager.received_capsules[capsule.policy_engine_hash] = capsule
 

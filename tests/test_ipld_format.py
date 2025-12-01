@@ -308,9 +308,7 @@ class TestMerkleProof:
         ]
 
         # Verify envelope at index 1
-        is_valid, proof = MerkleProof.verify_envelope_in_thread(
-            envelopes[1], envelopes, 1
-        )
+        is_valid, proof = MerkleProof.verify_envelope_in_thread(envelopes[1], envelopes, 1)
 
         assert is_valid is True
         assert proof is not None

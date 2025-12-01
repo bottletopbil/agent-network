@@ -107,9 +107,7 @@ class TestCircuitBreaker:
 
     def test_half_open_recovery(self):
         """Test successful recovery from HALF_OPEN to CLOSED."""
-        cb = CircuitBreaker(
-            failure_threshold=2, recovery_timeout=1, half_open_max_calls=3
-        )
+        cb = CircuitBreaker(failure_threshold=2, recovery_timeout=1, half_open_max_calls=3)
 
         # Trip and wait
         cb.trigger_breaker("Test")

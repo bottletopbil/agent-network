@@ -88,9 +88,7 @@ class DependencyDAG:
             self.graph[to_shard] = set()
             self.in_degree[to_shard] = 0
 
-        logger.debug(
-            f"Added dependency: shard {from_shard} -> {to_shard} " f"for need {need_id}"
-        )
+        logger.debug(f"Added dependency: shard {from_shard} -> {to_shard} " f"for need {need_id}")
 
     def mark_shard_complete(self, shard_id: int) -> Set[int]:
         """
@@ -152,9 +150,7 @@ class DependencyDAG:
         in_degree_copy = self.in_degree.copy()
 
         # Start with shards that have no dependencies
-        queue = deque(
-            [shard for shard in self.graph.keys() if in_degree_copy.get(shard, 0) == 0]
-        )
+        queue = deque([shard for shard in self.graph.keys() if in_degree_copy.get(shard, 0) == 0])
 
         result = []
 
@@ -312,9 +308,7 @@ class RollbackHandler:
 
         return record
 
-    def salvage_partial_work(
-        self, shard_id: int, artifact_refs: List[str]
-    ) -> List[str]:
+    def salvage_partial_work(self, shard_id: int, artifact_refs: List[str]) -> List[str]:
         """
         Salvage partial work from a failed shard.
 
@@ -358,9 +352,7 @@ class RollbackHandler:
         """
         return self.salvaged_artifacts.get(shard_id, []).copy()
 
-    def get_rollback_history(
-        self, shard_id: Optional[int] = None
-    ) -> List[RollbackRecord]:
+    def get_rollback_history(self, shard_id: Optional[int] = None) -> List[RollbackRecord]:
         """
         Get rollback history.
 

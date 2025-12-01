@@ -323,9 +323,7 @@ class TestCommitmentProtocol:
         # Create chain: A -> B -> C
         # C depends on B, B depends on A
 
-        commit_a = protocol.create_commitment(
-            shard_id=0, need_id="need-a", artifact_ref="hash-a"
-        )
+        commit_a = protocol.create_commitment(shard_id=0, need_id="need-a", artifact_ref="hash-a")
         protocol.publish_commitment(commit_a)
 
         commit_b = protocol.create_commitment(

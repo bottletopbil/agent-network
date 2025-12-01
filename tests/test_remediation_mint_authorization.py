@@ -28,9 +28,7 @@ def test_unauthorized_mint_rejected():
 
         # Attempt to create account with initial balance as non-system user
         with pytest.raises(ValueError) as exc_info:
-            ledger.create_account(
-                "user_account", initial_balance=1000, minter_id="hacker"
-            )
+            ledger.create_account("user_account", initial_balance=1000, minter_id="hacker")
 
         assert (
             "not authorized" in str(exc_info.value).lower()
@@ -99,10 +97,7 @@ def test_max_supply_enforcement():
         with pytest.raises(ValueError) as exc_info:
             ledger.create_account("account2", initial_balance=200)
 
-        assert (
-            "supply" in str(exc_info.value).lower()
-            or "exceeded" in str(exc_info.value).lower()
-        )
+        assert "supply" in str(exc_info.value).lower() or "exceeded" in str(exc_info.value).lower()
 
 
 def test_total_supply_tracking():

@@ -78,9 +78,7 @@ class PeerDiscovery:
 
         if self.nats_client:
             try:
-                await self.nats_client.publish(
-                    "peers.announce", json.dumps(announcement).encode()
-                )
+                await self.nats_client.publish("peers.announce", json.dumps(announcement).encode())
                 logger.debug(f"Announced peer {self.local_peer_id}")
             except Exception as e:
                 logger.error(f"Failed to announce peer: {e}")
@@ -111,9 +109,7 @@ class PeerDiscovery:
 
         # Return discovered peers (excluding self)
         return [
-            peer
-            for peer in self.discovered_peers.values()
-            if peer.peer_id != self.local_peer_id
+            peer for peer in self.discovered_peers.values() if peer.peer_id != self.local_peer_id
         ]
 
     def add_discovered_peer(self, peer_info: PeerInfo) -> None:
@@ -129,9 +125,7 @@ class PeerDiscovery:
         peer_info.last_seen = time.time_ns()
 
         if peer_info.peer_id not in self.discovered_peers:
-            logger.info(
-                f"Discovered new peer: {peer_info.peer_id} at {peer_info.address}"
-            )
+            logger.info(f"Discovered new peer: {peer_info.peer_id} at {peer_info.address}")
 
         self.discovered_peers[peer_info.peer_id] = peer_info
 
@@ -197,11 +191,7 @@ class PeerDiscovery:
         Returns:
             List of peers with that capability
         """
-        return [
-            peer
-            for peer in self.discovered_peers.values()
-            if capability in peer.capabilities
-        ]
+        return [peer for peer in self.discovered_peers.values() if capability in peer.capabilities]
 
     async def start_announcement_loop(self):
         """
@@ -209,9 +199,7 @@ class PeerDiscovery:
 
         Runs until cancelled - should be run as an asyncio task.
         """
-        logger.info(
-            f"Starting announcement loop (interval: {self.announcement_interval}s)"
-        )
+        logger.info(f"Starting announcement loop (interval: {self.announcement_interval}s)")
 
         while True:
             try:

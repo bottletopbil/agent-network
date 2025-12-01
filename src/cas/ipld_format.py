@@ -157,9 +157,7 @@ class ThreadIPLD:
         """
         self.cas_store = cas_store
 
-    def envelopes_to_dag(
-        self, envelopes: List[Dict[str, Any]], thread_id: str
-    ) -> Dict[str, Any]:
+    def envelopes_to_dag(self, envelopes: List[Dict[str, Any]], thread_id: str) -> Dict[str, Any]:
         """
         Convert list of envelopes to IPLD DAG structure.
 
@@ -179,9 +177,7 @@ class ThreadIPLD:
 
             # Store envelope in CAS
             if self.cas_store:
-                envelope_bytes = json.dumps(ipld_envelope, sort_keys=True).encode(
-                    "utf-8"
-                )
+                envelope_bytes = json.dumps(ipld_envelope, sort_keys=True).encode("utf-8")
                 envelope_cid = self.cas_store.put(envelope_bytes)
                 envelope_cids.append(envelope_cid)
                 logger.debug(f"Stored envelope in DAG: {envelope_cid}")
@@ -193,9 +189,7 @@ class ThreadIPLD:
         thread_dag = {
             "thread_id": thread_id,
             "envelope_count": len(envelopes),
-            "envelopes": [
-                {"/": cid} if isinstance(cid, str) else cid for cid in envelope_cids
-            ],
+            "envelopes": [{"/": cid} if isinstance(cid, str) else cid for cid in envelope_cids],
             "version": "1.0",
         }
 

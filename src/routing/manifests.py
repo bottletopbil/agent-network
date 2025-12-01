@@ -31,9 +31,7 @@ class AgentManifest:
 
     # Metadata
     tags: List[str] = field(default_factory=list)  # e.g., ["python", "ml", "finance"]
-    constraints: Dict[str, Any] = field(
-        default_factory=dict
-    )  # e.g., {"min_memory_gb": 8}
+    constraints: Dict[str, Any] = field(default_factory=dict)  # e.g., {"min_memory_gb": 8}
 
     # Economics
     price_per_task: float = 0.0  # Credits/tokens per task
@@ -131,9 +129,7 @@ class ManifestRegistry:
                 self.zone_index[manifest.zone] = set()
             self.zone_index[manifest.zone].add(agent_id)
 
-        logger.info(
-            f"Registered agent {agent_id} with capabilities: {manifest.capabilities}"
-        )
+        logger.info(f"Registered agent {agent_id} with capabilities: {manifest.capabilities}")
 
     def unregister(self, agent_id: str) -> None:
         """
@@ -190,9 +186,7 @@ class ManifestRegistry:
         agent_ids = self.capability_index.get(capability, set())
         return [self.manifests[aid] for aid in agent_ids]
 
-    def find_by_tags(
-        self, tags: List[str], match_all: bool = True
-    ) -> List[AgentManifest]:
+    def find_by_tags(self, tags: List[str], match_all: bool = True) -> List[AgentManifest]:
         """
         Find agents by tags.
 

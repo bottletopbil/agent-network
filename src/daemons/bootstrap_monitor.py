@@ -90,9 +90,7 @@ class BootstrapMonitor:
                     f"(threshold: {bootstrap_manager.bootstrap_threshold})"
                 )
             else:
-                logger.info(
-                    f"Exited bootstrap mode: {active_verifiers} verifiers, K={k_value}"
-                )
+                logger.info(f"Exited bootstrap mode: {active_verifiers} verifiers, K={k_value}")
 
         # Check if should exit bootstrap
         should_exit = bootstrap_manager.should_exit_bootstrap(

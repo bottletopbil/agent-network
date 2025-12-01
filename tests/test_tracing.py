@@ -201,9 +201,7 @@ class TestContextPropagation:
             enriched = propagate_context(envelope)
 
         # Start child span from context
-        with start_span_from_context(
-            "consumer", enriched, kind=SpanKind.CONSUMER
-        ) as child_span:
+        with start_span_from_context("consumer", enriched, kind=SpanKind.CONSUMER) as child_span:
             assert child_span.is_recording()
 
             # Should be linked to parent trace
@@ -214,9 +212,7 @@ class TestContextPropagation:
         envelope = {"operation": "DECIDE"}  # No trace context
 
         # Should create root span
-        with start_span_from_context(
-            "consumer", envelope, kind=SpanKind.CONSUMER
-        ) as span:
+        with start_span_from_context("consumer", envelope, kind=SpanKind.CONSUMER) as span:
             assert span.is_recording()
 
 
@@ -268,9 +264,7 @@ class TestBusIntegration:
 
         # Publisher side
         with create_span("task.execute", kind=SpanKind.INTERNAL) as task_span:
-            with create_span(
-                "bus.publish_envelope", kind=SpanKind.PRODUCER
-            ) as publish_span:
+            with create_span("bus.publish_envelope", kind=SpanKind.PRODUCER) as publish_span:
                 envelope = {"operation": "DECIDE", "task_id": "123"}
                 enriched = propagate_context(envelope)
 
@@ -279,9 +273,7 @@ class TestBusIntegration:
                 trace_ids.append(trace_id)
 
         # Consumer side
-        with start_span_from_context(
-            "bus.handle_envelope", enriched, kind=SpanKind.CONSUMER
-        ):
+        with start_span_from_context("bus.handle_envelope", enriched, kind=SpanKind.CONSUMER):
             with create_span("handler.process_decide"):
                 # Verify we have the same trace ID
                 current_span = get_current_span()

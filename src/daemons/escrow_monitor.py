@@ -40,9 +40,7 @@ class EscrowMonitor:
 
         self.running = True
         self._task = asyncio.create_task(self._monitor_loop())
-        logger.info(
-            f"Started escrow monitor with {self.check_interval_seconds}s interval"
-        )
+        logger.info(f"Started escrow monitor with {self.check_interval_seconds}s interval")
 
     async def stop(self):
         """Stop the monitor daemon."""

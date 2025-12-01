@@ -110,9 +110,7 @@ class P2PIdentity:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         identity_data = {
-            "private_key_b64": base64.b64encode(self.get_private_key_bytes()).decode(
-                "utf-8"
-            ),
+            "private_key_b64": base64.b64encode(self.get_private_key_bytes()).decode("utf-8"),
             "public_key_b64": self.get_public_key_base64(),
             "peer_id": self.to_peer_id(),
             "did_peer": self.to_did_peer(),

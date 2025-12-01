@@ -124,9 +124,7 @@ class TestProposalSubmission:
 
     def test_submit_proposal_invalid_slashing(self, governance):
         """Test that invalid slashing percentages are rejected."""
-        with pytest.raises(
-            ValueError, match="slashing_percentage must be between 0 and 1"
-        ):
+        with pytest.raises(ValueError, match="slashing_percentage must be between 0 and 1"):
             governance.submit_proposal(
                 proposer="alice",
                 title="Invalid Slashing",
@@ -266,9 +264,7 @@ class TestVoting:
         governance.start_voting(proposal_id)
 
         with pytest.raises(ValueError, match="exceeds voter's registered weight"):
-            governance.vote(
-                proposal_id, "bob", VoteChoice.YES, 1000.0
-            )  # Bob only has 500
+            governance.vote(proposal_id, "bob", VoteChoice.YES, 1000.0)  # Bob only has 500
 
 
 class TestVoteTallying:

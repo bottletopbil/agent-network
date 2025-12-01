@@ -364,8 +364,7 @@ class TestAuditTrail:
         assert len(transfer_ops) >= 1
         # Check metadata contains counterparty
         assert (
-            "to_account" in transfer_ops[0].metadata
-            or "from_account" in transfer_ops[0].metadata
+            "to_account" in transfer_ops[0].metadata or "from_account" in transfer_ops[0].metadata
         )
 
     def test_escrow_audit_metadata(self):
@@ -426,9 +425,7 @@ class TestConcurrency:
                 results.append(False)
 
         # Try to escrow 600 from two threads (only one should succeed)
-        threads = [
-            threading.Thread(target=try_escrow, args=(f"escrow-{i}",)) for i in range(2)
-        ]
+        threads = [threading.Thread(target=try_escrow, args=(f"escrow-{i}",)) for i in range(2)]
         for t in threads:
             t.start()
         for t in threads:

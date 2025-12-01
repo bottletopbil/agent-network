@@ -61,9 +61,7 @@ class BootstrapManager:
         progressive_k = max(2, int(active_verifiers * 0.3))
         return min(self.k_target, progressive_k)
 
-    def should_exit_bootstrap(
-        self, active_verifiers: int, hours_above_threshold: int
-    ) -> bool:
+    def should_exit_bootstrap(self, active_verifiers: int, hours_above_threshold: int) -> bool:
         """
         Determine if network should exit bootstrap mode.
 

@@ -130,22 +130,16 @@ class AgentRegistry:
         )
 
         # Create indexes
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_agent_status ON agent_registrations(status)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_status ON agent_registrations(status)")
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_capability ON agent_capabilities(capability)"
         )
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_tag ON agent_tags(tag)")
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_reputation ON agent_stats(reputation_score)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_reputation ON agent_stats(reputation_score)")
 
         self.conn.commit()
 
-    def register_agent(
-        self, agent_id: str, manifest: Dict[str, Any], stake: float
-    ) -> str:
+    def register_agent(self, agent_id: str, manifest: Dict[str, Any], stake: float) -> str:
         """
         Register a new agent.
 
@@ -435,9 +429,7 @@ class AgentRegistry:
         if registration:
             total_time = time.time() - registration["registered_at"]
             if total_time > 0:
-                uptime_percentage = min(
-                    100.0, (row["total_uptime_seconds"] / total_time) * 100
-                )
+                uptime_percentage = min(100.0, (row["total_uptime_seconds"] / total_time) * 100)
 
         return AgentStats(
             agent_id=row["agent_id"],

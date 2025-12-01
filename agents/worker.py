@@ -107,9 +107,7 @@ class WorkerAgent(BaseAgent):
         task_id = task["task_id"]
         input_data = task.get("input", {})
 
-        print(
-            f"[WORKER] Executing task {task_id}{'in sandbox' if use_sandbox else ''}..."
-        )
+        print(f"[WORKER] Executing task {task_id}{'in sandbox' if use_sandbox else ''}...")
 
         if use_sandbox:
             # Execute in sandboxed VM
@@ -162,9 +160,7 @@ class WorkerAgent(BaseAgent):
             command = f"echo 'Processing: {input_data}'"
 
             # Execute in sandbox
-            exec_result = executor.execute_sandboxed(
-                command=command, resources=limits, timeout=30
-            )
+            exec_result = executor.execute_sandboxed(command=command, resources=limits, timeout=30)
 
             # Cleanup
             executor.cleanup()

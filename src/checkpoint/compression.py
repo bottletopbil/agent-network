@@ -86,9 +86,7 @@ class DeterministicCompressor:
             # Parse JSON
             plan_state = json.loads(json_str)
 
-            logger.debug(
-                f"Decompressed state: {len(data)} -> {len(decompressed_bytes)} bytes"
-            )
+            logger.debug(f"Decompressed state: {len(data)} -> {len(decompressed_bytes)} bytes")
 
             return plan_state
 
@@ -190,16 +188,12 @@ class DeterministicCompressor:
         # Convert both to canonical JSON for comparison
         original_canonical = json.dumps(original, sort_keys=True, separators=(",", ":"))
 
-        decompressed_canonical = json.dumps(
-            decompressed, sort_keys=True, separators=(",", ":")
-        )
+        decompressed_canonical = json.dumps(decompressed, sort_keys=True, separators=(",", ":"))
 
         matches = original_canonical == decompressed_canonical
 
         if not matches:
-            logger.warning(
-                "Verification failed: decompressed data doesn't match original"
-            )
+            logger.warning("Verification failed: decompressed data doesn't match original")
 
         return matches
 
@@ -216,9 +210,7 @@ class DeterministicCompressor:
             "deterministic": True,
         }
 
-    def compress_batch(
-        self, items: List[Dict], max_batch_size: int = 1000
-    ) -> List[bytes]:
+    def compress_batch(self, items: List[Dict], max_batch_size: int = 1000) -> List[bytes]:
         """
         Compress a batch of items individually.
 

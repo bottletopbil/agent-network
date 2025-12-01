@@ -22,9 +22,7 @@ class IPFSContentStore:
     cryptographic hashes of the content.
     """
 
-    def __init__(
-        self, ipfs_host: str = "127.0.0.1", ipfs_port: int = 5001, auto_pin: bool = True
-    ):
+    def __init__(self, ipfs_host: str = "127.0.0.1", ipfs_port: int = 5001, auto_pin: bool = True):
         """
         Initialize IPFS content store.
 
@@ -167,9 +165,7 @@ class IPFSContentStore:
             if self._failure_count >= self._max_failures:
                 self._circuit_breaker_open = True
                 self._circuit_open_time = time.time()
-                logger.error(
-                    f"Circuit breaker opened after {self._failure_count} failures"
-                )
+                logger.error(f"Circuit breaker opened after {self._failure_count} failures")
 
             if isinstance(error[0], KeyError):
                 raise error[0]
@@ -183,9 +179,7 @@ class IPFSContentStore:
 
         # Reset failure counter on success
         if self._failure_count > 0:
-            logger.info(
-                f"IPFS get succeeded, resetting failure count from {self._failure_count}"
-            )
+            logger.info(f"IPFS get succeeded, resetting failure count from {self._failure_count}")
             self._failure_count = 0
 
         logger.debug(f"Retrieved content from IPFS: {cid} ({len(content)} bytes)")

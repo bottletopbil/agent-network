@@ -151,9 +151,7 @@ class TestTaskEquivalence:
 
             # Create 10 tasks
             for i in range(10):
-                op = create_test_op(
-                    OpType.ADD_TASK, f"task-{i}", i + 1, payload={"type": "test"}
-                )
+                op = create_test_op(OpType.ADD_TASK, f"task-{i}", i + 1, payload={"type": "test"})
                 sqlite_store.append_op(op)
 
             # Migrate
@@ -267,9 +265,7 @@ class TestFullMigrationPipeline:
                     4,
                     payload={"parent": "task-1", "child": "task-2"},
                 ),
-                create_test_op(
-                    OpType.ANNOTATE, "task-1", 5, payload={"priority": "high"}
-                ),
+                create_test_op(OpType.ANNOTATE, "task-1", 5, payload={"priority": "high"}),
             ]
 
             for op in ops:

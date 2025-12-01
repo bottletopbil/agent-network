@@ -124,10 +124,7 @@ class RaftConsensusAdapter:
         existing_value, _ = self.client.get(key)
         if existing_value:
             existing_data = json.loads(existing_value.decode())
-            if (
-                existing_data["proposal_id"] == proposal_id
-                and existing_data["epoch"] == epoch
-            ):
+            if existing_data["proposal_id"] == proposal_id and existing_data["epoch"] == epoch:
                 return record  # Idempotent retry succeeded
 
         return None  # Conflict: different DECIDE exists

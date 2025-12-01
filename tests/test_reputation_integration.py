@@ -44,9 +44,7 @@ class TestDIDBasedReputation:
             did,
             10000,
             ["testing"],
-            VerifierMetadata(
-                org_id="org1", asn="AS1234", region="us-west", reputation=0.8
-            ),
+            VerifierMetadata(org_id="org1", asn="AS1234", region="us-west", reputation=0.8),
         )
 
         # Record attestation failure for DID
@@ -88,9 +86,7 @@ class TestDIDBasedReputation:
             did,
             10000,
             ["testing"],
-            VerifierMetadata(
-                org_id="org1", asn="AS1234", region="us-west", reputation=0.8
-            ),
+            VerifierMetadata(org_id="org1", asn="AS1234", region="us-west", reputation=0.8),
         )
 
         # Build reputation
@@ -151,9 +147,7 @@ class TestDIDBasedReputation:
             did,
             10000,
             ["testing"],
-            VerifierMetadata(
-                org_id="org1", asn="AS1234", region="us-west", reputation=0.8
-            ),
+            VerifierMetadata(org_id="org1", asn="AS1234", region="us-west", reputation=0.8),
         )
 
         # Build some reputation
@@ -269,9 +263,7 @@ class TestScoringIntegration:
             did,
             10000,
             ["code_review"],
-            VerifierMetadata(
-                org_id="org1", asn="AS1234", region="us-west", reputation=0.8
-            ),
+            VerifierMetadata(org_id="org1", asn="AS1234", region="us-west", reputation=0.8),
         )
 
         # Build reputation through successful challenges
@@ -306,9 +298,7 @@ class TestScoringIntegration:
         # Verify reputation flowed through entire system
         expected_reputation = 0.8 + 0.1 + 0.1  # Initial + 2 successful challenges
         assert manifest.reputation == pytest.approx(expected_reputation, abs=0.01)
-        assert scored.score_breakdown["reputation"] == pytest.approx(
-            expected_reputation, abs=0.01
-        )
+        assert scored.score_breakdown["reputation"] == pytest.approx(expected_reputation, abs=0.01)
         assert scored.score_breakdown["reputation"] == 1.0  # Clamped to max
 
         # Cleanup
@@ -335,9 +325,7 @@ class TestBackwardCompatibility:
             did,
             10000,
             ["testing"],
-            VerifierMetadata(
-                org_id="org1", asn="AS1234", region="us-west", reputation=0.8
-            ),
+            VerifierMetadata(org_id="org1", asn="AS1234", region="us-west", reputation=0.8),
         )
 
         # Record event

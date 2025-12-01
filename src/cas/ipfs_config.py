@@ -67,16 +67,12 @@ class IPFSConfig:
             api_port=int(os.getenv("IPFS_API_PORT", "5001")),
             gateway_host=os.getenv("IPFS_GATEWAY_HOST", "127.0.0.1"),
             gateway_port=int(os.getenv("IPFS_GATEWAY_PORT", "8080")),
-            pinning_strategy=PinningStrategy(
-                os.getenv("IPFS_PINNING_STRATEGY", "pin_recent")
-            ),
+            pinning_strategy=PinningStrategy(os.getenv("IPFS_PINNING_STRATEGY", "pin_recent")),
             max_storage_gb=float(os.getenv("IPFS_MAX_STORAGE_GB", "100.0")),
             gc_interval_hours=int(os.getenv("IPFS_GC_INTERVAL_HOURS", "24")),
             gc_enabled=os.getenv("IPFS_GC_ENABLED", "true").lower() == "true",
             pin_recent_days=int(os.getenv("IPFS_PIN_RECENT_DAYS", "30")),
-            pin_size_threshold_mb=float(
-                os.getenv("IPFS_PIN_SIZE_THRESHOLD_MB", "10.0")
-            ),
+            pin_size_threshold_mb=float(os.getenv("IPFS_PIN_SIZE_THRESHOLD_MB", "10.0")),
         )
 
 
@@ -300,9 +296,7 @@ class IPFSClient:
 
             return {
                 "removed_count": len(results),
-                "removed_cids": [
-                    r.get("Key", {}).get("/") for r in results if "Key" in r
-                ],
+                "removed_cids": [r.get("Key", {}).get("/") for r in results if "Key" in r],
             }
         except Exception as e:
             logger.error(f"Failed to run GC: {e}")

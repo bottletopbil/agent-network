@@ -84,12 +84,8 @@ class BountyManager:
                 )
             """
             )
-            self.conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_bounty_task ON bounties(task_id)"
-            )
-            self.conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_bounty_status ON bounties(status)"
-            )
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_bounty_task ON bounties(task_id)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_bounty_status ON bounties(status)")
 
     def create_bounty(
         self, task_id: str, amount: int, task_class: TaskClass, creator_id: str
@@ -112,9 +108,7 @@ class BountyManager:
         # Validate against cap
         cap = BOUNTY_CAPS[task_class]
         if amount > cap:
-            raise ValueError(
-                f"Bounty amount {amount} exceeds {task_class.value} cap of {cap}"
-            )
+            raise ValueError(f"Bounty amount {amount} exceeds {task_class.value} cap of {cap}")
 
         if amount <= 0:
             raise ValueError(f"Bounty amount must be positive: {amount}")
@@ -224,9 +218,7 @@ class BountyManager:
             # Validate total doesn't exceed bounty (allow for burn)
             total_distributed = sum(recipients.values())
             if total_distributed > amount:
-                raise ValueError(
-                    f"Distribution total {total_distributed} exceeds bounty {amount}"
-                )
+                raise ValueError(f"Distribution total {total_distributed} exceeds bounty {amount}")
 
             # Release escrow to first recipient, then transfer to others
             if not recipients:
@@ -240,13 +232,9 @@ class BountyManager:
                 self.ledger.release_escrow(escrow_id, first_recipient)
 
                 # Transfer remaining amounts
-                remaining_recipients = {
-                    k: v for k, v in recipients.items() if k != first_recipient
-                }
+                remaining_recipients = {k: v for k, v in recipients.items() if k != first_recipient}
                 for recipient_id, recipient_amount in remaining_recipients.items():
-                    self.ledger.transfer(
-                        first_recipient, recipient_id, recipient_amount
-                    )
+                    self.ledger.transfer(first_recipient, recipient_id, recipient_amount)
 
                 # Handle burn (amount not distributed)
                 burn_amount = amount - total_distributed

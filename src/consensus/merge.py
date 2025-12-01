@@ -119,9 +119,7 @@ class MergeHandler:
 
         return conflicts
 
-    def mark_orphaned(
-        self, decide: Dict[str, Any], winning_epoch: int, plan_store
-    ) -> None:
+    def mark_orphaned(self, decide: Dict[str, Any], winning_epoch: int, plan_store) -> None:
         """
         Mark losing DECIDE branch as orphaned.
 

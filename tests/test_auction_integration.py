@@ -49,9 +49,7 @@ class TestAgentIntegrationHelpers:
 
     def test_bid_submitter(self):
         """Verify BidSubmitter creates bids correctly"""
-        submitter = BidSubmitter(
-            agent_id="test-agent", reputation=0.9, capabilities=["planning"]
-        )
+        submitter = BidSubmitter(agent_id="test-agent", reputation=0.9, capabilities=["planning"])
 
         payload = {"complexity": 1.0, "requires": ["planning"]}
         bid = submitter.create_bid(payload)

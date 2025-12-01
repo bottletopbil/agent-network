@@ -74,17 +74,11 @@ class TestTaskListing:
         market = TaskMarketplace(Path(db_file.name))
 
         # Post multiple tasks
-        market.post_task(
-            "task1", "Code analysis", ["code_analysis", "python"], 100.0, "user1"
-        )
+        market.post_task("task1", "Code analysis", ["code_analysis", "python"], 100.0, "user1")
 
-        market.post_task(
-            "task2", "Security audit", ["security", "audit"], 150.0, "user2"
-        )
+        market.post_task("task2", "Security audit", ["security", "audit"], 150.0, "user2")
 
-        market.post_task(
-            "task3", "Code review", ["code_analysis", "review"], 75.0, "user1"
-        )
+        market.post_task("task3", "Code review", ["code_analysis", "review"], 75.0, "user1")
 
         yield market
 
@@ -98,9 +92,7 @@ class TestTaskListing:
 
     def test_list_tasks_by_capability(self, marketplace_with_tasks):
         """Test filtering tasks by capability"""
-        tasks = marketplace_with_tasks.list_available_tasks(
-            capabilities=["code_analysis"]
-        )
+        tasks = marketplace_with_tasks.list_available_tasks(capabilities=["code_analysis"])
 
         assert len(tasks) == 2
         task_ids = [t["task_id"] for t in tasks]
@@ -219,9 +211,7 @@ class TestPriceTrends:
 
     def test_track_specific_capability_trend(self, marketplace_with_price_history):
         """Test tracking trend for specific capability"""
-        trends = marketplace_with_price_history.track_price_trends(
-            capability="security"
-        )
+        trends = marketplace_with_price_history.track_price_trends(capability="security")
 
         assert len(trends) == 1
         assert trends[0].capability == "security"

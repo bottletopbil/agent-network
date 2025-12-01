@@ -130,9 +130,7 @@ def _handle_cross_shard_commitment(payload: dict, artifact_hash: str):
                 f"{commitment.commitment_hash[:8]} for shard {shard_id}"
             )
         else:
-            logger.warning(
-                f"[COMMIT] Failed to publish commitment for shard {shard_id}"
-            )
+            logger.warning(f"[COMMIT] Failed to publish commitment for shard {shard_id}")
 
     except Exception as e:
         logger.error(f"[COMMIT] Error creating cross-shard commitment: {e}")

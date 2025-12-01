@@ -34,9 +34,7 @@ class TestPaymentChannel:
 
     def test_channel_balances_initialized(self):
         """Test that balances are properly initialized."""
-        channel = PaymentChannel(
-            channel_id="ch1", sender="alice", receiver="bob", capacity=50.0
-        )
+        channel = PaymentChannel(channel_id="ch1", sender="alice", receiver="bob", capacity=50.0)
 
         # Sender starts with full capacity
         assert channel.sender_balance == channel.capacity
@@ -190,9 +188,7 @@ class TestChannelManager:
 
         # Create valid payment
         valid_sig = create_payment_signature(channel_id, 30.0, 1)
-        valid_payment = Payment(
-            channel_id=channel_id, amount=30.0, nonce=1, signature=valid_sig
-        )
+        valid_payment = Payment(channel_id=channel_id, amount=30.0, nonce=1, signature=valid_sig)
 
         assert manager.verify_payment(valid_payment) is True
 
@@ -301,9 +297,7 @@ class TestEndToEnd:
         assert channel.receiver_balance == total_sent
 
         # Close and settle
-        sender, receiver, sender_final, receiver_final = manager.close_channel(
-            channel_id
-        )
+        sender, receiver, sender_final, receiver_final = manager.close_channel(channel_id)
 
         assert sender == "alice"
         assert receiver == "bob"

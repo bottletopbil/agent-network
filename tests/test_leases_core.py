@@ -95,9 +95,7 @@ class TestLeaseManager:
         # Verify last_heartbeat updated
         updated_lease = manager.get_lease(lease_id)
         assert updated_lease.last_heartbeat > original_lease.last_heartbeat
-        assert (
-            updated_lease.created_at == original_lease.created_at
-        )  # Should not change
+        assert updated_lease.created_at == original_lease.created_at  # Should not change
 
     def test_heartbeat_nonexistent(self):
         """Verify heartbeat fails for nonexistent lease"""
@@ -113,9 +111,7 @@ class TestLeaseManager:
         manager = LeaseManager(db_path)
 
         # Create lease with very short TTL (1 nanosecond for testing)
-        lease_id = manager.create_lease(
-            "task-exp", "worker-exp", ttl=0, heartbeat_interval=1
-        )
+        lease_id = manager.create_lease("task-exp", "worker-exp", ttl=0, heartbeat_interval=1)
 
         # Wait to ensure expiry
         time.sleep(0.01)

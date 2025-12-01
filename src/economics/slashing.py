@@ -271,9 +271,7 @@ class SlashingRules:
         if honest_verifiers and attestation_log:
             # Extract set of verifiers who actually attested
             actual_attestors = {
-                record["verifier_id"]
-                for record in attestation_log
-                if "verifier_id" in record
+                record["verifier_id"] for record in attestation_log if "verifier_id" in record
             }
 
             # Filter honest_verifiers to only include verified attestors
@@ -325,9 +323,7 @@ class SlashingRules:
         # 50% to challenger, 40% to honest verifiers, 10% + remainder burned
         challenger_payout = (total_slashed * 50) // 100
         honest_total = (total_slashed * 40) // 100
-        burned = (
-            total_slashed - challenger_payout - honest_total
-        )  # Remainder goes to burned
+        burned = total_slashed - challenger_payout - honest_total  # Remainder goes to burned
 
         # Verify exact distribution (no precision loss)
         assert (

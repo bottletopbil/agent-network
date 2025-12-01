@@ -92,9 +92,7 @@ class TestPatchApply:
         assert "patch_id" in error.lower()
 
         # Empty ops
-        patch2 = PlanPatch(
-            patch_id=str(uuid.uuid4()), actor_id="alice", base_lamport=10, ops=[]
-        )
+        patch2 = PlanPatch(patch_id=str(uuid.uuid4()), actor_id="alice", base_lamport=10, ops=[])
         is_valid, error = validator.validate_patch(patch2, db)
         assert not is_valid
         assert "empty" in error.lower()
@@ -134,18 +132,14 @@ class TestConflictDetection:
             patch_id=str(uuid.uuid4()),
             actor_id="alice",
             base_lamport=10,
-            ops=[
-                {"op_type": "ADD_TASK", "task_id": "task-1", "payload": {"version": 1}}
-            ],
+            ops=[{"op_type": "ADD_TASK", "task_id": "task-1", "payload": {"version": 1}}],
         )
 
         patch2 = PlanPatch(
             patch_id=str(uuid.uuid4()),
             actor_id="bob",
             base_lamport=11,
-            ops=[
-                {"op_type": "ADD_TASK", "task_id": "task-1", "payload": {"version": 2}}
-            ],
+            ops=[{"op_type": "ADD_TASK", "task_id": "task-1", "payload": {"version": 2}}],
         )
 
         # Detect conflicts

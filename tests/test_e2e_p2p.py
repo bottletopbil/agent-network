@@ -224,9 +224,7 @@ async def test_full_workflow_p2p_only(test_nodes_3):
         if i == 1:
             continue  # Skip sender
         assert len(node.received_messages) > 0, f"Node {i} did not receive DECIDE"
-        decide_received = any(
-            msg.get("kind") == "DECIDE" for msg in node.received_messages
-        )
+        decide_received = any(msg.get("kind") == "DECIDE" for msg in node.received_messages)
         assert decide_received, f"Node {i} did not receive DECIDE envelope"
 
     logger.info("✓ DECIDE propagated to all nodes")
@@ -258,9 +256,7 @@ async def test_full_workflow_p2p_only(test_nodes_3):
         if i == 1:
             continue  # Skip sender
         assert len(node.received_messages) > 0, f"Node {i} did not receive FINALIZE"
-        finalize_received = any(
-            msg.get("kind") == "FINALIZE" for msg in node.received_messages
-        )
+        finalize_received = any(msg.get("kind") == "FINALIZE" for msg in node.received_messages)
         assert finalize_received, f"Node {i} did not receive FINALIZE envelope"
 
     logger.info("✓ FINALIZE propagated to all nodes")
@@ -437,9 +433,7 @@ async def test_10_node_mesh(test_nodes_10):
 
         # Count how many nodes received it
         receivers = [
-            i
-            for i, node in enumerate(nodes)
-            if i != sender_id and len(node.received_messages) > 0
+            i for i, node in enumerate(nodes) if i != sender_id and len(node.received_messages) > 0
         ]
         propagation_rate = len(receivers) / (len(nodes) - 1) * 100
 
@@ -448,9 +442,7 @@ async def test_10_node_mesh(test_nodes_10):
         )
 
         # Require > 80% propagation
-        assert (
-            propagation_rate > 80
-        ), f"Poor propagation from node {sender_id}: {propagation_rate}%"
+        assert propagation_rate > 80, f"Poor propagation from node {sender_id}: {propagation_rate}%"
 
     logger.info("✓ All nodes can broadcast to mesh successfully")
 

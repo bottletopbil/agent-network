@@ -137,9 +137,7 @@ class TestSlashOnInvalidResult:
 class TestPayoutDistribution:
     """Test payout distribution with slashed amounts"""
 
-    def test_distribute_to_honest_verifiers(
-        self, stake_manager, slashing_rules, ledger
-    ):
+    def test_distribute_to_honest_verifiers(self, stake_manager, slashing_rules, ledger):
         """Test distributing slashed amounts to honest verifiers"""
         # Setup
         verifier1 = "verifier1"  # Dishonest
@@ -222,24 +220,17 @@ class TestRelatedPartyBlocking:
         relationship_detector.register_party(
             PartyInfo(account_id=challenger, org_domain="acme.com")
         )
-        relationship_detector.register_party(
-            PartyInfo(account_id=verifier1, org_domain="acme.com")
-        )
+        relationship_detector.register_party(PartyInfo(account_id=verifier1, org_domain="acme.com"))
         relationship_detector.register_party(
             PartyInfo(account_id=verifier2, org_domain="other.com")
         )
 
         # Detect relationship
-        assert (
-            relationship_detector.detect_same_org([verifier1, verifier2], challenger)
-            is True
-        )
+        assert relationship_detector.detect_same_org([verifier1, verifier2], challenger) is True
 
         # Create bounty
         ledger.create_account("depositor", 10000)
-        bounty_id = bounty_manager.create_bounty(
-            "task1", 100, TaskClass.COMPLEX, "depositor"
-        )
+        bounty_id = bounty_manager.create_bounty("task1", 100, TaskClass.COMPLEX, "depositor")
 
         # Attempt payout should fail (related party)
         with pytest.raises(ValueError, match="Related party conflict"):
@@ -247,8 +238,7 @@ class TestRelatedPartyBlocking:
                 bounty_id=bounty_id,
                 task_id="task1",
                 committee=[verifier1, verifier2],
-                task_completion_time_ns=time.time_ns()
-                - (11 * 60 * 1_000_000_000),  # 11 min ago
+                task_completion_time_ns=time.time_ns() - (11 * 60 * 1_000_000_000),  # 11 min ago
                 challenger=challenger,
             )
 
@@ -261,9 +251,7 @@ class TestRelatedPartyBlocking:
         verifier1 = "verifier1"
 
         # Register with same ASN
-        relationship_detector.register_party(
-            PartyInfo(account_id=challenger, asn=12345)
-        )
+        relationship_detector.register_party(PartyInfo(account_id=challenger, asn=12345))
         relationship_detector.register_party(PartyInfo(account_id=verifier1, asn=12345))
 
         # Detect relationship
@@ -271,9 +259,7 @@ class TestRelatedPartyBlocking:
 
         # Create bounty
         ledger.create_account("depositor", 10000)
-        bounty_id = bounty_manager.create_bounty(
-            "task1", 100, TaskClass.COMPLEX, "depositor"
-        )
+        bounty_id = bounty_manager.create_bounty("task1", 100, TaskClass.COMPLEX, "depositor")
 
         # Attempt payout should fail
         with pytest.raises(ValueError, match="Related party conflict"):
@@ -303,15 +289,11 @@ class TestRelatedPartyBlocking:
         )
 
         # Detect relationship
-        assert (
-            relationship_detector.detect_identity_links([verifier1], challenger) is True
-        )
+        assert relationship_detector.detect_identity_links([verifier1], challenger) is True
 
         # Create bounty
         ledger.create_account("depositor", 10000)
-        bounty_id = bounty_manager.create_bounty(
-            "task1", 100, TaskClass.COMPLEX, "depositor"
-        )
+        bounty_id = bounty_manager.create_bounty("task1", 100, TaskClass.COMPLEX, "depositor")
 
         # Attempt payout should fail
         with pytest.raises(ValueError, match="Related party conflict"):
@@ -365,9 +347,7 @@ class TestPayoutChallengePeriod:
         """Test payout blocked if challenge period not elapsed"""
         # Create bounty
         ledger.create_account("depositor", 10000)
-        bounty_id = bounty_manager.create_bounty(
-            "task1", 100, TaskClass.COMPLEX, "depositor"
-        )
+        bounty_id = bounty_manager.create_bounty("task1", 100, TaskClass.COMPLEX, "depositor")
 
         # Task completed 3 minutes ago (less than 2 × T_challenge = 10 minutes)
         completion_time = time.time_ns() - (3 * 60 * 1_000_000_000)
@@ -387,9 +367,7 @@ class TestPayoutChallengePeriod:
         """Test payout allowed after challenge period"""
         # Create bounty and fund verifier
         ledger.create_account("depositor", 10000)
-        bounty_id = bounty_manager.create_bounty(
-            "task1", 100, TaskClass.COMPLEX, "depositor"
-        )
+        bounty_id = bounty_manager.create_bounty("task1", 100, TaskClass.COMPLEX, "depositor")
         bounty_manager.escrow_bounty(bounty_id, "commit1")  # Escrow before payout
 
         # Task completed 11 minutes ago (more than 2 × T_challenge = 10 minutes)
@@ -406,15 +384,11 @@ class TestPayoutChallengePeriod:
         # Verify payout
         assert ledger.get_balance("verifier1") == 100
 
-    def test_payout_blocked_if_invalidated(
-        self, payout_distributor, bounty_manager, ledger
-    ):
+    def test_payout_blocked_if_invalidated(self, payout_distributor, bounty_manager, ledger):
         """Test payout blocked if task invalidated"""
         # Create bounty
         ledger.create_account("depositor", 10000)
-        bounty_id = bounty_manager.create_bounty(
-            "task1", 100, TaskClass.COMPLEX, "depositor"
-        )
+        bounty_id = bounty_manager.create_bounty("task1", 100, TaskClass.COMPLEX, "depositor")
 
         # Mark task as invalidated
         payout_distributor.mark_invalidated("task3")

@@ -142,9 +142,7 @@ class LeaseMonitor:
             self.heartbeat_protocol.remove_expectation(lease_id)
             return
 
-        print(
-            f"[LEASE_MONITOR] Lease {lease_id} missed heartbeat (task: {lease.task_id})"
-        )
+        print(f"[LEASE_MONITOR] Lease {lease_id} missed heartbeat (task: {lease.task_id})")
 
         # Publish RELEASE message
         self._publish_release(lease.task_id, lease_id, "heartbeat_miss")
@@ -183,8 +181,6 @@ class LeaseMonitor:
             # For now, just add to a list for testing
             if hasattr(self.bus, "published_messages"):
                 self.bus.published_messages.append(release_message)
-            print(
-                f"[LEASE_MONITOR] Published RELEASE for lease {lease_id} (reason: {reason})"
-            )
+            print(f"[LEASE_MONITOR] Published RELEASE for lease {lease_id} (reason: {reason})")
         except Exception as e:
             print(f"[LEASE_MONITOR] ERROR publishing RELEASE: {e}")

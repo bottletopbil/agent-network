@@ -203,9 +203,7 @@ class PeerReputation:
             List of peer IDs sorted by score (worst first)
         """
         # Score all peers
-        peer_scores = [
-            (peer_id, self.get_score(peer_id)) for peer_id in self.peers.keys()
-        ]
+        peer_scores = [(peer_id, self.get_score(peer_id)) for peer_id in self.peers.keys()]
 
         # Sort by score (ascending)
         peer_scores.sort(key=lambda x: x[1])
@@ -224,8 +222,7 @@ class PeerReputation:
         return {
             "total_peers": len(self.peers),
             "blacklisted": len(self.blacklist),
-            "avg_score": sum(self.get_score(p) for p in self.peers)
-            / max(len(self.peers), 1),
+            "avg_score": sum(self.get_score(p) for p in self.peers) / max(len(self.peers), 1),
             "best_peers": self.get_best_peers(5),
             "worst_peers": self.get_worst_peers(5),
         }

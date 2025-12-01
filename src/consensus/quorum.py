@@ -108,9 +108,7 @@ class QuorumTracker:
         state = self.states.get(key)
         return len(state.attestations) if state else 0
 
-    def get_k_plan(
-        self, active_verifiers: int, alpha: float = 0.3, k_target: int = 5
-    ) -> int:
+    def get_k_plan(self, active_verifiers: int, alpha: float = 0.3, k_target: int = 5) -> int:
         """
         Calculate K_plan based on active verifiers.
 

@@ -75,9 +75,7 @@ tasks_completed_total = Counter(
     ["task_type", "status"],
 )
 
-active_tasks = Gauge(
-    "agent_swarm_active_tasks", "Number of currently active tasks", ["task_type"]
-)
+active_tasks = Gauge("agent_swarm_active_tasks", "Number of currently active tasks", ["task_type"])
 
 # Agent metrics
 active_agents = Gauge(
@@ -91,9 +89,7 @@ agent_errors_total = Counter(
 )
 
 # Economic metrics
-staked_tokens = Gauge(
-    "agent_swarm_staked_tokens", "Total amount of tokens staked", ["pool"]
-)
+staked_tokens = Gauge("agent_swarm_staked_tokens", "Total amount of tokens staked", ["pool"])
 
 bounty_paid_total = Counter("agent_swarm_bounty_paid_total", "Total bounties paid")
 
@@ -247,9 +243,7 @@ class MetricsCollector:
 
     def record_message_failed(self, kind: str, operation: str, error_type: str):
         """Record a failed message operation."""
-        messages_failed_total.labels(
-            kind=kind, operation=operation, error_type=error_type
-        ).inc()
+        messages_failed_total.labels(kind=kind, operation=operation, error_type=error_type).inc()
 
     def record_task_created(self, task_type: str):
         """Record task creation."""

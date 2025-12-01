@@ -19,20 +19,16 @@ class InsufficientBalanceError(Exception):
     """Raised when account has insufficient balance for operation"""
 
 
-
 class AccountExistsError(Exception):
     """Raised when attempting to create duplicate account"""
-
 
 
 class EscrowNotFoundError(Exception):
     """Raised when escrow ID not found"""
 
 
-
 class EscrowAlreadyReleasedError(Exception):
     """Raised when attempting to operate on already-released escrow"""
-
 
 
 @dataclass
@@ -127,9 +123,7 @@ class CreditLedger:
             self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_ops_timestamp ON operations(timestamp_ns)"
             )
-            self.conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_ops_type ON operations(op_type)"
-            )
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ops_type ON operations(op_type)")
             self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_escrows_account ON escrows(account_id)"
             )
@@ -204,9 +198,7 @@ class CreditLedger:
                             OpType.MINT.value,
                             initial_balance,
                             time.time_ns(),
-                            json.dumps(
-                                {"reason": "initial_balance", "minter": minter_id}
-                            ),
+                            json.dumps({"reason": "initial_balance", "minter": minter_id}),
                         ),
                     )
 
@@ -249,9 +241,7 @@ class CreditLedger:
         row = cursor.fetchone()
         if not row:
             return None
-        return Account(
-            account_id=row[0], balance=row[1], locked=row[2], unbonding=row[3]
-        )
+        return Account(account_id=row[0], balance=row[1], locked=row[2], unbonding=row[3])
 
     def get_total_supply(self) -> int:
         """
@@ -265,9 +255,7 @@ class CreditLedger:
 
     def _get_total_supply_unsafe(self) -> int:
         """Internal: Get total supply without acquiring lock. Used when lock already held."""
-        cursor = self.conn.execute(
-            "SELECT total_supply FROM supply_tracking WHERE id = 1"
-        )
+        cursor = self.conn.execute("SELECT total_supply FROM supply_tracking WHERE id = 1")
         row = cursor.fetchone()
         return row[0] if row else 0
 
@@ -304,9 +292,7 @@ class CreditLedger:
             # Check source balance
             from_balance = self.get_balance(from_id)
             if from_balance < amount:
-                raise InsufficientBalanceError(
-                    f"Insufficient balance: {from_balance} < {amount}"
-                )
+                raise InsufficientBalanceError(f"Insufficient balance: {from_balance} < {amount}")
 
             # Check if recipient exists
             cursor = self.conn.execute(
@@ -469,9 +455,7 @@ class CreditLedger:
 
                 from_id, amount, released = row
                 if released:
-                    raise EscrowAlreadyReleasedError(
-                        f"Escrow already released: {escrow_id}"
-                    )
+                    raise EscrowAlreadyReleasedError(f"Escrow already released: {escrow_id}")
 
                 # Unlock from source account
                 self.conn.execute(
@@ -540,9 +524,7 @@ class CreditLedger:
 
             account_id, amount, released = row
             if released:
-                raise EscrowAlreadyReleasedError(
-                    f"Escrow already released: {escrow_id}"
-                )
+                raise EscrowAlreadyReleasedError(f"Escrow already released: {escrow_id}")
 
             with self.conn:
                 # Return to balance
@@ -573,9 +555,7 @@ class CreditLedger:
                     ),
                 )
 
-    def get_audit_trail(
-        self, account_id: Optional[str] = None, limit: int = 100
-    ) -> List[LedgerOp]:
+    def get_audit_trail(self, account_id: Optional[str] = None, limit: int = 100) -> List[LedgerOp]:
         """
         Get audit trail of operations.
 

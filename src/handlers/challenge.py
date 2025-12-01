@@ -127,9 +127,7 @@ async def handle_challenge(envelope: dict):
     # Check if low quality challenger
     if abuse_detector.is_low_quality_challenger(challenger_id):
         reputation = abuse_detector.calculate_reputation_impact(challenger_id)
-        print(
-            f"[CHALLENGE] WARNING: Low quality challenger (reputation: {reputation:.2f})"
-        )
+        print(f"[CHALLENGE] WARNING: Low quality challenger (reputation: {reputation:.2f})")
         # Could require higher bond or reject
 
     # Record challenge attempt
@@ -143,9 +141,7 @@ async def handle_challenge(envelope: dict):
         return
 
     remaining_time = window_manager.get_remaining_time(task_id)
-    print(
-        f"[CHALLENGE] Challenge window for task {task_id} has {remaining_time:.1f}s remaining"
-    )
+    print(f"[CHALLENGE] Challenge window for task {task_id} has {remaining_time:.1f}s remaining")
 
     # Calculate required bond
     required_bond = bond_calculator.calculate_bond(proof_type, complexity)
@@ -193,9 +189,7 @@ async def handle_challenge(envelope: dict):
     if ledger:
         try:
             ledger.escrow(challenger_id, required_bond, escrow_id)
-            print(
-                f"[CHALLENGE] Escrowed {required_bond} credits, escrow_id: {escrow_id}"
-            )
+            print(f"[CHALLENGE] Escrowed {required_bond} credits, escrow_id: {escrow_id}")
         except Exception as e:
             print(f"[CHALLENGE] ERROR: Failed to escrow bond: {e}")
             return

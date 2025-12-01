@@ -97,9 +97,7 @@ class TestPeerReputation:
 
         # Create low-scoring peer (need very high failure rate)
         for _ in range(5):
-            reputation.record_message_delivered(
-                "bad-peer", latency_ms=1500.0
-            )  # Bad latency
+            reputation.record_message_delivered("bad-peer", latency_ms=1500.0)  # Bad latency
         for _ in range(95):
             reputation.record_message_failed("bad-peer")
 
@@ -303,9 +301,7 @@ class TestCircuitRelay:
         """Can add relay node"""
         relay = CircuitRelayClient()
 
-        relay.add_relay_node(
-            "relay-1", "/ip4/relay.example.com/tcp/4001/p2p/12D3Koo..."
-        )
+        relay.add_relay_node("relay-1", "/ip4/relay.example.com/tcp/4001/p2p/12D3Koo...")
 
         assert len(relay.relay_nodes) == 1
 
@@ -323,9 +319,7 @@ class TestCircuitRelay:
         """Falls back to relay on direct failure"""
         relay = CircuitRelayClient(enable_auto_relay=True)
 
-        relay.add_relay_node(
-            "relay-1", "/ip4/relay.example.com/tcp/4001/p2p/12D3Koo..."
-        )
+        relay.add_relay_node("relay-1", "/ip4/relay.example.com/tcp/4001/p2p/12D3Koo...")
 
         # Try connecting (may use relay if direct fails)
         # Note: Simulated behavior

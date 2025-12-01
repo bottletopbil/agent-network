@@ -54,9 +54,7 @@ class RelationshipDetector:
         """
         return self._party_cache.get(account_id)
 
-    def detect_same_org(
-        self, verifiers: List[str], challenger: Optional[str] = None
-    ) -> bool:
+    def detect_same_org(self, verifiers: List[str], challenger: Optional[str] = None) -> bool:
         """
         Detect if any verifiers share organization with challenger.
 
@@ -82,9 +80,7 @@ class RelationshipDetector:
 
         return False
 
-    def detect_same_asn(
-        self, verifiers: List[str], challenger: Optional[str] = None
-    ) -> bool:
+    def detect_same_asn(self, verifiers: List[str], challenger: Optional[str] = None) -> bool:
         """
         Detect if any verifiers share ASN with challenger.
 
@@ -110,9 +106,7 @@ class RelationshipDetector:
 
         return False
 
-    def detect_identity_links(
-        self, verifiers: List[str], challenger: Optional[str] = None
-    ) -> bool:
+    def detect_identity_links(self, verifiers: List[str], challenger: Optional[str] = None) -> bool:
         """
         Detect if any verifiers share identity proof hash with challenger.
 

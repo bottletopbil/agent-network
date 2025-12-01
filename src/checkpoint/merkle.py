@@ -79,8 +79,7 @@ class MerkleTree:
         self.root_hash = current_level[0]
 
         logger.debug(
-            f"Built Merkle tree with {len(leaves)} leaves, "
-            f"root: {self.root_hash[:8]}..."
+            f"Built Merkle tree with {len(leaves)} leaves, " f"root: {self.root_hash[:8]}..."
         )
 
         return self.root_hash

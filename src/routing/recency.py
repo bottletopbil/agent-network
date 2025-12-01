@@ -57,9 +57,7 @@ class RecencyWeighter:
 
         logger.debug(f"Recorded activity for {agent_id} at {timestamp}")
 
-    def get_recency_weight(
-        self, agent_id: str, current_time: Optional[float] = None
-    ) -> float:
+    def get_recency_weight(self, agent_id: str, current_time: Optional[float] = None) -> float:
         """
         Calculate recency weight for an agent.
 
@@ -98,9 +96,7 @@ class RecencyWeighter:
 
         return weight
 
-    def get_recency_score(
-        self, agent_id: str, current_time: Optional[float] = None
-    ) -> float:
+    def get_recency_score(self, agent_id: str, current_time: Optional[float] = None) -> float:
         """
         Get normalized recency score (0.0 - 1.0).
 

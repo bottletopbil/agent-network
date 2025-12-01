@@ -60,9 +60,7 @@ class Coordinator:
 
         # Log registered verbs
         verbs = DISPATCHER.list_verbs()
-        print(
-            f"[COORDINATOR] Registered {len(verbs)} verb handlers: {', '.join(verbs)}"
-        )
+        print(f"[COORDINATOR] Registered {len(verbs)} verb handlers: {', '.join(verbs)}")
 
         # Start bootstrap monitor if verifier pool is provided
         self.bootstrap_monitor = None
@@ -153,9 +151,7 @@ class Coordinator:
         """
         Start coordinator - subscribe to NATS and route envelopes.
         """
-        print(
-            f"[COORDINATOR] Starting coordinator on subject pattern: {thread_pattern}"
-        )
+        print(f"[COORDINATOR] Starting coordinator on subject pattern: {thread_pattern}")
         print("[COORDINATOR] Listening for envelopes...")
         print("-" * 60)
 

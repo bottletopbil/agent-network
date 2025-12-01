@@ -91,9 +91,7 @@ def handle_invalidate(
         return
 
     logger.info(f"Processing INVALIDATE for task {task_id}, challenge {challenge_id}")
-    logger.info(
-        f"Slashing {len(slashed_verifiers)} verifiers, rewarding challenger {challenger}"
-    )
+    logger.info(f"Slashing {len(slashed_verifiers)} verifiers, rewarding challenger {challenger}")
 
     # 1. Mark task result as invalid in plan store
     # (This is a metadata annotation on the task)

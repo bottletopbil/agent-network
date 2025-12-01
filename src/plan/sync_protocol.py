@@ -203,9 +203,7 @@ class SyncManager:
             results[peer_id] = self.sync_with_peer(peer_id)
 
         successes = sum(1 for success in results.values() if success)
-        logger.info(
-            f"Batch sync completed: {successes}/{len(results)} peers successful"
-        )
+        logger.info(f"Batch sync completed: {successes}/{len(results)} peers successful")
 
         return results
 

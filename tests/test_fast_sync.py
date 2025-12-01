@@ -54,9 +54,7 @@ class TestFastSync:
 
             # Create and store checkpoint
             cp = manager.create_checkpoint(5, {"tasks": 10}, ["hash-1", "hash-2"])
-            signed = manager.sign_checkpoint(
-                cp, [{"verifier_id": "v1", "signature": "sig1"}]
-            )
+            signed = manager.sign_checkpoint(cp, [{"verifier_id": "v1", "signature": "sig1"}])
             manager.store_checkpoint(signed)
 
             # Download
@@ -198,16 +196,13 @@ class TestFastSync:
                 plan_state={"tasks": 10, "active": 3},
                 op_hashes=[f"hash-{i}" for i in range(50)],
             )
-            signed = manager.sign_checkpoint(
-                cp, [{"verifier_id": "v1", "signature": "sig1"}]
-            )
+            signed = manager.sign_checkpoint(cp, [{"verifier_id": "v1", "signature": "sig1"}])
             manager.store_checkpoint(signed)
 
             # Mock op source
             def mock_ops(epoch):
                 return [
-                    {"op_id": f"op-{i}", "epoch": epoch + 1, "lamport": 100 + i}
-                    for i in range(5)
+                    {"op_id": f"op-{i}", "epoch": epoch + 1, "lamport": 100 + i} for i in range(5)
                 ]
 
             # Perform fast sync
@@ -250,9 +245,7 @@ class TestFastSync:
         sync = FastSync()
 
         # Many ops - should use fast sync
-        should_use = sync.should_use_fast_sync(
-            full_sync_op_count=10000, checkpoint_available=True
-        )
+        should_use = sync.should_use_fast_sync(full_sync_op_count=10000, checkpoint_available=True)
 
         assert should_use is True
 
@@ -261,9 +254,7 @@ class TestFastSync:
         sync = FastSync()
 
         # Few ops - don't need fast sync
-        should_use = sync.should_use_fast_sync(
-            full_sync_op_count=100, checkpoint_available=True
-        )
+        should_use = sync.should_use_fast_sync(full_sync_op_count=100, checkpoint_available=True)
 
         assert should_use is False
 
@@ -272,9 +263,7 @@ class TestFastSync:
         sync = FastSync()
 
         # No checkpoint available
-        should_use = sync.should_use_fast_sync(
-            full_sync_op_count=10000, checkpoint_available=False
-        )
+        should_use = sync.should_use_fast_sync(full_sync_op_count=10000, checkpoint_available=False)
 
         assert should_use is False
 

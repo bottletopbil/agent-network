@@ -136,9 +136,7 @@ class OPAEngine(BasePolicyEngine):
     falls back to Python-based implementation if not.
     """
 
-    def __init__(
-        self, policy_path: Optional[Path] = None, use_opa_binary: bool = False
-    ):
+    def __init__(self, policy_path: Optional[Path] = None, use_opa_binary: bool = False):
         """
         Initialize OPA engine.
 
@@ -156,8 +154,7 @@ class OPAEngine(BasePolicyEngine):
 
         if self.use_opa_binary and not self.opa_available:
             logger.warning(
-                "OPA binary requested but not available, "
-                "falling back to Python implementation"
+                "OPA binary requested but not available, " "falling back to Python implementation"
             )
 
     def _check_opa_binary(self) -> bool:
@@ -231,9 +228,7 @@ class OPAEngine(BasePolicyEngine):
             if result.returncode == 0:
                 output = json.loads(result.stdout)
                 allowed = (
-                    output.get("result", [{}])[0]
-                    .get("expressions", [{}])[0]
-                    .get("value", False)
+                    output.get("result", [{}])[0].get("expressions", [{}])[0].get("value", False)
                 )
 
                 return PolicyResult(

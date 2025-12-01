@@ -179,9 +179,7 @@ class TEEVerifier:
             logger.error(f"Failed to verify quote: {e}")
             return False
 
-    def check_mrenclave(
-        self, report: AttestationReport, expected_mrenclave: str
-    ) -> bool:
+    def check_mrenclave(self, report: AttestationReport, expected_mrenclave: str) -> bool:
         """
         Check that enclave measurement matches expected value.
 
@@ -204,9 +202,7 @@ class TEEVerifier:
 
         return matches
 
-    def register_trusted_enclave(
-        self, mrenclave: str, name: str, version: str = "1.0"
-    ) -> bool:
+    def register_trusted_enclave(self, mrenclave: str, name: str, version: str = "1.0") -> bool:
         """
         Register a trusted enclave measurement.
 

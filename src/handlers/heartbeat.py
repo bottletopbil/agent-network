@@ -79,9 +79,7 @@ async def handle_heartbeat(envelope: dict):
         actor_id=sender,
         op_type=OpType.ANNOTATE,
         task_id=(
-            lease.task_id
-            if lease_manager and lease_manager.get_lease(lease_id)
-            else "unknown"
+            lease.task_id if lease_manager and lease_manager.get_lease(lease_id) else "unknown"
         ),
         payload={
             "annotation_type": "heartbeat",

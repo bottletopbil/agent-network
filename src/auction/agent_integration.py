@@ -69,9 +69,7 @@ class BidSubmitter:
     Tracks bid history and manages submission logic.
     """
 
-    def __init__(
-        self, agent_id: str, reputation: float = 0.5, capabilities: List[str] = None
-    ):
+    def __init__(self, agent_id: str, reputation: float = 0.5, capabilities: List[str] = None):
         """
         Initialize bid submitter.
 
@@ -85,9 +83,7 @@ class BidSubmitter:
         self.capabilities = capabilities or []
         self.bid_history = []
 
-    def create_bid(
-        self, task_payload: Dict[str, Any], proposal_id: str = None
-    ) -> Dict[str, Any]:
+    def create_bid(self, task_payload: Dict[str, Any], proposal_id: str = None) -> Dict[str, Any]:
         """
         Create a bid proposal for a task.
 
@@ -124,9 +120,7 @@ class BidSubmitter:
         """
         import time
 
-        self.bid_history.append(
-            {"task_id": task_id, "bid": bid, "timestamp": time.time()}
-        )
+        self.bid_history.append({"task_id": task_id, "bid": bid, "timestamp": time.time()})
 
     def get_bid_history(self, task_id: str = None) -> List[Dict[str, Any]]:
         """

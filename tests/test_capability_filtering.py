@@ -130,9 +130,7 @@ class TestAgentManifest:
 
     def test_manifest_creation(self):
         """Can create agent manifest"""
-        manifest = AgentManifest(
-            agent_id="test-agent", capabilities=["test"], io_schema={}
-        )
+        manifest = AgentManifest(agent_id="test-agent", capabilities=["test"], io_schema={})
 
         assert manifest.agent_id == "test-agent"
         assert manifest.capabilities == ["test"]
@@ -195,9 +193,7 @@ class TestManifestRegistry:
 
     def test_register_and_get(self, registry):
         """Can register and retrieve manifest"""
-        manifest = AgentManifest(
-            agent_id="test-agent", capabilities=["test"], io_schema={}
-        )
+        manifest = AgentManifest(agent_id="test-agent", capabilities=["test"], io_schema={})
 
         registry.register(manifest)
 
@@ -207,9 +203,7 @@ class TestManifestRegistry:
 
     def test_unregister(self, registry):
         """Can unregister agent"""
-        manifest = AgentManifest(
-            agent_id="test-agent", capabilities=["test"], io_schema={}
-        )
+        manifest = AgentManifest(agent_id="test-agent", capabilities=["test"], io_schema={})
 
         registry.register(manifest)
         assert registry.get("test-agent") is not None
@@ -246,9 +240,7 @@ class TestManifestRegistry:
         for manifest in sample_manifests:
             registry.register(manifest)
 
-        python_or_js_agents = registry.find_by_tags(
-            ["python", "javascript"], match_all=False
-        )
+        python_or_js_agents = registry.find_by_tags(["python", "javascript"], match_all=False)
 
         assert len(python_or_js_agents) == 4  # All except maybe none
         agent_ids = {a.agent_id for a in python_or_js_agents}

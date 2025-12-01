@@ -185,9 +185,7 @@ class CircuitRelayClient:
             "relay_attempts": self.relay_attempts,
             "successful_direct": self.successful_direct,
             "successful_relay": self.successful_relay,
-            "direct_success_rate": (
-                self.successful_direct / max(self.direct_attempts, 1)
-            ),
+            "direct_success_rate": (self.successful_direct / max(self.direct_attempts, 1)),
             "relay_success_rate": (self.successful_relay / max(self.relay_attempts, 1)),
             "auto_relay_enabled": self.enable_auto_relay,
         }

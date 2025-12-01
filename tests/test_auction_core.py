@@ -115,9 +115,7 @@ class TestAuctionLifecycle:
         manager.close_auction("need-closed")
 
         # Try to bid
-        success = manager.accept_bid(
-            "need-closed", "agent-1", {"cost": 500, "eta": 3600}
-        )
+        success = manager.accept_bid("need-closed", "agent-1", {"cost": 500, "eta": 3600})
 
         assert success is False
 

@@ -318,9 +318,7 @@ class PruningManager:
         self.policy = policy or PruningPolicy()
         self.storage = storage or TieredStorage()
 
-    def prune_before_epoch(
-        self, ops: List[dict], current_epoch: int
-    ) -> tuple[int, int]:
+    def prune_before_epoch(self, ops: List[dict], current_epoch: int) -> tuple[int, int]:
         """
         Prune operations before threshold epoch.
 

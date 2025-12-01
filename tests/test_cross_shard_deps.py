@@ -250,9 +250,7 @@ class TestRollbackHandler:
         )
 
         # Salvage some artifacts
-        salvaged = handler.salvage_partial_work(
-            shard_id=1, artifact_refs=["hash-1", "hash-2"]
-        )
+        salvaged = handler.salvage_partial_work(shard_id=1, artifact_refs=["hash-1", "hash-2"])
 
         assert len(salvaged) == 2
         assert "hash-1" in salvaged

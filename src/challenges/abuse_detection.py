@@ -70,9 +70,7 @@ class AbuseDetector:
 
         # Clean old timestamps (keep only last hour)
         one_hour_ago = current_time_ns - (3600 * 1e9)
-        stats.challenges_in_window = [
-            ts for ts in stats.challenges_in_window if ts > one_hour_ago
-        ]
+        stats.challenges_in_window = [ts for ts in stats.challenges_in_window if ts > one_hour_ago]
 
     def record_outcome(self, challenger_id: str, outcome: str) -> None:
         """Record the outcome of a challenge"""
@@ -103,9 +101,7 @@ class AbuseDetector:
 
         # Check hourly limit
         one_hour_ago = current_time_ns - (3600 * 1e9)
-        challenges_last_hour = sum(
-            1 for ts in stats.challenges_in_window if ts > one_hour_ago
-        )
+        challenges_last_hour = sum(1 for ts in stats.challenges_in_window if ts > one_hour_ago)
 
         if challenges_last_hour >= self.MAX_CHALLENGES_PER_HOUR:
             return (
@@ -115,9 +111,7 @@ class AbuseDetector:
 
         # Check daily limit
         one_day_ago = current_time_ns - (24 * 3600 * 1e9)
-        challenges_last_day = sum(
-            1 for ts in stats.challenges_in_window if ts > one_day_ago
-        )
+        challenges_last_day = sum(1 for ts in stats.challenges_in_window if ts > one_day_ago)
 
         if challenges_last_day >= self.MAX_CHALLENGES_PER_DAY:
             return (
@@ -142,9 +136,7 @@ class AbuseDetector:
 
         # Check for rapid-fire pattern
         window_start = current_time_ns - (self.SPAM_DETECTION_WINDOW_SECONDS * 1e9)
-        recent_challenges = sum(
-            1 for ts in stats.challenges_in_window if ts > window_start
-        )
+        recent_challenges = sum(1 for ts in stats.challenges_in_window if ts > window_start)
 
         if recent_challenges >= self.SPAM_THRESHOLD_COUNT:
             return (
@@ -188,9 +180,7 @@ class AbuseDetector:
 
         return max(0.0, min(1.0, base_score))
 
-    def is_low_quality_challenger(
-        self, challenger_id: str, min_challenges: int = 5
-    ) -> bool:
+    def is_low_quality_challenger(self, challenger_id: str, min_challenges: int = 5) -> bool:
         """
         Check if challenger has consistently low success rate.
 

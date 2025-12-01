@@ -168,9 +168,7 @@ class TestManifestManager:
         manifest_mgr = ManifestManager()
 
         with pytest.raises(ValueError):
-            manifest_mgr.create_manifest(
-                agent_id="did:invalid:000", capabilities=[], io_schema={}
-            )
+            manifest_mgr.create_manifest(agent_id="did:invalid:000", capabilities=[], io_schema={})
 
     def test_sign_manifest(self):
         """Test signing manifest."""
@@ -507,9 +505,7 @@ class TestManifestRegistry:
             registry.register(manifest)
 
         # Search for fast planners under $2
-        results = registry.search(
-            capabilities=["planning"], tags=["fast"], max_price=2.0
-        )
+        results = registry.search(capabilities=["planning"], tags=["fast"], max_price=2.0)
 
         assert len(results) == 1
         assert results[0].agent_id == "did:key:agent0"

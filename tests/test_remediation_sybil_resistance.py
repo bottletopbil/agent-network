@@ -39,8 +39,7 @@ def test_did_creation_requires_stake():
             did_manager.create_did_key(account_id="user1")
 
         assert (
-            "stake" in str(exc_info.value).lower()
-            or "insufficient" in str(exc_info.value).lower()
+            "stake" in str(exc_info.value).lower() or "insufficient" in str(exc_info.value).lower()
         )
 
 
@@ -124,9 +123,7 @@ def test_mass_did_creation_expensive():
         total_cost = min_stake * 1000
 
         # Should be expensive (at least 100,000 credits)
-        assert (
-            total_cost >= 100000
-        ), f"Sybil attack too cheap: {total_cost} credits for 1000 DIDs"
+        assert total_cost >= 100000, f"Sybil attack too cheap: {total_cost} credits for 1000 DIDs"
 
         # Try to create with insufficient funds
         ledger.create_account("attacker", initial_balance=total_cost - 1)

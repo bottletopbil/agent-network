@@ -114,18 +114,14 @@ class TestMonotonicState:
         store.append_op(add_op)
 
         # Update to DECIDED (lamport 5)
-        state_op1 = create_test_op(
-            OpType.STATE, "task-1", 5, payload={"state": "DECIDED"}
-        )
+        state_op1 = create_test_op(OpType.STATE, "task-1", 5, payload={"state": "DECIDED"})
         store.append_op(state_op1)
 
         assert store.get_task("task-1")["state"] == "DECIDED"
         assert store.get_task("task-1")["last_lamport"] == 5
 
         # Try to update to DRAFT with lower lamport (3) - should be ignored
-        state_op2 = create_test_op(
-            OpType.STATE, "task-1", 3, payload={"state": "DRAFT"}
-        )
+        state_op2 = create_test_op(OpType.STATE, "task-1", 3, payload={"state": "DRAFT"})
         store.append_op(state_op2)
 
         # State should remain DECIDED (higher lamport wins)
@@ -139,15 +135,11 @@ class TestMonotonicState:
         add_op = create_test_op(OpType.ADD_TASK, "task-1", 1)
         store.append_op(add_op)
 
-        state_op1 = create_test_op(
-            OpType.STATE, "task-1", 5, payload={"state": "DECIDED"}
-        )
+        state_op1 = create_test_op(OpType.STATE, "task-1", 5, payload={"state": "DECIDED"})
         store.append_op(state_op1)
 
         # Same lamport, different state
-        state_op2 = create_test_op(
-            OpType.STATE, "task-1", 5, payload={"state": "VERIFIED"}
-        )
+        state_op2 = create_test_op(OpType.STATE, "task-1", 5, payload={"state": "VERIFIED"})
         store.append_op(state_op2)
 
         # Original state should remain
@@ -164,9 +156,7 @@ class TestMonotonicState:
         states = [(2, "DRAFT"), (3, "DECIDED"), (4, "VERIFIED"), (5, "FINAL")]
 
         for lamport, state in states:
-            op = create_test_op(
-                OpType.STATE, "task-1", lamport, payload={"state": state}
-            )
+            op = create_test_op(OpType.STATE, "task-1", lamport, payload={"state": state})
             store.append_op(op)
             assert store.get_task("task-1")["state"] == state
             assert store.get_task("task-1")["last_lamport"] == lamport
@@ -194,9 +184,7 @@ class TestLWWAnnotations:
         assert task["annotations"]["owner"] == "alice"
 
         # Update with higher lamport (10) - should win
-        annot_op2 = create_test_op(
-            OpType.ANNOTATE, "task-1", 10, payload={"priority": "critical"}
-        )
+        annot_op2 = create_test_op(OpType.ANNOTATE, "task-1", 10, payload={"priority": "critical"})
         store.append_op(annot_op2)
 
         task = store.get_task("task-1")
@@ -211,15 +199,11 @@ class TestLWWAnnotations:
         store.append_op(add_op)
 
         # Annotate with lamport 10
-        annot_op1 = create_test_op(
-            OpType.ANNOTATE, "task-1", 10, payload={"status": "active"}
-        )
+        annot_op1 = create_test_op(OpType.ANNOTATE, "task-1", 10, payload={"status": "active"})
         store.append_op(annot_op1)
 
         # Try to update with lower lamport (5) - should be ignored
-        annot_op2 = create_test_op(
-            OpType.ANNOTATE, "task-1", 5, payload={"status": "inactive"}
-        )
+        annot_op2 = create_test_op(OpType.ANNOTATE, "task-1", 5, payload={"status": "inactive"})
         store.append_op(annot_op2)
 
         task = store.get_task("task-1")
@@ -318,16 +302,12 @@ class TestMergePeers:
         # Peer A: task-1 at DRAFT (lamport 5)
         peer_a = AutomergePlanStore()
         peer_a.append_op(create_test_op(OpType.ADD_TASK, "task-1", 1))
-        peer_a.append_op(
-            create_test_op(OpType.STATE, "task-1", 5, payload={"state": "DRAFT"})
-        )
+        peer_a.append_op(create_test_op(OpType.STATE, "task-1", 5, payload={"state": "DRAFT"}))
 
         # Peer B: task-1 at DECIDED (lamport 10)
         peer_b = AutomergePlanStore()
         peer_b.append_op(create_test_op(OpType.ADD_TASK, "task-1", 1))
-        peer_b.append_op(
-            create_test_op(OpType.STATE, "task-1", 10, payload={"state": "DECIDED"})
-        )
+        peer_b.append_op(create_test_op(OpType.STATE, "task-1", 10, payload={"state": "DECIDED"}))
 
         # Merge B into A
         peer_a.merge_with_peer(peer_b.get_save_data())
@@ -378,17 +358,13 @@ class TestMergePeers:
         # Peer A: priority = "high" (lamport 5)
         peer_a = AutomergePlanStore()
         peer_a.append_op(create_test_op(OpType.ADD_TASK, "task-1", 1))
-        peer_a.append_op(
-            create_test_op(OpType.ANNOTATE, "task-1", 5, payload={"priority": "high"})
-        )
+        peer_a.append_op(create_test_op(OpType.ANNOTATE, "task-1", 5, payload={"priority": "high"}))
 
         # Peer B: priority = "critical" (lamport 10)
         peer_b = AutomergePlanStore()
         peer_b.append_op(create_test_op(OpType.ADD_TASK, "task-1", 1))
         peer_b.append_op(
-            create_test_op(
-                OpType.ANNOTATE, "task-1", 10, payload={"priority": "critical"}
-            )
+            create_test_op(OpType.ANNOTATE, "task-1", 10, payload={"priority": "critical"})
         )
 
         # Merge

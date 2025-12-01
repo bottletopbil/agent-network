@@ -91,9 +91,7 @@ class TestGasMetering:
 
         meter.consume_set_membership()
         expected = (
-            GasMeter.COST_FIELD_ACCESS
-            + GasMeter.COST_COMPARISON
-            + GasMeter.COST_SET_MEMBERSHIP
+            GasMeter.COST_FIELD_ACCESS + GasMeter.COST_COMPARISON + GasMeter.COST_SET_MEMBERSHIP
         )
         assert meter.used == expected
 

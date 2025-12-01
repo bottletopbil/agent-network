@@ -82,9 +82,7 @@ class MerkleProof:
         return tree[-1][0]
 
     @staticmethod
-    def build_proof(
-        thread_envelopes: List[Dict[str, Any]], target_index: int
-    ) -> Dict[str, Any]:
+    def build_proof(thread_envelopes: List[Dict[str, Any]], target_index: int) -> Dict[str, Any]:
         """
         Build Merkle proof for envelope at target_index.
 
@@ -150,9 +148,7 @@ class MerkleProof:
         return proof
 
     @staticmethod
-    def verify_proof(
-        root_cid: str, envelope: Dict[str, Any], proof: Dict[str, Any]
-    ) -> bool:
+    def verify_proof(root_cid: str, envelope: Dict[str, Any], proof: Dict[str, Any]) -> bool:
         """
         Verify Merkle proof for envelope.
 

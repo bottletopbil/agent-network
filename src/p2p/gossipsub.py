@@ -26,9 +26,7 @@ class GossipsubMessage:
     timestamp: float = field(default_factory=time.time)
 
     @classmethod
-    def create(
-        cls, topic: str, data: bytes, from_peer: str, sequence: int
-    ) -> "GossipsubMessage":
+    def create(cls, topic: str, data: bytes, from_peer: str, sequence: int) -> "GossipsubMessage":
         """Create message with computed ID"""
         # Message ID: hash(topic + data + from_peer + sequence)
         msg_str = f"{topic}{data.hex()}{from_peer}{sequence}"
@@ -205,9 +203,7 @@ class GossipsubRouter:
             self.fanout[topic] = peers_to_send
 
         # Propagate to peers (simulated)
-        logger.debug(
-            f"Publishing to topic {topic}: {msg.msg_id} to {len(peers_to_send)} peers"
-        )
+        logger.debug(f"Publishing to topic {topic}: {msg.msg_id} to {len(peers_to_send)} peers")
 
         # Deliver locally if subscribed
         if topic in self.subscriptions:
@@ -329,16 +325,12 @@ class GossipsubRouter:
         # Clean up old seen messages
         cutoff_time = current_time - self.SEEN_MSG_TTL
         old_msg_ids = [
-            msg_id
-            for msg_id, msg in self.seen_messages.items()
-            if msg.timestamp < cutoff_time
+            msg_id for msg_id, msg in self.seen_messages.items() if msg.timestamp < cutoff_time
         ]
         for msg_id in old_msg_ids:
             del self.seen_messages[msg_id]
 
-        logger.debug(
-            f"Heartbeat: {len(self.mesh)} topics, {len(self.seen_messages)} seen messages"
-        )
+        logger.debug(f"Heartbeat: {len(self.mesh)} topics, {len(self.seen_messages)} seen messages")
 
     def get_stats(self) -> Dict[str, Any]:
         """Get router statistics"""

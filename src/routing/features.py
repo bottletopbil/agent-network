@@ -64,9 +64,7 @@ class FeatureExtractor:
         features.append(input_size)
 
         # Feature 8: Required capabilities count (normalized)
-        capability_count = (
-            len(need.get("capabilities", [])) / 10.0
-        )  # Normalize by max ~10
+        capability_count = len(need.get("capabilities", [])) / 10.0  # Normalize by max ~10
         features.append(min(capability_count, 1.0))
 
         # Feature 9-10: Reserved for future extensions
@@ -213,9 +211,7 @@ class FeatureExtractor:
         # Look for array types
         properties = input_schema.get("properties", {})
         has_arrays = any(
-            prop.get("type") == "array"
-            for prop in properties.values()
-            if isinstance(prop, dict)
+            prop.get("type") == "array" for prop in properties.values() if isinstance(prop, dict)
         )
 
         if has_arrays:

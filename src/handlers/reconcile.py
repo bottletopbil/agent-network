@@ -52,9 +52,7 @@ async def handle_reconcile(envelope: dict):
     merge_handler = MergeHandler()
 
     for branch in orphaned_branches:
-        merge_handler.mark_orphaned(
-            decide=branch, winning_epoch=new_epoch, plan_store=plan_store
-        )
+        merge_handler.mark_orphaned(decide=branch, winning_epoch=new_epoch, plan_store=plan_store)
 
     # Log summary details if available
     if summary:

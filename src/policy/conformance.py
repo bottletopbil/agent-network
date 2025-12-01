@@ -256,9 +256,7 @@ class ConformanceChecker:
             logger.warning(f"Capsule missing required tests: {missing_tests}")
             return False
 
-        logger.info(
-            f"Capsule conformance valid: {len(capsule.conformance_vector)} tests passed"
-        )
+        logger.info(f"Capsule conformance valid: {len(capsule.conformance_vector)} tests passed")
         return True
 
     def get_test_coverage(self, passed_tests: List[str]) -> Dict[str, Any]:
@@ -283,9 +281,7 @@ class ConformanceChecker:
             "passed_tests": len(passed_tests),
             "passed_required": passed_required,
             "passed_optional": passed_optional,
-            "coverage_percent": (
-                (len(passed_tests) / total_tests * 100) if total_tests > 0 else 0
-            ),
+            "coverage_percent": ((len(passed_tests) / total_tests * 100) if total_tests > 0 else 0),
             "is_conformant": passed_required == required_tests,
         }
 

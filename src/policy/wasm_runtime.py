@@ -126,9 +126,7 @@ class WASMRuntime:
                 policy_version="1.0.0",
             )
 
-    def _evaluate_with_metering(
-        self, input_data: Dict, gas_meter: GasMeter
-    ) -> PolicyResult:
+    def _evaluate_with_metering(self, input_data: Dict, gas_meter: GasMeter) -> PolicyResult:
         """
         Evaluate policy with gas metering.
 
@@ -224,9 +222,7 @@ def get_wasm_runtime() -> WASMRuntime:
     return _wasm_runtime
 
 
-def init_wasm_runtime(
-    policy_path: Optional[Path] = None, gas_limit: int = 100000
-) -> WASMRuntime:
+def init_wasm_runtime(policy_path: Optional[Path] = None, gas_limit: int = 100000) -> WASMRuntime:
     """
     Initialize global WASM runtime.
 

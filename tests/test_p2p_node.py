@@ -163,9 +163,7 @@ class TestP2PNode:
         with tempfile.TemporaryDirectory() as tmpdir:
             identity_path = Path(tmpdir) / "identity.json"
 
-            node = P2PNode(
-                listen_addr="/ip4/0.0.0.0/tcp/4001", identity_path=identity_path
-            )
+            node = P2PNode(listen_addr="/ip4/0.0.0.0/tcp/4001", identity_path=identity_path)
 
             # No addrs before starting
             assert len(node.get_multiaddrs()) == 0
@@ -190,9 +188,7 @@ class TestP2PNode:
         with tempfile.TemporaryDirectory() as tmpdir:
             identity_path = Path(tmpdir) / "identity.json"
 
-            node = P2PNode(
-                listen_addr="/ip4/127.0.0.1/tcp/5001", identity_path=identity_path
-            )
+            node = P2PNode(listen_addr="/ip4/127.0.0.1/tcp/5001", identity_path=identity_path)
 
             assert node.listen_host == "127.0.0.1"
             assert node.listen_port == 5001

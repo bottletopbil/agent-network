@@ -39,9 +39,7 @@ class TestAgentRegistration:
             "tags": ["python"],
         }
 
-        registration_id = registry.register_agent(
-            agent_id="agent1", manifest=manifest, stake=100.0
-        )
+        registration_id = registry.register_agent(agent_id="agent1", manifest=manifest, stake=100.0)
 
         assert registration_id is not None
         assert len(registration_id) > 0
@@ -173,9 +171,7 @@ class TestAgentSearch:
 
     def test_search_by_multiple_capabilities(self, registry_with_agents):
         """Test searching by multiple capabilities (AND logic)"""
-        results = registry_with_agents.search_agents(
-            capabilities=["code_analysis", "security"]
-        )
+        results = registry_with_agents.search_agents(capabilities=["code_analysis", "security"])
 
         assert len(results) == 1
         assert results[0]["agent_id"] == "agent3"

@@ -85,8 +85,7 @@ class TestDecideHandler:
         decide_ops = [
             op
             for op in ops
-            if op.op_type == OpType.ANNOTATE
-            and op.payload.get("annotation_type") == "decide"
+            if op.op_type == OpType.ANNOTATE and op.payload.get("annotation_type") == "decide"
         ]
         assert len(decide_ops) == 1
         assert decide_ops[0].payload["proposal_id"] == "proposal-A"
@@ -117,8 +116,7 @@ class TestDecideHandler:
         decide_ops = [
             op
             for op in ops
-            if op.op_type == OpType.ANNOTATE
-            and op.payload.get("annotation_type") == "decide"
+            if op.op_type == OpType.ANNOTATE and op.payload.get("annotation_type") == "decide"
         ]
         assert len(decide_ops) == 1  # Still only 1
 
@@ -205,8 +203,7 @@ class TestFinalizeHandler:
         finalize_ops = [
             op
             for op in ops
-            if op.op_type == OpType.ANNOTATE
-            and op.payload.get("annotation_type") == "finalize"
+            if op.op_type == OpType.ANNOTATE and op.payload.get("annotation_type") == "finalize"
         ]
         assert len(finalize_ops) == 1
 
@@ -289,7 +286,6 @@ class TestFinalizeHandler:
         finalize_ops = [
             op
             for op in ops
-            if op.op_type == OpType.ANNOTATE
-            and op.payload.get("annotation_type") == "finalize"
+            if op.op_type == OpType.ANNOTATE and op.payload.get("annotation_type") == "finalize"
         ]
         assert len(finalize_ops) == 2

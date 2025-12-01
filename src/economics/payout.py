@@ -88,9 +88,7 @@ class PayoutDistributor:
                 # Give remainder to first member
                 amount = committee_share + (remainder if i == 0 else 0)
                 shares.append(
-                    PayoutShare(
-                        recipient_id=member_id, amount=amount, share_type="COMMITTEE"
-                    )
+                    PayoutShare(recipient_id=member_id, amount=amount, share_type="COMMITTEE")
                 )
         else:
             # With challenge: 50% challenger, 40% verifiers, 10% burn
@@ -115,9 +113,7 @@ class PayoutDistributor:
                 # Give remainder to first member
                 amount = verifier_share + (verifier_remainder if i == 0 else 0)
                 shares.append(
-                    PayoutShare(
-                        recipient_id=member_id, amount=amount, share_type="COMMITTEE"
-                    )
+                    PayoutShare(recipient_id=member_id, amount=amount, share_type="COMMITTEE")
                 )
 
             # Burn share (no recipient)
@@ -213,9 +209,7 @@ class PayoutDistributor:
             ValueError: If invalid parameters, bounty not found, or payout blocked
         """
         # Check if payout can proceed
-        can_pay, reason = self.can_payout(
-            task_id, task_completion_time_ns, current_time_ns
-        )
+        can_pay, reason = self.can_payout(task_id, task_completion_time_ns, current_time_ns)
         if not can_pay:
             raise ValueError(f"Cannot execute payout: {reason}")
 
@@ -245,9 +239,7 @@ class PayoutDistributor:
         # Execute distribution
         self.bounty_manager.distribute_bounty(bounty_id, recipients)
 
-    def validate_related_parties(
-        self, committee: List[str], challenger: Optional[str]
-    ) -> bool:
+    def validate_related_parties(self, committee: List[str], challenger: Optional[str]) -> bool:
         """
         Validate no conflicts between challenger and committee (basic check).
 

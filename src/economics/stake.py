@@ -16,7 +16,6 @@ class InsufficientStakeError(Exception):
     """Raised when account has insufficient staked amount"""
 
 
-
 @dataclass
 class UnbondingRecord:
     """Record of credits in unbonding period"""
@@ -142,9 +141,7 @@ class StakeManager:
             # Check staked amount
             staked = self.get_staked_amount(account_id)
             if staked < amount:
-                raise InsufficientStakeError(
-                    f"Insufficient stake to unstake: {staked} < {amount}"
-                )
+                raise InsufficientStakeError(f"Insufficient stake to unstake: {staked} < {amount}")
 
             # Calculate completion time
             started_at = time.time_ns()

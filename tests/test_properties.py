@@ -157,9 +157,7 @@ class TestP4EpochFencing:
                 max_seen = epoch
 
         # Filtered should be monotonic
-        is_monotonic = all(
-            filtered[i] <= filtered[i + 1] for i in range(len(filtered) - 1)
-        )
+        is_monotonic = all(filtered[i] <= filtered[i + 1] for i in range(len(filtered) - 1))
         assert is_monotonic
         assert filtered == [1, 2, 3, 4]
 
@@ -343,9 +341,7 @@ class TestChaosResilience:
             return True
 
         properties = {"decide_uniqueness": property_decide_uniqueness}
-        result = runner.run(
-            workload, properties, duration_sec=2.0, chaos_interval_sec=0.5
-        )
+        result = runner.run(workload, properties, duration_sec=2.0, chaos_interval_sec=0.5)
 
         assert result.property_checks["decide_uniqueness"]
 
@@ -364,9 +360,7 @@ class TestChaosResilience:
 
         properties = {"epoch_valid": lambda ctx: ctx.get("epoch", 0) > 0}
 
-        result = runner.run(
-            workload, properties, duration_sec=1.0, chaos_interval_sec=0.3
-        )
+        result = runner.run(workload, properties, duration_sec=1.0, chaos_interval_sec=0.3)
         assert result.property_checks["epoch_valid"]
 
 

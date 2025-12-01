@@ -297,9 +297,7 @@ class TestCheckpointManager:
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = CheckpointManager(Path(tmpdir))
 
-            checkpoint = manager.create_checkpoint(
-                epoch=1, plan_state={}, op_hashes=["hash-1"]
-            )
+            checkpoint = manager.create_checkpoint(epoch=1, plan_state={}, op_hashes=["hash-1"])
 
             signatures = [
                 {"verifier_id": "v1", "signature": "sig1"},

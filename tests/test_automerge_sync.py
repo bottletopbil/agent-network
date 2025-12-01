@@ -106,12 +106,8 @@ class TestFullSync:
         sync_a = SyncManager(store_a, "peer-a")
         sync_b = SyncManager(store_b, "peer-b")
 
-        sync_a.register_peer(
-            "peer-b", "nats://peer-b", lambda _: store_b.get_save_data()
-        )
-        sync_b.register_peer(
-            "peer-a", "nats://peer-a", lambda _: store_a.get_save_data()
-        )
+        sync_a.register_peer("peer-b", "nats://peer-b", lambda _: store_b.get_save_data())
+        sync_b.register_peer("peer-a", "nats://peer-a", lambda _: store_a.get_save_data())
 
         # Sync both ways
         sync_a.sync_with_peer("peer-b")
@@ -132,9 +128,7 @@ class TestFullSync:
         store_b = AutomergePlanStore()
 
         sync_a = SyncManager(store_a, "peer-a")
-        sync_a.register_peer(
-            "peer-b", "nats://peer-b", lambda _: store_b.get_save_data()
-        )
+        sync_a.register_peer("peer-b", "nats://peer-b", lambda _: store_b.get_save_data())
 
         # Check peer state before sync
         peer_state = sync_a.get_peer_state("peer-b")
@@ -200,26 +194,14 @@ class TestThreeWayMerge:
         sync_c = SyncManager(store_c, "peer-c")
 
         # Register all peers
-        sync_a.register_peer(
-            "peer-b", "nats://peer-b", lambda _: store_b.get_save_data()
-        )
-        sync_a.register_peer(
-            "peer-c", "nats://peer-c", lambda _: store_c.get_save_data()
-        )
+        sync_a.register_peer("peer-b", "nats://peer-b", lambda _: store_b.get_save_data())
+        sync_a.register_peer("peer-c", "nats://peer-c", lambda _: store_c.get_save_data())
 
-        sync_b.register_peer(
-            "peer-a", "nats://peer-a", lambda _: store_a.get_save_data()
-        )
-        sync_b.register_peer(
-            "peer-c", "nats://peer-c", lambda _: store_c.get_save_data()
-        )
+        sync_b.register_peer("peer-a", "nats://peer-a", lambda _: store_a.get_save_data())
+        sync_b.register_peer("peer-c", "nats://peer-c", lambda _: store_c.get_save_data())
 
-        sync_c.register_peer(
-            "peer-a", "nats://peer-a", lambda _: store_a.get_save_data()
-        )
-        sync_c.register_peer(
-            "peer-b", "nats://peer-b", lambda _: store_b.get_save_data()
-        )
+        sync_c.register_peer("peer-a", "nats://peer-a", lambda _: store_a.get_save_data())
+        sync_c.register_peer("peer-b", "nats://peer-b", lambda _: store_b.get_save_data())
 
         # Sync A with B and C
         sync_a.sync_all_peers()
@@ -254,17 +236,11 @@ class TestThreeWayMerge:
         store_c.append_op(create_test_op(OpType.ADD_TASK, "task-1", 1))
 
         # Each updates state with different lamport
-        store_a.append_op(
-            create_test_op(OpType.STATE, "task-1", 5, payload={"state": "DRAFT"})
-        )
+        store_a.append_op(create_test_op(OpType.STATE, "task-1", 5, payload={"state": "DRAFT"}))
 
-        store_b.append_op(
-            create_test_op(OpType.STATE, "task-1", 10, payload={"state": "DECIDED"})
-        )
+        store_b.append_op(create_test_op(OpType.STATE, "task-1", 10, payload={"state": "DECIDED"}))
 
-        store_c.append_op(
-            create_test_op(OpType.STATE, "task-1", 15, payload={"state": "VERIFIED"})
-        )
+        store_c.append_op(create_test_op(OpType.STATE, "task-1", 15, payload={"state": "VERIFIED"}))
 
         # Merge all three
         store_a.merge_with_peer(store_b.get_save_data())
@@ -294,14 +270,10 @@ class TestConcurrentEdits:
         store_b.append_op(create_test_op(OpType.ADD_TASK, "task-2", 2))
 
         # A updates task-1
-        store_a.append_op(
-            create_test_op(OpType.STATE, "task-1", 10, payload={"state": "DECIDED"})
-        )
+        store_a.append_op(create_test_op(OpType.STATE, "task-1", 10, payload={"state": "DECIDED"}))
 
         # B updates task-2 (concurrent)
-        store_b.append_op(
-            create_test_op(OpType.STATE, "task-2", 11, payload={"state": "VERIFIED"})
-        )
+        store_b.append_op(create_test_op(OpType.STATE, "task-2", 11, payload={"state": "VERIFIED"}))
 
         # Merge
         store_a.merge_with_peer(store_b.get_save_data())
@@ -330,9 +302,7 @@ class TestConcurrentEdits:
 
         # B annotates with lamport 10 (higher)
         store_b.append_op(
-            create_test_op(
-                OpType.ANNOTATE, "task-1", 10, payload={"priority": "critical"}
-            )
+            create_test_op(OpType.ANNOTATE, "task-1", 10, payload={"priority": "critical"})
         )
 
         # Merge
@@ -415,9 +385,7 @@ class TestPeerDiscovery:
         """Can add discovered peers"""
         discovery = PeerDiscovery("peer-a", "nats://peer-a")
 
-        peer_info = PeerInfo(
-            peer_id="peer-b", address="nats://peer-b", capabilities=["plan_sync"]
-        )
+        peer_info = PeerInfo(peer_id="peer-b", address="nats://peer-b", capabilities=["plan_sync"])
 
         discovery.add_discovered_peer(peer_info)
 
@@ -445,12 +413,8 @@ class TestPeerDiscovery:
         """Can filter peers by capability"""
         discovery = PeerDiscovery("peer-a", "nats://peer-a")
 
-        discovery.add_discovered_peer(
-            PeerInfo("peer-b", "nats://peer-b", ["plan_sync"])
-        )
-        discovery.add_discovered_peer(
-            PeerInfo("peer-c", "nats://peer-c", ["consensus"])
-        )
+        discovery.add_discovered_peer(PeerInfo("peer-b", "nats://peer-b", ["plan_sync"]))
+        discovery.add_discovered_peer(PeerInfo("peer-c", "nats://peer-c", ["consensus"]))
         discovery.add_discovered_peer(
             PeerInfo("peer-d", "nats://peer-d", ["plan_sync", "consensus"])
         )
@@ -464,9 +428,7 @@ class TestPeerDiscovery:
     def test_discovery_status(self):
         """Can get discovery status"""
         discovery = PeerDiscovery("peer-a", "nats://peer-a", ["plan_sync"])
-        discovery.add_discovered_peer(
-            PeerInfo("peer-b", "nats://peer-b", ["plan_sync"])
-        )
+        discovery.add_discovered_peer(PeerInfo("peer-b", "nats://peer-b", ["plan_sync"]))
 
         status = discovery.get_discovery_status()
 

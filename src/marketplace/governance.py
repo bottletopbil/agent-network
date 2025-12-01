@@ -333,9 +333,7 @@ class GovernanceSystem:
         proposal = self.proposals[proposal_id]
 
         if proposal.status != ProposalStatus.ACTIVE:
-            raise ValueError(
-                f"Proposal must be active to finalize (status: {proposal.status})"
-            )
+            raise ValueError(f"Proposal must be active to finalize (status: {proposal.status})")
 
         # Tally votes
         result = self.tally_votes(proposal_id)
@@ -362,9 +360,7 @@ class GovernanceSystem:
         proposal = self.proposals[proposal_id]
 
         if proposal.status != ProposalStatus.PASSED:
-            raise ValueError(
-                f"Proposal must be passed to execute (status: {proposal.status})"
-            )
+            raise ValueError(f"Proposal must be passed to execute (status: {proposal.status})")
 
         # Apply parameter changes
         for param, value in proposal.parameter_changes.items():

@@ -65,9 +65,7 @@ class ReputationTracker:
                 )
             """
             )
-            self.conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_rep_did ON reputation_events(did)"
-            )
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_rep_did ON reputation_events(did)")
             self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_rep_verifier ON reputation_events(verifier_id)"
             )
@@ -86,9 +84,7 @@ class ReputationTracker:
         """
         if not verdict:
             # Failed attestation gets penalty
-            self._apply_delta(
-                did, "ATTESTATION_FAILED", self.FAILED_ATTESTATION_PENALTY
-            )
+            self._apply_delta(did, "ATTESTATION_FAILED", self.FAILED_ATTESTATION_PENALTY)
         # Successful attestations don't change reputation (maintaining is expected)
 
     def record_challenge(self, did: str, upheld: bool) -> None:
@@ -198,9 +194,7 @@ class ReputationTracker:
 
         return current_rep
 
-    def get_reputation_history(
-        self, did: str, limit: int = 10
-    ) -> List[ReputationEvent]:
+    def get_reputation_history(self, did: str, limit: int = 10) -> List[ReputationEvent]:
         """
         Get reputation event history.
 

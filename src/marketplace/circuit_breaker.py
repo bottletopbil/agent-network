@@ -106,10 +106,7 @@ class CircuitBreaker:
         """Check if circuit is open (tripped)."""
         # Check if we should transition from OPEN to HALF_OPEN
         if self.state == CircuitState.OPEN:
-            if (
-                self.trip_time
-                and datetime.now() - self.trip_time >= self.recovery_timeout
-            ):
+            if self.trip_time and datetime.now() - self.trip_time >= self.recovery_timeout:
                 self.state = CircuitState.HALF_OPEN
                 self.half_open_calls = 0
                 return False
@@ -129,10 +126,7 @@ class CircuitBreaker:
 
         if self.state == CircuitState.OPEN:
             # Check if recovery timeout has passed
-            if (
-                self.trip_time
-                and datetime.now() - self.trip_time >= self.recovery_timeout
-            ):
+            if self.trip_time and datetime.now() - self.trip_time >= self.recovery_timeout:
                 self.state = CircuitState.HALF_OPEN
                 self.half_open_calls = 0
                 return True
@@ -266,9 +260,7 @@ class EmergencyStop:
             "reason": self.pause_reason,
             "pause_time": self.pause_time,
             "duration_seconds": (
-                (datetime.now() - self.pause_time).total_seconds()
-                if self.pause_time
-                else 0
+                (datetime.now() - self.pause_time).total_seconds() if self.pause_time else 0
             ),
         }
 

@@ -36,7 +36,6 @@ class SandboxError(Exception):
     """Base exception for sandbox-related errors."""
 
 
-
 @dataclass
 class ResourceLimits:
     """Resource limits for a Firecracker VM."""
@@ -118,9 +117,7 @@ class FirecrackerVM:
 
         # Check if firecracker binary exists
         try:
-            result = subprocess.run(
-                ["which", "firecracker"], capture_output=True, timeout=5
-            )
+            result = subprocess.run(["which", "firecracker"], capture_output=True, timeout=5)
             if result.returncode != 0:
                 return False
         except (subprocess.TimeoutExpired, FileNotFoundError):
@@ -169,9 +166,7 @@ class FirecrackerVM:
             # Real Firecracker implementation
             return self._start_firecracker_vm(vm_id, image, resources)
 
-    def _start_firecracker_vm(
-        self, vm_id: str, image: str, resources: ResourceLimits
-    ) -> str:
+    def _start_firecracker_vm(self, vm_id: str, image: str, resources: ResourceLimits) -> str:
         """
         Start a real Firecracker VM (Linux only).
 
@@ -297,8 +292,7 @@ class FirecrackerVM:
 
         # Placeholder for real implementation
         raise NotImplementedError(
-            "Real Firecracker execution requires full setup. "
-            "Use mock_mode=True for development."
+            "Real Firecracker execution requires full setup. " "Use mock_mode=True for development."
         )
 
     def stop_vm(self, vm_id: str):

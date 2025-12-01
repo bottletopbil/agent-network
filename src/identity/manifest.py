@@ -245,9 +245,7 @@ class ManifestManager:
         if registry:
             try:
                 registry.register(manifest)
-                logger.info(
-                    f"Published manifest to registry: {manifest.agent_id[:30]}..."
-                )
+                logger.info(f"Published manifest to registry: {manifest.agent_id[:30]}...")
                 return True
             except Exception as e:
                 logger.error(f"Failed to publish manifest: {e}")

@@ -114,9 +114,7 @@ class PatchValidator:
 
         return True, None
 
-    def detect_conflicts(
-        self, patch: PlanPatch, other_patches: List[PlanPatch]
-    ) -> List[str]:
+    def detect_conflicts(self, patch: PlanPatch, other_patches: List[PlanPatch]) -> List[str]:
         """
         Detect conflicts between this patch and other patches.
 
@@ -163,9 +161,7 @@ class PatchValidator:
 
         return conflicts
 
-    def _detect_cycle(
-        self, edges: List[Tuple[str, str]], new_edge: Tuple[str, str]
-    ) -> bool:
+    def _detect_cycle(self, edges: List[Tuple[str, str]], new_edge: Tuple[str, str]) -> bool:
         """
         Detect if adding new_edge would create a cycle.
 

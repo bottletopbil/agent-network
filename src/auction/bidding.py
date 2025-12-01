@@ -86,9 +86,7 @@ class AuctionManager:
             auction = self._auctions[need_id]
 
             if auction["status"] != "open":
-                print(
-                    f"[AUCTION] Auction {need_id} is not open (status: {auction['status']})"
-                )
+                print(f"[AUCTION] Auction {need_id} is not open (status: {auction['status']})")
                 return False
 
             # Check bid window hasn't expired
@@ -118,9 +116,7 @@ class AuctionManager:
                 if auction["extensions"] < max_extensions:
                     # Extend auction by 5 seconds
                     extension_ns = 5 * 1_000_000_000
-                    auction[
-                        "start_time"
-                    ] -= extension_ns  # Move start back = extend deadline
+                    auction["start_time"] -= extension_ns  # Move start back = extend deadline
                     auction["extensions"] += 1
 
                     logger.info(

@@ -50,11 +50,7 @@ async def handle_need(envelope: dict):
         budget = payload.get("budget", 1000.0)
         auction_manager.start_auction(task_id, budget)
 
-        bid_window = (
-            auction_manager.config.bid_window
-            if hasattr(auction_manager, "config")
-            else 30
-        )
+        bid_window = auction_manager.config.bid_window if hasattr(auction_manager, "config") else 30
         print(
             f"[NEED] Started auction for task {task_id} (budget: {budget}, window: {bid_window}s)"
         )

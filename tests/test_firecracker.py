@@ -309,9 +309,7 @@ class TestEdgeCases:
 
     def test_maximal_resources(self):
         """Test VM with maximal resources."""
-        limits = ResourceLimits(
-            cpu_cores=32, mem_mb=32768, disk_mb=102400, net_bw_mbps=10000
-        )
+        limits = ResourceLimits(cpu_cores=32, mem_mb=32768, disk_mb=102400, net_bw_mbps=10000)
 
         fc = FirecrackerVM(mock_mode=True)
         vm_id = fc.start_vm("/mock/image.img", limits)

@@ -77,9 +77,7 @@ class VerifierPool:
             self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_verifiers_active ON verifiers(active)"
             )
-            self.conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_verifiers_org ON verifiers(org_id)"
-            )
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_verifiers_org ON verifiers(org_id)")
             self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_verifiers_region ON verifiers(region)"
             )
@@ -109,9 +107,7 @@ class VerifierPool:
         # Validate verifier has sufficient stake
         current_stake = self.stake_manager.get_staked_amount(verifier_id)
         if current_stake < stake:
-            raise ValueError(
-                f"Verifier stake mismatch: claimed {stake}, actual {current_stake}"
-            )
+            raise ValueError(f"Verifier stake mismatch: claimed {stake}, actual {current_stake}")
 
         with self.lock:
             with self.conn:

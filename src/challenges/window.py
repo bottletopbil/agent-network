@@ -177,9 +177,7 @@ class ChallengeWindow:
 
         return window.is_open()
 
-    def extend_window(
-        self, task_id: str, extension_seconds: int
-    ) -> Optional[WindowInfo]:
+    def extend_window(self, task_id: str, extension_seconds: int) -> Optional[WindowInfo]:
         """
         Extend challenge window duration.
 

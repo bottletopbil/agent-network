@@ -62,16 +62,10 @@ class LeaseManager:
                 )
             """
             )
-            self.conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_leases_worker ON leases(worker_id)"
-            )
-            self.conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_leases_task ON leases(task_id)"
-            )
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_leases_worker ON leases(worker_id)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_leases_task ON leases(task_id)")
 
-    def create_lease(
-        self, task_id: str, worker_id: str, ttl: int, heartbeat_interval: int
-    ) -> str:
+    def create_lease(self, task_id: str, worker_id: str, ttl: int, heartbeat_interval: int) -> str:
         """
         Create a new lease.
 

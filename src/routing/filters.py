@@ -73,9 +73,7 @@ class CapabilityFilter:
             if required_output:
                 agent_output = io_schema.get("output", {})
                 if not self._schemas_compatible(required_output, agent_output):
-                    logger.debug(
-                        f"Agent {manifest.agent_id} output schema incompatible"
-                    )
+                    logger.debug(f"Agent {manifest.agent_id} output schema incompatible")
                     continue
 
             compatible.append(manifest)
@@ -154,9 +152,7 @@ class CapabilityFilter:
             else:
                 logger.debug(f"Agent {manifest.agent_id} doesn't meet constraints")
 
-        logger.info(
-            f"Constraint filtering: {len(manifests)} → {len(compatible)} agents"
-        )
+        logger.info(f"Constraint filtering: {len(manifests)} → {len(compatible)} agents")
         return compatible
 
     def filter_by_zone(
@@ -192,14 +188,10 @@ class CapabilityFilter:
                 out_of_zone.append(manifest)
 
         if in_zone:
-            logger.info(
-                f"Zone filtering: {len(in_zone)} agents in zone '{preferred_zone}'"
-            )
+            logger.info(f"Zone filtering: {len(in_zone)} agents in zone '{preferred_zone}'")
             return in_zone
         else:
-            logger.warning(
-                f"No agents in preferred zone '{preferred_zone}', using all zones"
-            )
+            logger.warning(f"No agents in preferred zone '{preferred_zone}', using all zones")
             return manifests
 
     def filter_by_budget(
@@ -267,9 +259,7 @@ class CapabilityFilter:
         logger.info(f"Filter cascade complete: {len(candidates)} agents qualified")
         return candidates
 
-    def _schemas_compatible(
-        self, required: Dict[str, Any], provided: Dict[str, Any]
-    ) -> bool:
+    def _schemas_compatible(self, required: Dict[str, Any], provided: Dict[str, Any]) -> bool:
         """
         Check if two schemas are compatible.
 

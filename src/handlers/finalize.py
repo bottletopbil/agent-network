@@ -108,9 +108,7 @@ def _check_cross_shard_dependencies(payload: dict) -> bool:
     blocking = dependency_dag.get_blocking_shards(shard_id)
 
     if blocking:
-        logger.debug(
-            f"Shard {shard_id} blocked by {len(blocking)} dependencies: {blocking}"
-        )
+        logger.debug(f"Shard {shard_id} blocked by {len(blocking)} dependencies: {blocking}")
         return False
 
     return True

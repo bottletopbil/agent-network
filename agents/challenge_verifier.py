@@ -56,9 +56,7 @@ class ChallengeVerifierAgent(BaseAgent):
         # Stake requirement
         self.stake_amount = stake_amount
         if self.stake_amount < MIN_VERIFIER_STAKE:
-            raise ValueError(
-                f"Insufficient stake: {stake_amount} < {MIN_VERIFIER_STAKE}"
-            )
+            raise ValueError(f"Insufficient stake: {stake_amount} < {MIN_VERIFIER_STAKE}")
 
         # Initialize verification components
         self.verifier = ChallengeVerifier()
@@ -88,9 +86,7 @@ class ChallengeVerifierAgent(BaseAgent):
         # 2. Register public key with pool contract
         # 3. Receive pool membership confirmation
         self.registered = True
-        print(
-            f"[CHALLENGE_VERIFIER] Registered with verifier pool, stake: {self.stake_amount}"
-        )
+        print(f"[CHALLENGE_VERIFIER] Registered with verifier pool, stake: {self.stake_amount}")
 
     async def on_envelope(self, envelope: dict):
         """Handle incoming envelopes"""
@@ -172,9 +168,7 @@ class ChallengeVerifierAgent(BaseAgent):
             proof_type = ProofType(proof_type_str)
         except ValueError:
             print(f"[CHALLENGE_VERIFIER] ERROR: Invalid proof_type: {proof_type_str}")
-            self.queue.mark_failed(
-                challenge_id, f"Invalid proof_type: {proof_type_str}"
-            )
+            self.queue.mark_failed(challenge_id, f"Invalid proof_type: {proof_type_str}")
             return
 
         # Get evidence from CAS (if evidence_hash provided)
@@ -261,9 +255,7 @@ class ChallengeVerifierAgent(BaseAgent):
         await publish_envelope(f"challenge_{challenge_id}", subject, signed)
 
         verdict_str = "UPHELD" if verdict.is_valid else "REJECTED"
-        print(
-            f"[CHALLENGE_VERIFIER] Published verdict: {verdict_str} for challenge {challenge_id}"
-        )
+        print(f"[CHALLENGE_VERIFIER] Published verdict: {verdict_str} for challenge {challenge_id}")
 
 
 if __name__ == "__main__":
@@ -289,9 +281,7 @@ if __name__ == "__main__":
         # Run both queue processing and message listening
         await asyncio.gather(
             agent.process_queue(),  # Process challenges from queue
-            agent.run(
-                "challenges", "challenge.*"
-            ),  # Listen for challenge notifications
+            agent.run("challenges", "challenge.*"),  # Listen for challenge notifications
         )
 
     asyncio.run(main())

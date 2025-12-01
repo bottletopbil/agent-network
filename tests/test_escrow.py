@@ -211,9 +211,7 @@ class TestEscrowManager:
         ttl_ns = 1_000_000_000  # 1 second
 
         # Create escrow that will expire
-        escrow_id = manager.create_escrow(
-            artifact_hash="hash-abc", dependencies=[0], ttl_ns=ttl_ns
-        )
+        escrow_id = manager.create_escrow(artifact_hash="hash-abc", dependencies=[0], ttl_ns=ttl_ns)
 
         # Get actual creation time
         escrow = manager.get_escrow(escrow_id)

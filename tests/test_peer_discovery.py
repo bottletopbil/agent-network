@@ -204,9 +204,7 @@ class TestP2PNodeWithDiscovery:
         with tempfile.TemporaryDirectory() as tmpdir:
             identity_path = Path(tmpdir) / "identity.json"
 
-            node = P2PNode(
-                identity_path=identity_path, enable_mdns=True, enable_dht=False
-            )
+            node = P2PNode(identity_path=identity_path, enable_mdns=True, enable_dht=False)
             node.start()
 
             assert node.mdns is not None
@@ -219,9 +217,7 @@ class TestP2PNodeWithDiscovery:
         with tempfile.TemporaryDirectory() as tmpdir:
             identity_path = Path(tmpdir) / "identity.json"
 
-            node = P2PNode(
-                identity_path=identity_path, enable_mdns=False, enable_dht=True
-            )
+            node = P2PNode(identity_path=identity_path, enable_mdns=False, enable_dht=True)
             node.start()
 
             assert node.dht is not None

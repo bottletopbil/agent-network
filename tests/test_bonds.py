@@ -40,49 +40,35 @@ class TestBondCalculation:
         """Test bond calculation with SIMPLE complexity (1x multiplier)"""
         calculator = BondCalculator()
 
-        bond = calculator.calculate_bond(
-            ProofType.SCHEMA_VIOLATION, ComplexityLevel.SIMPLE
-        )
+        bond = calculator.calculate_bond(ProofType.SCHEMA_VIOLATION, ComplexityLevel.SIMPLE)
         assert bond == 10  # 10 * 1
 
-        bond = calculator.calculate_bond(
-            ProofType.OUTPUT_MISMATCH, ComplexityLevel.SIMPLE
-        )
+        bond = calculator.calculate_bond(ProofType.OUTPUT_MISMATCH, ComplexityLevel.SIMPLE)
         assert bond == 100  # 100 * 1
 
     def test_bond_with_moderate_complexity(self):
         """Test bond calculation with MODERATE complexity (2x multiplier)"""
         calculator = BondCalculator()
 
-        bond = calculator.calculate_bond(
-            ProofType.SCHEMA_VIOLATION, ComplexityLevel.MODERATE
-        )
+        bond = calculator.calculate_bond(ProofType.SCHEMA_VIOLATION, ComplexityLevel.MODERATE)
         assert bond == 20  # 10 * 2
 
-        bond = calculator.calculate_bond(
-            ProofType.MISSING_CITATION, ComplexityLevel.MODERATE
-        )
+        bond = calculator.calculate_bond(ProofType.MISSING_CITATION, ComplexityLevel.MODERATE)
         assert bond == 50  # 25 * 2
 
     def test_bond_with_complex_complexity(self):
         """Test bond calculation with COMPLEX complexity (5x multiplier)"""
         calculator = BondCalculator()
 
-        bond = calculator.calculate_bond(
-            ProofType.SEMANTIC_CONTRADICTION, ComplexityLevel.COMPLEX
-        )
+        bond = calculator.calculate_bond(ProofType.SEMANTIC_CONTRADICTION, ComplexityLevel.COMPLEX)
         assert bond == 250  # 50 * 5
 
-        bond = calculator.calculate_bond(
-            ProofType.OUTPUT_MISMATCH, ComplexityLevel.COMPLEX
-        )
+        bond = calculator.calculate_bond(ProofType.OUTPUT_MISMATCH, ComplexityLevel.COMPLEX)
         assert bond == 500  # 100 * 5
 
     def test_convenience_function(self):
         """Test calculate_bond_simple convenience function"""
-        bond = calculate_bond_simple(
-            ProofType.MISSING_CITATION, ComplexityLevel.MODERATE
-        )
+        bond = calculate_bond_simple(ProofType.MISSING_CITATION, ComplexityLevel.MODERATE)
         assert bond == 50
 
 

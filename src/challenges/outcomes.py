@@ -161,9 +161,7 @@ class OutcomeHandler:
         if self.ledger:
             # Release bond escrow to challenger
             try:
-                self.ledger.release_escrow(
-                    f"challenge_bond_{challenge_id}", challenger_id
-                )
+                self.ledger.release_escrow(f"challenge_bond_{challenge_id}", challenger_id)
             except Exception as e:
                 print(f"[OUTCOME] Warning: Could not release bond escrow: {e}")
 
@@ -175,9 +173,7 @@ class OutcomeHandler:
                 print(f"[OUTCOME] Warning: Could not transfer reward: {e}")
 
         print(f"[OUTCOME] Challenge {challenge_id} UPHELD")
-        print(
-            f"[OUTCOME] Returned {bond_returned} + rewarded {reward_amount} to {challenger_id}"
-        )
+        print(f"[OUTCOME] Returned {bond_returned} + rewarded {reward_amount} to {challenger_id}")
         print(f"[OUTCOME] Slashed {len(verifiers_slashed)} verifiers")
 
         return OutcomeResult(
@@ -235,9 +231,7 @@ class OutcomeHandler:
             pass
 
         print(f"[OUTCOME] Challenge {challenge_id} WITHDRAWN")
-        print(
-            f"[OUTCOME] Returned {bond_returned} to {challenger_id} (fee: {fee_amount})"
-        )
+        print(f"[OUTCOME] Returned {bond_returned} to {challenger_id} (fee: {fee_amount})")
 
         return OutcomeResult(
             outcome=ChallengeOutcome.WITHDRAWN,

@@ -135,9 +135,7 @@ class FeedbackCollector:
 
         self.feedback_history.append(feedback)
 
-        logger.info(
-            f"Recorded feedback: task={task_id}, agent={agent_id}, reward={reward:.2f}"
-        )
+        logger.info(f"Recorded feedback: task={task_id}, agent={agent_id}, reward={reward:.2f}")
 
     def get_agent_stats(self, agent_id: str) -> Dict[str, float]:
         """
@@ -161,11 +159,8 @@ class FeedbackCollector:
 
         return {
             "count": len(agent_feedback),
-            "avg_reward": sum(f["reward"] for f in agent_feedback)
-            / len(agent_feedback),
-            "avg_quality": sum(
-                f["quality"] for f in agent_feedback if f["quality"] is not None
-            )
+            "avg_reward": sum(f["reward"] for f in agent_feedback) / len(agent_feedback),
+            "avg_quality": sum(f["quality"] for f in agent_feedback if f["quality"] is not None)
             / len(agent_feedback),
             "avg_latency_ms": sum(
                 f["latency_ms"] for f in agent_feedback if f["latency_ms"] is not None

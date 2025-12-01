@@ -110,9 +110,7 @@ def sign_with_key(signing_key: SigningKey, message: bytes) -> bytes:
     return signed.signature
 
 
-def sign_record(
-    record: Dict[str, Any], agent_id: Optional[str] = None
-) -> Dict[str, Any]:
+def sign_record(record: Dict[str, Any], agent_id: Optional[str] = None) -> Dict[str, Any]:
     """
     Sign a record dictionary.
 
@@ -136,9 +134,7 @@ def sign_record(
         # Fall back to env keypair (backward compatible)
         sk_b64 = os.getenv("SWARM_SIGNING_SK_B64") or os.getenv("SWARM_PRIVATE_KEY")
         if not sk_b64:
-            raise ValueError(
-                "No SWARM_SIGNING_SK_B64 or SWARM_PRIVATE_KEY in environment"
-            )
+            raise ValueError("No SWARM_SIGNING_SK_B64 or SWARM_PRIVATE_KEY in environment")
 
         seed = base64.b64decode(sk_b64)
         signing_key = SigningKey(seed)
@@ -181,9 +177,7 @@ def verify_record(record: Dict[str, Any]) -> bool:
         verify_key = VerifyKey(pk_bytes)
 
         # Reconstruct the message that was signed
-        to_verify = {
-            k: v for k, v in record.items() if k not in ("sig_b64", "sig_pk_b64")
-        }
+        to_verify = {k: v for k, v in record.items() if k not in ("sig_b64", "sig_pk_b64")}
         message = cjson(to_verify)
 
         # Verify

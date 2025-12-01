@@ -162,9 +162,7 @@ class TaskMarketplace:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_status ON tasks(status)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_bid_task ON bids(task_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_bid_agent ON bids(agent_id)")
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_rating_agent ON agent_ratings(agent_id)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_rating_agent ON agent_ratings(agent_id)")
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_price_capability ON price_history(capability)"
         )
@@ -498,9 +496,7 @@ class TaskMarketplace:
 
         return trends
 
-    def rate_agent(
-        self, agent_id: str, rater_id: str, rating: float, comment: str = ""
-    ) -> int:
+    def rate_agent(self, agent_id: str, rater_id: str, rating: float, comment: str = "") -> int:
         """
         Rate an agent.
 

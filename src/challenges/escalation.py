@@ -148,9 +148,7 @@ class EscalationHandler:
 
         self.escalations[escalation_id] = escalation
 
-        print(
-            f"[ESCALATION] Challenge {challenge_id} escalated to {level.value}: {reason}"
-        )
+        print(f"[ESCALATION] Challenge {challenge_id} escalated to {level.value}: {reason}")
 
         # Take action based on level
         if level == EscalationLevel.VERIFIER_CONSENSUS:
@@ -164,9 +162,7 @@ class EscalationHandler:
 
     def _request_more_verifiers(self, challenge_id: str):
         """Request additional verifiers for consensus"""
-        print(
-            f"[ESCALATION] Requesting additional verifiers for challenge {challenge_id}"
-        )
+        print(f"[ESCALATION] Requesting additional verifiers for challenge {challenge_id}")
         # In production, would trigger verifier selection process
 
     def create_human_review_task(self, challenge_id: str) -> str:
@@ -205,9 +201,7 @@ class EscalationHandler:
         """
         vote_id = f"gov_vote_{challenge_id}"
 
-        print(
-            f"[ESCALATION] Initiated governance vote {vote_id} for challenge {challenge_id}"
-        )
+        print(f"[ESCALATION] Initiated governance vote {vote_id} for challenge {challenge_id}")
 
         # In production, would:
         # 1. Create voting proposal
@@ -218,9 +212,7 @@ class EscalationHandler:
 
         return vote_id
 
-    def resolve_escalation(
-        self, escalation_id: str, resolution: Dict[str, Any]
-    ) -> bool:
+    def resolve_escalation(self, escalation_id: str, resolution: Dict[str, Any]) -> bool:
         """
         Resolve an escalated case.
 
@@ -238,9 +230,7 @@ class EscalationHandler:
         escalation.resolved = True
         escalation.resolution = resolution
 
-        print(
-            f"[ESCALATION] Resolved escalation {escalation_id}: {resolution.get('outcome')}"
-        )
+        print(f"[ESCALATION] Resolved escalation {escalation_id}: {resolution.get('outcome')}")
 
         return True
 

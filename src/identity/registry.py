@@ -206,9 +206,7 @@ class ManifestRegistry:
 
         # Filter by capabilities
         if capabilities:
-            results = [
-                m for m in results if all(cap in m.capabilities for cap in capabilities)
-            ]
+            results = [m for m in results if all(cap in m.capabilities for cap in capabilities)]
 
         # Filter by tags
         if tags:

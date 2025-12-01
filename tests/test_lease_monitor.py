@@ -69,9 +69,7 @@ class TestLeaseMonitorExpiry:
         monitor = LeaseMonitor(manager, protocol, bus)
 
         # Create lease with TTL=0  (immediately expired)
-        lease_id = manager.create_lease(
-            "task-exp", "worker-exp", ttl=0, heartbeat_interval=30
-        )
+        lease_id = manager.create_lease("task-exp", "worker-exp", ttl=0, heartbeat_interval=30)
 
         # Wait to ensure expiry
         time.sleep(0.01)
@@ -99,9 +97,7 @@ class TestLeaseMonitorExpiry:
         monitor = LeaseMonitor(manager, protocol, bus)
 
         # Create expired lease
-        lease_id = manager.create_lease(
-            "task-123", "worker-abc", ttl=0, heartbeat_interval=30
-        )
+        lease_id = manager.create_lease("task-123", "worker-abc", ttl=0, heartbeat_interval=30)
         time.sleep(0.01)
 
         # Check
@@ -123,9 +119,7 @@ class TestLeaseMonitorExpiry:
         manager = LeaseManager(db_path)
 
         # Create expired lease
-        lease_id = manager.create_lease(
-            "task-scav", "worker-scav", ttl=0, heartbeat_interval=30
-        )
+        lease_id = manager.create_lease("task-scav", "worker-scav", ttl=0, heartbeat_interval=30)
         time.sleep(0.01)
 
         # Scavenge
@@ -239,9 +233,7 @@ class TestLeaseMonitorBackground:
         monitor.CHECK_INTERVAL = 0.2  # 0.2 seconds
 
         # Create expired lease
-        lease_id = manager.create_lease(
-            "task-bg", "worker-bg", ttl=0, heartbeat_interval=30
-        )
+        lease_id = manager.create_lease("task-bg", "worker-bg", ttl=0, heartbeat_interval=30)
         time.sleep(0.01)
 
         # Start monitor
@@ -294,14 +286,10 @@ class TestLeaseMonitorIntegration:
         monitor = LeaseMonitor(manager, protocol, bus)
 
         # Create expired lease (TTL)
-        lease_id1 = manager.create_lease(
-            "task-exp", "worker-1", ttl=0, heartbeat_interval=30
-        )
+        lease_id1 = manager.create_lease("task-exp", "worker-1", ttl=0, heartbeat_interval=30)
 
         # Create lease with missed heartbeat
-        lease_id2 = manager.create_lease(
-            "task-hb", "worker-2", ttl=3600, heartbeat_interval=30
-        )
+        lease_id2 = manager.create_lease("task-hb", "worker-2", ttl=3600, heartbeat_interval=30)
         protocol.expect_heartbeat(lease_id2, 0)  # Immediate miss
 
         time.sleep(0.01)

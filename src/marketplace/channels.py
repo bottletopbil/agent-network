@@ -73,9 +73,7 @@ class ChannelManager:
 
         return channel_id
 
-    def send_payment(
-        self, channel_id: str, amount: float, nonce: int, signature: str
-    ) -> bool:
+    def send_payment(self, channel_id: str, amount: float, nonce: int, signature: str) -> bool:
         """
         Send a payment through a channel.
 
@@ -105,14 +103,10 @@ class ChannelManager:
             raise ValueError("Amount must be positive")
 
         if channel.sender_balance < amount:
-            raise ValueError(
-                f"Insufficient balance: {channel.sender_balance} < {amount}"
-            )
+            raise ValueError(f"Insufficient balance: {channel.sender_balance} < {amount}")
 
         # Create payment object for verification
-        payment = Payment(
-            channel_id=channel_id, amount=amount, nonce=nonce, signature=signature
-        )
+        payment = Payment(channel_id=channel_id, amount=amount, nonce=nonce, signature=signature)
 
         # Verify signature
         if not self.verify_payment(payment):

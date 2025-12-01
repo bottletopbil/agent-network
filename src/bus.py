@@ -133,9 +133,7 @@ async def publish_raw(thread_id: str, subject: str, message: dict):
     try:
         data = json.dumps(message).encode()
         await js.publish(subject, data)
-        log_event(
-            thread_id=thread_id, subject=subject, kind="BUS.PUBLISH", payload=message
-        )
+        log_event(thread_id=thread_id, subject=subject, kind="BUS.PUBLISH", payload=message)
     finally:
         # Return connection to pool instead of draining
         await _connection_pool.release((nc, js))
@@ -202,9 +200,7 @@ async def subscribe_envelopes(
     Subscribe and ONLY deliver envelopes that pass the rule book to your handler.
     """
     nc, js = await connect()
-    durable = durable_name or subject.replace(".", "_").replace("*", "ALL").replace(
-        ">", "ALL"
-    )
+    durable = durable_name or subject.replace(".", "_").replace("*", "ALL").replace(">", "ALL")
     sub = await js.subscribe(subject, durable=durable)
 
     async def _runner():
@@ -224,9 +220,7 @@ async def subscribe_envelopes(
                 continue
 
             # Always log delivery (CCTV)
-            log_event(
-                thread_id=thread_id, subject=subject, kind="BUS.DELIVER", payload=env
-            )
+            log_event(thread_id=thread_id, subject=subject, kind="BUS.DELIVER", payload=env)
 
             # ✅ Verify via policy (defense in depth on receive)
             try:
@@ -284,9 +278,7 @@ async def subscribe(
     Logs to audit trail but does NOT validate as envelopes.
     """
     nc, js = await connect()
-    durable = durable_name or subject.replace(".", "_").replace("*", "ALL").replace(
-        ">", "ALL"
-    )
+    durable = durable_name or subject.replace(".", "_").replace("*", "ALL").replace(">", "ALL")
     sub = await js.subscribe(subject, durable=durable)
 
     async def _runner():

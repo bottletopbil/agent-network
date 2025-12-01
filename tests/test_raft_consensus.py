@@ -149,9 +149,7 @@ def test_bucket_hashing(raft_adapter):
     unique_buckets = set(buckets)
 
     # Should spread across many buckets (at least 100 for 1000 needs)
-    assert (
-        len(unique_buckets) > 100
-    ), f"Poor distribution: only {len(unique_buckets)} buckets used"
+    assert len(unique_buckets) > 100, f"Poor distribution: only {len(unique_buckets)} buckets used"
 
     # Each bucket should be 0-255
     for bucket in buckets:

@@ -67,9 +67,7 @@ async def handle_update_plan(envelope: dict):
         print(f"[UPDATE_PLAN] ERROR: Invalid patch structure")
         return
 
-    print(
-        f"[UPDATE_PLAN] Processing patch {patch.patch_id} with {len(ops_data)} operations"
-    )
+    print(f"[UPDATE_PLAN] Processing patch {patch.patch_id} with {len(ops_data)} operations")
 
     applied_count = 0
     current_lamport = lamport
@@ -83,25 +81,19 @@ async def handle_update_plan(envelope: dict):
 
         # Validate op has required fields
         if not op_type_str or not task_id:
-            print(
-                f"[UPDATE_PLAN] WARNING: Skipping op {idx}: missing op_type or task_id"
-            )
+            print(f"[UPDATE_PLAN] WARNING: Skipping op {idx}: missing op_type or task_id")
             continue
 
         # Validate op_type is valid
         try:
             op_type = OpType(op_type_str)
         except ValueError:
-            print(
-                f"[UPDATE_PLAN] WARNING: Skipping op {idx}: invalid op_type '{op_type_str}'"
-            )
+            print(f"[UPDATE_PLAN] WARNING: Skipping op {idx}: invalid op_type '{op_type_str}'")
             continue
 
         # Validate op-specific fields
         if op_type_str == "STATE" and "state" not in op_payload:
-            print(
-                f"[UPDATE_PLAN] WARNING: Skipping op {idx}: STATE op missing 'state' in payload"
-            )
+            print(f"[UPDATE_PLAN] WARNING: Skipping op {idx}: STATE op missing 'state' in payload")
             continue
 
         if op_type_str == "LINK":
@@ -127,9 +119,7 @@ async def handle_update_plan(envelope: dict):
         applied_count += 1
         current_lamport += 1
 
-    print(
-        f"[UPDATE_PLAN] Applied {applied_count}/{len(ops_data)} operations to thread {thread_id}"
-    )
+    print(f"[UPDATE_PLAN] Applied {applied_count}/{len(ops_data)} operations to thread {thread_id}")
 
     # Record plan version after applying ops (only if we applied at least one op)
     if applied_count > 0:
@@ -142,9 +132,7 @@ async def handle_update_plan(envelope: dict):
             plan_state = {}
 
             # Get all unique task_ids from the operations we just applied
-            task_ids = set(
-                op_data.get("task_id") for op_data in ops_data if op_data.get("task_id")
-            )
+            task_ids = set(op_data.get("task_id") for op_data in ops_data if op_data.get("task_id"))
 
             for task_id in task_ids:
                 task = plan_store.get_task(task_id)

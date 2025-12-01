@@ -57,9 +57,7 @@ async def test_concurrent_async_operations():
 
         # Should be reasonably fast (not deadlocked)
         # With proper async it should be under 5 seconds
-        assert (
-            elapsed < 5.0
-        ), f"Operations took {elapsed}s - possible deadlock or blocking"
+        assert elapsed < 5.0, f"Operations took {elapsed}s - possible deadlock or blocking"
 
         # Verify all ops were actually stored
         ops = await plan_store.get_ops_for_thread("thread_123")
@@ -168,9 +166,7 @@ async def test_annotate_task_async():
         await plan_store.append_op(op)
 
         # Annotate it
-        await plan_store.annotate_task(
-            task_id, {"invalidated": True, "reason": "test annotation"}
-        )
+        await plan_store.annotate_task(task_id, {"invalidated": True, "reason": "test annotation"})
 
         # Verify annotation was stored
         ops = await plan_store.get_ops_for_thread("thread_789")

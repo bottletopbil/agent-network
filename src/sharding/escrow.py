@@ -55,9 +55,7 @@ class EscrowArtifact:
 
     def all_dependencies_ready(self) -> bool:
         """Check if all shard dependencies are ready."""
-        return all(
-            shard_id in self.ready_shards for shard_id in self.shard_dependencies
-        )
+        return all(shard_id in self.ready_shards for shard_id in self.shard_dependencies)
 
 
 class EscrowManager:
@@ -141,8 +139,7 @@ class EscrowManager:
 
         if escrow.state != EscrowState.PENDING:
             logger.debug(
-                f"Escrow {escrow_id} is in state {escrow.state.value}, "
-                f"ignoring ready signal"
+                f"Escrow {escrow_id} is in state {escrow.state.value}, " f"ignoring ready signal"
             )
             return False
 
@@ -195,9 +192,7 @@ class EscrowManager:
             return None
 
         if escrow.state != EscrowState.READY:
-            logger.error(
-                f"Cannot release escrow {escrow_id} in state {escrow.state.value}"
-            )
+            logger.error(f"Cannot release escrow {escrow_id} in state {escrow.state.value}")
             return None
 
         # Transition to released
@@ -230,9 +225,7 @@ class EscrowManager:
             return False
 
         if escrow.state not in (EscrowState.PENDING, EscrowState.READY):
-            logger.debug(
-                f"Escrow {escrow_id} already in final state {escrow.state.value}"
-            )
+            logger.debug(f"Escrow {escrow_id} already in final state {escrow.state.value}")
             return False
 
         # Transition to expired
@@ -289,9 +282,7 @@ class EscrowManager:
         expired = []
 
         for escrow_id, escrow in self.escrows.items():
-            if escrow.state == EscrowState.PENDING and escrow.is_expired(
-                current_time_ns
-            ):
+            if escrow.state == EscrowState.PENDING and escrow.is_expired(current_time_ns):
                 if self.expire_escrow(escrow_id):
                     expired.append(escrow_id)
 
@@ -316,11 +307,7 @@ class EscrowManager:
         Returns:
             List of pending EscrowArtifacts
         """
-        return [
-            escrow
-            for escrow in self.escrows.values()
-            if escrow.state == EscrowState.PENDING
-        ]
+        return [escrow for escrow in self.escrows.values() if escrow.state == EscrowState.PENDING]
 
     def cleanup_completed(self) -> int:
         """

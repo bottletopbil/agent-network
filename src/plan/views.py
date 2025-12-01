@@ -348,9 +348,7 @@ class GraphView:
             List of task IDs with no dependencies
         """
         all_nodes = set(self.edges.keys()) | set(self.reverse_edges.keys())
-        return [
-            task_id for task_id in all_nodes if len(self.get_children(task_id)) == 0
-        ]
+        return [task_id for task_id in all_nodes if len(self.get_children(task_id)) == 0]
 
     def get_root_tasks(self) -> List[str]:
         """

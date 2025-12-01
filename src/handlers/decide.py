@@ -75,9 +75,7 @@ async def handle_decide(envelope: dict):
 
     if decide_record is None:
         consensus_type = "Raft" if use_raft_consensus() else "Redis"
-        print(
-            f"[DECIDE] CONFLICT ({consensus_type}): DECIDE already exists for need {need_id}"
-        )
+        print(f"[DECIDE] CONFLICT ({consensus_type}): DECIDE already exists for need {need_id}")
         return
 
     consensus_type = "Raft" if use_raft_consensus() else "Redis"

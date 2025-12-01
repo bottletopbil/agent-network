@@ -204,13 +204,9 @@ class CapsuleManager:
         is_valid = expected_signature == capsule.signature
 
         if is_valid:
-            logger.info(
-                f"Capsule signature valid: {capsule.policy_engine_hash[:16]}..."
-            )
+            logger.info(f"Capsule signature valid: {capsule.policy_engine_hash[:16]}...")
         else:
-            logger.warning(
-                f"Capsule signature invalid: {capsule.policy_engine_hash[:16]}..."
-            )
+            logger.warning(f"Capsule signature invalid: {capsule.policy_engine_hash[:16]}...")
 
         return is_valid
 
@@ -234,8 +230,7 @@ class CapsuleManager:
             await self.nats_client.publish(subject, capsule_json.encode("utf-8"))
 
             logger.info(
-                f"Distributed capsule to {subject}: "
-                f"hash={capsule.policy_engine_hash[:16]}..."
+                f"Distributed capsule to {subject}: " f"hash={capsule.policy_engine_hash[:16]}..."
             )
         except Exception as e:
             logger.error(f"Failed to distribute capsule: {e}", exc_info=True)

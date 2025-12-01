@@ -76,9 +76,7 @@ def get_cas_store(base_path: Optional[Path] = None):
             logger.info("Using IPFS-backed CAS")
             return (IPFSContentStore(), True)
         except Exception as e:
-            logger.error(
-                f"Failed to initialize IPFS CAS: {e}. Falling back to file-based CAS."
-            )
+            logger.error(f"Failed to initialize IPFS CAS: {e}. Falling back to file-based CAS.")
             return (FileCAS(base_path), False)
     else:
         # Use file-based CAS

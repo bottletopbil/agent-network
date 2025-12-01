@@ -70,11 +70,7 @@ class MessageCache:
         cutoff_time = current_time - self.ttl_seconds
 
         # Remove expired entries
-        expired = [
-            msg_id
-            for msg_id, timestamp in self.cache.items()
-            if timestamp < cutoff_time
-        ]
+        expired = [msg_id for msg_id, timestamp in self.cache.items() if timestamp < cutoff_time]
 
         for msg_id in expired:
             del self.cache[msg_id]
@@ -99,9 +95,7 @@ class HybridBus:
     Supports configurable preference for P2P-first mode.
     """
 
-    def __init__(
-        self, nats_bus=None, p2p_bus=None, monitor=None, p2p_primary: bool = None
-    ):
+    def __init__(self, nats_bus=None, p2p_bus=None, monitor=None, p2p_primary: bool = None):
         """
         Initialize hybrid bus.
 
@@ -193,9 +187,7 @@ class HybridBus:
 
         logger.debug(f"Published via hybrid bus: {msg_id}")
 
-    def subscribe_envelopes(
-        self, subject: str, handler: Callable[[Dict[str, Any]], None]
-    ):
+    def subscribe_envelopes(self, subject: str, handler: Callable[[Dict[str, Any]], None]):
         """
         Subscribe to envelopes from both transports with deduplication.
 
@@ -228,9 +220,7 @@ class HybridBus:
                 logger.error(f"Handler error: {e}")
 
         # Subscribe to P2P
-        self.p2p_bus.subscribe_envelopes(
-            subject, lambda env: deduplicated_handler(env, "P2P")
-        )
+        self.p2p_bus.subscribe_envelopes(subject, lambda env: deduplicated_handler(env, "P2P"))
 
         # Subscribe to NATS
         if self.nats_bus:

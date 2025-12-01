@@ -370,9 +370,7 @@ class AutomergePlanStore:
         self.current_epoch = epoch
 
         # Create pruning manager
-        manager = PruningManager(
-            policy=PruningPolicy(keep_epochs=10), storage=self.tiered_storage
-        )
+        manager = PruningManager(policy=PruningPolicy(keep_epochs=10), storage=self.tiered_storage)
 
         # Add epoch to ops for pruning
         ops_with_epoch = []

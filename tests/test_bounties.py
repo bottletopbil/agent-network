@@ -60,9 +60,7 @@ class TestBountyCreation:
         bounty_mgr = BountyManager(ledger)
 
         # Within cap
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         assert bounty_id is not None
 
         # Exceeds cap
@@ -75,9 +73,7 @@ class TestBountyCreation:
         bounty_mgr = BountyManager(ledger)
 
         # Within cap
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 1000, TaskClass.CRITICAL, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 1000, TaskClass.CRITICAL, "creator1")
         assert bounty_id is not None
 
         # Exceeds cap
@@ -103,9 +99,7 @@ class TestBountyEscrow:
 
         # Create account and bounty
         ledger.create_account("creator1", 1000)
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
 
         # Escrow
         escrow_id = bounty_mgr.escrow_bounty(bounty_id, "commit-1")
@@ -126,9 +120,7 @@ class TestBountyEscrow:
 
         # Create account with insufficient funds
         ledger.create_account("creator1", 50)
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
 
         # Try to escrow
         with pytest.raises(Exception):  # InsufficientBalanceError from ledger
@@ -140,9 +132,7 @@ class TestBountyEscrow:
         bounty_mgr = BountyManager(ledger)
 
         ledger.create_account("creator1", 1000)
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
 
         # First escrow
         bounty_mgr.escrow_bounty(bounty_id, "commit-1")
@@ -157,9 +147,7 @@ class TestBountyEscrow:
         bounty_mgr = BountyManager(ledger)
 
         ledger.create_account("creator1", 1000)
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         bounty_mgr.escrow_bounty(bounty_id, "commit-1")
 
         # Cancel
@@ -189,9 +177,7 @@ class TestPayoutDistribution:
         ledger.create_account("verifier3", 0)
 
         # Create and escrow bounty
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         bounty_mgr.escrow_bounty(bounty_id, "commit-1")
 
         # Execute payout (no challenger)
@@ -216,9 +202,7 @@ class TestPayoutDistribution:
         ledger.create_account("challenger1", 0)
 
         # Create and escrow bounty
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         bounty_mgr.escrow_bounty(bounty_id, "commit-1")
 
         # Execute payout with challenger
@@ -241,9 +225,7 @@ class TestPayoutDistribution:
         ledger.create_account("creator1", 1000)
         ledger.create_account("verifier1", 0)
 
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         bounty_mgr.escrow_bounty(bounty_id, "commit-1")
 
         # Single verifier gets everything (no challenge)
@@ -257,9 +239,7 @@ class TestPayoutDistribution:
         payout = PayoutDistributor(bounty_mgr)
 
         # Calculate shares without executing
-        shares = payout.calculate_shares(
-            bounty_amount=100, committee=["v1", "v2"], challenger="c1"
-        )
+        shares = payout.calculate_shares(bounty_amount=100, committee=["v1", "v2"], challenger="c1")
 
         # Find burn share
         burn_shares = [s for s in shares if s.share_type == "BURN"]
@@ -295,9 +275,7 @@ class TestRelatedParties:
         ledger.create_account("verifier1", 0)
         ledger.create_account("verifier2", 0)
 
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         bounty_mgr.escrow_bounty(bounty_id, "commit-1")
 
         # Try to execute with challenger in committee
@@ -324,9 +302,7 @@ class TestIntegration:
         ledger.create_account("verifier2", 0)
 
         # Create bounty
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         assert bounty_mgr.get_bounty(bounty_id).status == "CREATED"
 
         # Escrow
@@ -354,9 +330,7 @@ class TestIntegration:
         ledger.create_account("challenger1", 0)
 
         # Create and escrow bounty
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 100, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 100, TaskClass.COMPLEX, "creator1")
         bounty_mgr.escrow_bounty(bounty_id, "commit-1")
 
         # Challenge occurred, distribute accordingly
@@ -377,9 +351,7 @@ class TestIntegration:
         ledger = CreditLedger(Path(tempfile.mktemp()))
         bounty_mgr = BountyManager(ledger)
 
-        bounty_id = bounty_mgr.create_bounty(
-            "task-1", 50, TaskClass.COMPLEX, "creator1"
-        )
+        bounty_id = bounty_mgr.create_bounty("task-1", 50, TaskClass.COMPLEX, "creator1")
 
         # Retrieve by task ID
         bounty = bounty_mgr.get_task_bounty("task-1")

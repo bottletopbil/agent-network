@@ -176,9 +176,7 @@ class IntelligentRouter:
                         selected = canary_winner
                         routing_method = "canary"
 
-                    self.metrics.complete_routing(
-                        metrics, selected, routing_method, success=True
-                    )
+                    self.metrics.complete_routing(metrics, selected, routing_method, success=True)
                     return selected
                 else:
                     logger.warning("No canary winner found")
@@ -199,9 +197,7 @@ class IntelligentRouter:
 
                 if selected:
                     logger.info(f"Stage 4 - Bandit selected: {selected}")
-                    self.metrics.complete_routing(
-                        metrics, selected, "bandit", success=True
-                    )
+                    self.metrics.complete_routing(metrics, selected, "bandit", success=True)
                     return selected
 
             # Fallback: Select top scored agent
@@ -213,16 +209,12 @@ class IntelligentRouter:
 
             # No agent found
             logger.warning("No agent selected through routing pipeline")
-            self.metrics.complete_routing(
-                metrics, None, "none", success=False, fallback_used=True
-            )
+            self.metrics.complete_routing(metrics, None, "none", success=False, fallback_used=True)
             return None
 
         except Exception as e:
             logger.error(f"Routing error: {e}")
-            self.metrics.complete_routing(
-                metrics, None, "error", success=False, fallback_used=True
-            )
+            self.metrics.complete_routing(metrics, None, "error", success=False, fallback_used=True)
             return None
 
     def record_outcome(
@@ -260,13 +252,9 @@ class IntelligentRouter:
             self.bandit.update(agent_id, reward=reward, context=features)
 
         # Record metrics
-        self.metrics.record_outcome(
-            need_id=need_id, agent_id=agent_id, actual_reward=reward
-        )
+        self.metrics.record_outcome(need_id=need_id, agent_id=agent_id, actual_reward=reward)
 
-        logger.info(
-            f"Recorded outcome: need={need_id}, agent={agent_id}, reward={reward:.2f}"
-        )
+        logger.info(f"Recorded outcome: need={need_id}, agent={agent_id}, reward={reward:.2f}")
 
     def get_stats(self) -> Dict:
         """Get router statistics"""
@@ -281,15 +269,11 @@ class IntelligentRouter:
 _global_router: Optional[IntelligentRouter] = None
 
 
-def get_router(
-    enable_canary: bool = True, enable_bandit: bool = True
-) -> IntelligentRouter:
+def get_router(enable_canary: bool = True, enable_bandit: bool = True) -> IntelligentRouter:
     """Get or create global intelligent router"""
     global _global_router
     if _global_router is None:
-        _global_router = IntelligentRouter(
-            enable_canary=enable_canary, enable_bandit=enable_bandit
-        )
+        _global_router = IntelligentRouter(enable_canary=enable_canary, enable_bandit=enable_bandit)
     return _global_router
 
 

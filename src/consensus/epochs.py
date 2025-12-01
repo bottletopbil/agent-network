@@ -97,9 +97,7 @@ class EpochManager:
         self.current_epoch += 1
         self.epoch_start = time.time_ns()
 
-        print(
-            f"[EPOCH] Advanced from epoch {old_epoch} to {self.current_epoch} (reason: {reason})"
-        )
+        print(f"[EPOCH] Advanced from epoch {old_epoch} to {self.current_epoch} (reason: {reason})")
 
         return self.current_epoch
 

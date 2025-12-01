@@ -336,9 +336,7 @@ class Test10xSpeedupVsAuction:
 
         # Average routing should be fast
         # (In production with actual auctions, this would be 10x faster)
-        assert (
-            avg_time_per_need < 300
-        )  # < 300ms per routing (accounting for test overhead)
+        assert avg_time_per_need < 300  # < 300ms per routing (accounting for test overhead)
 
     @pytest.mark.asyncio
     async def test_metrics_show_fast_routing(self, router):

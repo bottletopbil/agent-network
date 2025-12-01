@@ -139,8 +139,7 @@ class GateEnforcer:
             )
 
             logger.info(
-                f"Ingress validation: {decision.allowed} - "
-                f"{decision.reason} (gas: {gas_used})"
+                f"Ingress validation: {decision.allowed} - " f"{decision.reason} (gas: {gas_used})"
             )
             return decision
 
@@ -187,9 +186,7 @@ class GateEnforcer:
             reason = result.reasons[0] if result.reasons else None
             if violations:
                 reason = (
-                    f"{reason}; Violations: {violations}"
-                    if reason
-                    else f"Violations: {violations}"
+                    f"{reason}; Violations: {violations}" if reason else f"Violations: {violations}"
                 )
 
             decision = PolicyDecision(
@@ -220,9 +217,7 @@ class GateEnforcer:
         agent_id = envelope.get("agent_id", "unknown")
         return f"{op_type}:{agent_id}"
 
-    def _extract_policy_input(
-        self, envelope: Dict[str, Any], gate: PolicyGate
-    ) -> Dict[str, Any]:
+    def _extract_policy_input(self, envelope: Dict[str, Any], gate: PolicyGate) -> Dict[str, Any]:
         """Extract policy input from envelope for given gate"""
         return {
             "gate": gate.value,
@@ -258,25 +253,19 @@ class GateEnforcer:
         claimed_cpu = claimed_resources.get("cpu_ms", float("inf"))
         actual_cpu = actual_resources.get("cpu_ms", 0)
         if actual_cpu > claimed_cpu * 1.1:  # Allow 10% margin
-            violations.append(
-                f"CPU exceeded: claimed {claimed_cpu}ms, actual {actual_cpu}ms"
-            )
+            violations.append(f"CPU exceeded: claimed {claimed_cpu}ms, actual {actual_cpu}ms")
 
         # Check memory
         claimed_mem = claimed_resources.get("memory_mb", float("inf"))
         actual_mem = actual_resources.get("memory_mb", 0)
         if actual_mem > claimed_mem * 1.1:  # Allow 10% margin
-            violations.append(
-                f"Memory exceeded: claimed {claimed_mem}MB, actual {actual_mem}MB"
-            )
+            violations.append(f"Memory exceeded: claimed {claimed_mem}MB, actual {actual_mem}MB")
 
         # Check gas
         claimed_gas = claimed_resources.get("gas", float("inf"))
         actual_gas = actual_resources.get("gas", 0)
         if actual_gas > claimed_gas * 1.1:  # Allow 10% margin
-            violations.append(
-                f"Gas exceeded: claimed {claimed_gas}, actual {actual_gas}"
-            )
+            violations.append(f"Gas exceeded: claimed {claimed_gas}, actual {actual_gas}")
 
         return "; ".join(violations) if violations else None
 

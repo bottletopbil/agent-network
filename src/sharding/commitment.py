@@ -28,9 +28,7 @@ class CommitmentArtifact:
     artifact_hash: str  # Hash of the actual result artifact
     timestamp_ns: int
     commitment_hash: str = ""  # Hash of this commitment itself
-    dependencies: List[str] = field(
-        default_factory=list
-    )  # Other commitment hashes this depends on
+    dependencies: List[str] = field(default_factory=list)  # Other commitment hashes this depends on
 
     def __post_init__(self):
         """Calculate commitment hash if not provided."""
@@ -125,9 +123,7 @@ class CommitmentProtocol:
         if key in self.commitments:
             existing = self.commitments[key]
             if existing.commitment_hash == commitment.commitment_hash:
-                logger.debug(
-                    f"Commitment {commitment.commitment_hash[:8]} already published"
-                )
+                logger.debug(f"Commitment {commitment.commitment_hash[:8]} already published")
                 return False
             else:
                 logger.warning(
@@ -197,9 +193,7 @@ class CommitmentProtocol:
 
         return True
 
-    def get_commitment(
-        self, shard_id: int, need_id: str
-    ) -> Optional[CommitmentArtifact]:
+    def get_commitment(self, shard_id: int, need_id: str) -> Optional[CommitmentArtifact]:
         """
         Get commitment for a specific shard and NEED.
 
@@ -213,9 +207,7 @@ class CommitmentProtocol:
         key = (shard_id, need_id)
         return self.commitments.get(key)
 
-    def get_commitment_by_hash(
-        self, commitment_hash: str
-    ) -> Optional[CommitmentArtifact]:
+    def get_commitment_by_hash(self, commitment_hash: str) -> Optional[CommitmentArtifact]:
         """
         Get commitment by its hash.
 
@@ -301,9 +293,7 @@ class CommitmentProtocol:
             return
 
         # Check if all dependencies are finalized
-        all_deps_finalized = all(
-            dep_hash in self.finalized for dep_hash in commitment.dependencies
-        )
+        all_deps_finalized = all(dep_hash in self.finalized for dep_hash in commitment.dependencies)
 
         if all_deps_finalized:
             self.finalize_commitment(commitment_hash)
@@ -316,11 +306,7 @@ class CommitmentProtocol:
             finalized_hash: Commitment that was just finalized
         """
         # Find all commitments waiting on this dependency
-        waiting = [
-            comm_hash
-            for comm_hash, deps in self.pending.items()
-            if finalized_hash in deps
-        ]
+        waiting = [comm_hash for comm_hash, deps in self.pending.items() if finalized_hash in deps]
 
         for comm_hash in waiting:
             # Remove this dependency from pending set
@@ -352,9 +338,7 @@ class CommitmentProtocol:
             List of CommitmentArtifacts
         """
         return [
-            commitment
-            for (shard, nid), commitment in self.commitments.items()
-            if nid == need_id
+            commitment for (shard, nid), commitment in self.commitments.items() if nid == need_id
         ]
 
     def clear_need(self, need_id: str) -> None:

@@ -30,9 +30,7 @@ class RegisterRequest(BaseModel):
     """Request to register an agent"""
 
     agent_id: str = Field(..., description="Unique agent identifier (DID)")
-    manifest: dict = Field(
-        ..., description="Agent manifest (capabilities, pricing, etc.)"
-    )
+    manifest: dict = Field(..., description="Agent manifest (capabilities, pricing, etc.)")
     stake: float = Field(..., ge=0, description="Stake amount in credits")
 
     class Config:
@@ -155,9 +153,7 @@ async def update_manifest(agent_id: str, request: UpdateManifestRequest):
 
 @app.get("/agents/search", response_model=List[AgentRecord])
 async def search_agents(
-    capabilities: Optional[str] = Query(
-        None, description="Comma-separated capabilities"
-    ),
+    capabilities: Optional[str] = Query(None, description="Comma-separated capabilities"),
     min_reputation: Optional[float] = Query(None, ge=0, le=1),
     status: Optional[str] = Query(None),
     tags: Optional[str] = Query(None, description="Comma-separated tags"),

@@ -61,13 +61,9 @@ class TestPreflightGate:
 
     def test_preflight_allows_valid_envelope(self, gate_enforcer, sample_envelope):
         """Preflight should allow valid envelopes"""
-        mock_result = PolicyResult(
-            allowed=True, reasons=["Valid"], policy_version="1.0.0"
-        )
+        mock_result = PolicyResult(allowed=True, reasons=["Valid"], policy_version="1.0.0")
 
-        with patch.object(
-            gate_enforcer.opa_engine, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.opa_engine, "evaluate", return_value=mock_result):
             decision = gate_enforcer.preflight_validate(sample_envelope)
 
         assert decision.allowed is True
@@ -80,9 +76,7 @@ class TestPreflightGate:
             allowed=False, reasons=["Invalid operation"], policy_version="1.0.0"
         )
 
-        with patch.object(
-            gate_enforcer.opa_engine, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.opa_engine, "evaluate", return_value=mock_result):
             decision = gate_enforcer.preflight_validate(sample_envelope)
 
         assert decision.allowed is False
@@ -92,13 +86,9 @@ class TestPreflightGate:
     def test_preflight_caching(self, sample_envelope):
         """Preflight should cache decisions"""
         enforcer = GateEnforcer(enable_cache=True)
-        mock_result = PolicyResult(
-            allowed=True, reasons=["Valid"], policy_version="1.0.0"
-        )
+        mock_result = PolicyResult(allowed=True, reasons=["Valid"], policy_version="1.0.0")
 
-        with patch.object(
-            enforcer.opa_engine, "evaluate", return_value=mock_result
-        ) as mock_eval:
+        with patch.object(enforcer.opa_engine, "evaluate", return_value=mock_result) as mock_eval:
             # First call
             decision1 = enforcer.preflight_validate(sample_envelope)
             assert decision1.allowed is True
@@ -130,9 +120,7 @@ class TestIngressGate:
             allowed=True, reasons=["Valid"], policy_version="1.0.0", gas_used=50
         )
 
-        with patch.object(
-            gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result):
             with patch.object(gate_enforcer.gas_meter, "used", 50, create=True):
                 decision = gate_enforcer.ingress_validate(sample_envelope)
 
@@ -148,9 +136,7 @@ class TestIngressGate:
             gas_used=50,
         )
 
-        with patch.object(
-            gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result):
             with patch.object(gate_enforcer.gas_meter, "used", 50, create=True):
                 decision = gate_enforcer.ingress_validate(sample_envelope)
 
@@ -188,13 +174,9 @@ class TestCommitGate:
             allowed=True, reasons=["Valid"], policy_version="1.0.0", gas_used=75
         )
 
-        with patch.object(
-            gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result):
             with patch.object(gate_enforcer.gas_meter, "used", 75, create=True):
-                decision = gate_enforcer.commit_gate_validate(
-                    sample_envelope, sample_telemetry
-                )
+                decision = gate_enforcer.commit_gate_validate(sample_envelope, sample_telemetry)
 
         assert decision.allowed is True
         assert decision.gate == PolicyGate.COMMIT_GATE
@@ -214,13 +196,9 @@ class TestCommitGate:
             allowed=True, reasons=["Valid"], policy_version="1.0.0", gas_used=75
         )
 
-        with patch.object(
-            gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result):
             with patch.object(gate_enforcer.gas_meter, "used", 75, create=True):
-                decision = gate_enforcer.commit_gate_validate(
-                    sample_envelope, bad_telemetry
-                )
+                decision = gate_enforcer.commit_gate_validate(sample_envelope, bad_telemetry)
 
         # Should be rejected due to resource violation
         assert decision.allowed is False
@@ -240,13 +218,9 @@ class TestCommitGate:
             allowed=True, reasons=["Valid"], policy_version="1.0.0", gas_used=75
         )
 
-        with patch.object(
-            gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result):
             with patch.object(gate_enforcer.gas_meter, "used", 75, create=True):
-                decision = gate_enforcer.commit_gate_validate(
-                    sample_envelope, bad_telemetry
-                )
+                decision = gate_enforcer.commit_gate_validate(sample_envelope, bad_telemetry)
 
         assert decision.allowed is False
         assert "memory exceeded" in decision.reason.lower()
@@ -265,13 +239,9 @@ class TestCommitGate:
             allowed=True, reasons=["Valid"], policy_version="1.0.0", gas_used=75
         )
 
-        with patch.object(
-            gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result):
             with patch.object(gate_enforcer.gas_meter, "used", 75, create=True):
-                decision = gate_enforcer.commit_gate_validate(
-                    sample_envelope, bad_telemetry
-                )
+                decision = gate_enforcer.commit_gate_validate(sample_envelope, bad_telemetry)
 
         assert decision.allowed is False
         assert "gas exceeded" in decision.reason.lower()
@@ -291,9 +261,7 @@ class TestCommitGate:
             allowed=True, reasons=["Valid"], policy_version="1.0.0", gas_used=75
         )
 
-        with patch.object(
-            gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result
-        ):
+        with patch.object(gate_enforcer.wasm_runtime, "evaluate", return_value=mock_result):
             with patch.object(gate_enforcer.gas_meter, "used", 75, create=True):
                 decision = gate_enforcer.commit_gate_validate(
                     sample_envelope, within_margin_telemetry

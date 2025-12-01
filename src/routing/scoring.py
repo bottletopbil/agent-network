@@ -150,13 +150,9 @@ class AgentScorer:
         scores["recency"] = recency_score
 
         # Compute weighted total
-        total_score = sum(
-            self.weights.get(factor, 0.0) * score for factor, score in scores.items()
-        )
+        total_score = sum(self.weights.get(factor, 0.0) * score for factor, score in scores.items())
 
-        return ScoredAgent(
-            manifest=agent_manifest, total_score=total_score, score_breakdown=scores
-        )
+        return ScoredAgent(manifest=agent_manifest, total_score=total_score, score_breakdown=scores)
 
     def score_agents(
         self,
@@ -226,9 +222,7 @@ class AgentScorer:
 
         return adjusted
 
-    def select_top_k(
-        self, scored_agents: List[ScoredAgent], k: int
-    ) -> List[ScoredAgent]:
+    def select_top_k(self, scored_agents: List[ScoredAgent], k: int) -> List[ScoredAgent]:
         """
         Select top K agents by score.
 
@@ -246,9 +240,7 @@ class AgentScorer:
             return []
 
         # Sort by score (descending), then by agent_id (ascending) for tie-breaking
-        sorted_agents = sorted(
-            scored_agents, key=lambda x: (-x.total_score, x.manifest.agent_id)
-        )
+        sorted_agents = sorted(scored_agents, key=lambda x: (-x.total_score, x.manifest.agent_id))
 
         return sorted_agents[:k]
 

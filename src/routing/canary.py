@@ -340,9 +340,7 @@ class CanaryRunner:
             key_score = len(matching_keys) / len(total_keys)
 
             # Value match for common keys
-            value_matches = sum(
-                1 for k in matching_keys if output.get(k) == expected.get(k)
-            )
+            value_matches = sum(1 for k in matching_keys if output.get(k) == expected.get(k))
             value_score = value_matches / len(matching_keys) if matching_keys else 0
 
             # Weighted combination
@@ -382,9 +380,7 @@ class CanaryRunner:
 _global_runner: Optional[CanaryRunner] = None
 
 
-def get_canary_runner(
-    min_quality: float = 0.6, default_timeout_ms: int = 5000
-) -> CanaryRunner:
+def get_canary_runner(min_quality: float = 0.6, default_timeout_ms: int = 5000) -> CanaryRunner:
     """Get or create global canary runner"""
     global _global_runner
     if _global_runner is None:

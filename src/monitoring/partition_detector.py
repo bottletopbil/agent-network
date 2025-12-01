@@ -83,9 +83,7 @@ class PartitionDetector:
         """Register a peer for monitoring."""
         with self._lock:
             if peer_id not in self._peers:
-                self._peers[peer_id] = PeerStatus(
-                    peer_id=peer_id, last_heartbeat=time.time()
-                )
+                self._peers[peer_id] = PeerStatus(peer_id=peer_id, last_heartbeat=time.time())
                 logger.info(f"Registered peer: {peer_id}")
 
     def heartbeat(self, peer_id: str):
@@ -160,9 +158,7 @@ class PartitionDetector:
     def get_alive_peers(self) -> Set[str]:
         """Get currently alive peer IDs."""
         with self._lock:
-            return {
-                peer_id for peer_id, status in self._peers.items() if status.is_alive
-            }
+            return {peer_id for peer_id, status in self._peers.items() if status.is_alive}
 
     def is_partitioned(self) -> bool:
         """Check if any partition exists."""

@@ -23,20 +23,13 @@ def write_jsonl(line: dict, logfile: Optional[str] = None) -> str:
 
 
 def log_event(
-    *,
-    thread_id: str,
-    subject: str,
-    kind: str,
-    payload: dict,
-    logfile: Optional[str] = None
+    *, thread_id: str, subject: str, kind: str, payload: dict, logfile: Optional[str] = None
 ):
     """
     kind: e.g. 'BUS.PUBLISH', 'BUS.DELIVER'
     payload: arbitrary JSON-friendly dict (we also store its hash).
     """
-    payload_hash = sha256_hex(
-        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
-    )
+    payload_hash = sha256_hex(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode())
     record = {
         "ts_ns": now_ns(),
         "thread_id": thread_id,

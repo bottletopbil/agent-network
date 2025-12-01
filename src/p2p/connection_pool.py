@@ -79,9 +79,7 @@ class ConnectionPool:
         """Set reputation tracker for quality-based rotation"""
         self.reputation = reputation
 
-    def add_connection(
-        self, peer_id: str, host: str, port: int
-    ) -> Optional[Connection]:
+    def add_connection(self, peer_id: str, host: str, port: int) -> Optional[Connection]:
         """
         Add connection to pool.
 
@@ -195,9 +193,7 @@ class ConnectionPool:
 
         # Find worst peers currently connected
         connected_peers = list(self.connections.keys())
-        peer_scores = [
-            (peer_id, self.reputation.get_score(peer_id)) for peer_id in connected_peers
-        ]
+        peer_scores = [(peer_id, self.reputation.get_score(peer_id)) for peer_id in connected_peers]
 
         # Sort by score (worst first)
         peer_scores.sort(key=lambda x: x[1])
@@ -233,8 +229,7 @@ class ConnectionPool:
 
         # Otherwise evict oldest idle connection
         idle_connections = [
-            (peer_id, conn.get_idle_time())
-            for peer_id, conn in self.connections.items()
+            (peer_id, conn.get_idle_time()) for peer_id, conn in self.connections.items()
         ]
 
         idle_connections.sort(key=lambda x: x[1], reverse=True)

@@ -494,9 +494,7 @@ class TestIntegration:
 
         # Select committee
         constraints = DiversityConstraints()
-        committee = selector.select_committee(
-            k=5, min_stake=3000, constraints=constraints
-        )
+        committee = selector.select_committee(k=5, min_stake=3000, constraints=constraints)
 
         # Verify results
         assert len(committee) == 5

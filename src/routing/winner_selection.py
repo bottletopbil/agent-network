@@ -79,9 +79,7 @@ class WinnerSelector:
             return None
 
         # Sort by quality (descending), then latency (ascending)
-        sorted_results = sorted(
-            qualified, key=lambda r: (-r.quality_score, r.latency_ms)
-        )
+        sorted_results = sorted(qualified, key=lambda r: (-r.quality_score, r.latency_ms))
 
         winner = sorted_results[0]
 
@@ -136,8 +134,7 @@ class WinnerSelector:
 
         # Calculate combined scores
         scored = [
-            (result.agent_id, self._combined_score(result, canary_results))
-            for result in qualified
+            (result.agent_id, self._combined_score(result, canary_results)) for result in qualified
         ]
 
         # Sort by score (descending)
@@ -145,9 +142,7 @@ class WinnerSelector:
 
         return scored
 
-    def _combined_score(
-        self, result: CanaryResult, all_results: List[CanaryResult]
-    ) -> float:
+    def _combined_score(self, result: CanaryResult, all_results: List[CanaryResult]) -> float:
         """
         Calculate combined score from quality and latency.
 
@@ -174,9 +169,7 @@ class WinnerSelector:
             latency_score = 1.0 - (result.latency_ms - min_lat) / (max_lat - min_lat)
 
         # Weighted combination
-        combined = (
-            self.quality_weight * quality_score + self.latency_weight * latency_score
-        )
+        combined = self.quality_weight * quality_score + self.latency_weight * latency_score
 
         return combined
 
@@ -195,9 +188,7 @@ class WinnerSelector:
 
         passed = sum(1 for r in canary_results if r.passed)
         qualified = sum(
-            1
-            for r in canary_results
-            if r.passed and r.quality_score >= self.min_quality_threshold
+            1 for r in canary_results if r.passed and r.quality_score >= self.min_quality_threshold
         )
 
         return {
@@ -206,10 +197,8 @@ class WinnerSelector:
             "qualified": qualified,
             "pass_rate": passed / len(canary_results),
             "qualification_rate": qualified / len(canary_results),
-            "avg_quality": sum(r.quality_score for r in canary_results)
-            / len(canary_results),
-            "avg_latency_ms": sum(r.latency_ms for r in canary_results)
-            / len(canary_results),
+            "avg_quality": sum(r.quality_score for r in canary_results) / len(canary_results),
+            "avg_latency_ms": sum(r.latency_ms for r in canary_results) / len(canary_results),
         }
 
 

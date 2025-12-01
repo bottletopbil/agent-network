@@ -72,9 +72,7 @@ def test_escrow_double_spend_race_condition():
         assert (
             results["success_count"] == 1
         ), f"Expected 1 successful release, got {results['success_count']} (DOUBLE-SPEND BUG!)"
-        assert (
-            len(results["errors"]) == 1
-        ), f"Expected 1 error, got {len(results['errors'])}"
+        assert len(results["errors"]) == 1, f"Expected 1 error, got {len(results['errors'])}"
 
         # Verify final state: locked should only be reduced by 500 (not 1000)
         source_final = ledger.get_account("source_account")
@@ -84,9 +82,7 @@ def test_escrow_double_spend_race_condition():
 
         # Destination should receive exactly 500
         dest_final = ledger.get_account("dest_account")
-        assert (
-            dest_final.balance == 500
-        ), f"Expected dest balance=500, got {dest_final.balance}"
+        assert dest_final.balance == 500, f"Expected dest balance=500, got {dest_final.balance}"
 
 
 def test_escrow_release_sequential_works():

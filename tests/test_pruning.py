@@ -315,9 +315,7 @@ class TestIntegration:
             assert manager.storage.get_hot_tier_size() == 60  # Kept ops still in hot
 
             # Verify can still retrieve old ops from cold
-            old_ops = manager.storage.retrieve_from_cold(
-                [f"op-90-{i}" for i in range(5)]
-            )
+            old_ops = manager.storage.retrieve_from_cold([f"op-90-{i}" for i in range(5)])
             assert len(old_ops) == 5
 
     def test_stats_after_pruning(self):

@@ -47,9 +47,7 @@ async def handle_propose_extended(envelope: dict):
         _ballot_registry[sender] = set()
 
     if ballot in _ballot_registry[sender]:
-        print(
-            f"[PROPOSE_EXTENDED] ERROR: Duplicate ballot '{ballot}' from {sender[:8]}..."
-        )
+        print(f"[PROPOSE_EXTENDED] ERROR: Duplicate ballot '{ballot}' from {sender[:8]}...")
         return
 
     # Validate patch is not empty
@@ -64,9 +62,7 @@ async def handle_propose_extended(envelope: dict):
         task_id = op_data.get("task_id")
 
         if not op_type_str or not task_id:
-            print(
-                f"[PROPOSE_EXTENDED] WARNING: Skipping invalid patch op at index {idx}"
-            )
+            print(f"[PROPOSE_EXTENDED] WARNING: Skipping invalid patch op at index {idx}")
             continue
 
         # Validate op_type
@@ -74,9 +70,7 @@ async def handle_propose_extended(envelope: dict):
             OpType(op_type_str)
             valid_ops.append(op_data)
         except ValueError:
-            print(
-                f"[PROPOSE_EXTENDED] WARNING: Invalid op_type '{op_type_str}' at index {idx}"
-            )
+            print(f"[PROPOSE_EXTENDED] WARNING: Invalid op_type '{op_type_str}' at index {idx}")
             continue
 
     if not valid_ops:

@@ -135,9 +135,7 @@ class CheckpointManager:
 
             self.compressor = DeterministicCompressor(compression_level)
 
-    def create_checkpoint(
-        self, epoch: int, plan_state: Dict, op_hashes: List[str]
-    ) -> Checkpoint:
+    def create_checkpoint(self, epoch: int, plan_state: Dict, op_hashes: List[str]) -> Checkpoint:
         """
         Create a new checkpoint from current state.
 
@@ -164,8 +162,7 @@ class CheckpointManager:
         )
 
         logger.info(
-            f"Created checkpoint for epoch {epoch}, "
-            f"{len(op_hashes)} ops, root: {root[:8]}..."
+            f"Created checkpoint for epoch {epoch}, " f"{len(op_hashes)} ops, root: {root[:8]}..."
         )
 
         return checkpoint
@@ -192,9 +189,7 @@ class CheckpointManager:
 
         return signed
 
-    def store_checkpoint(
-        self, checkpoint: SignedCheckpoint, path: Optional[Path] = None
-    ) -> Path:
+    def store_checkpoint(self, checkpoint: SignedCheckpoint, path: Optional[Path] = None) -> Path:
         """
         Store checkpoint to disk with optional compression.
 
@@ -257,21 +252,15 @@ class CheckpointManager:
                 # Decompress state
                 if self.compressor:
                     compressed_bytes = bytes.fromhex(state["_data"])
-                    decompressed_state = self.compressor.decompress_state(
-                        compressed_bytes
-                    )
+                    decompressed_state = self.compressor.decompress_state(compressed_bytes)
                     if decompressed_state:
                         data["checkpoint"]["state_summary"] = decompressed_state
                 else:
-                    logger.warning(
-                        "Checkpoint is compressed but no compressor available"
-                    )
+                    logger.warning("Checkpoint is compressed but no compressor available")
 
             checkpoint = SignedCheckpoint.from_dict(data)
 
-            logger.info(
-                f"Loaded checkpoint epoch {checkpoint.checkpoint.epoch} from {path}"
-            )
+            logger.info(f"Loaded checkpoint epoch {checkpoint.checkpoint.epoch} from {path}")
 
             # Cache it
             self.checkpoints[checkpoint.checkpoint.epoch] = checkpoint
@@ -313,9 +302,7 @@ class CheckpointManager:
             Latest SignedCheckpoint if any exist
         """
         # Find all checkpoint files
-        checkpoint_files = sorted(
-            self.checkpoint_dir.glob("checkpoint_epoch_*.json"), reverse=True
-        )
+        checkpoint_files = sorted(self.checkpoint_dir.glob("checkpoint_epoch_*.json"), reverse=True)
 
         if not checkpoint_files:
             return None

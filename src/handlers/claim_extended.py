@@ -47,9 +47,7 @@ async def handle_claim_extended(envelope: dict):
 
     # Validate lease_ttl meets minimum
     if lease_ttl < MIN_LEASE_TTL:
-        print(
-            f"[CLAIM_EXTENDED] ERROR: lease_ttl {lease_ttl}s below minimum {MIN_LEASE_TTL}s"
-        )
+        print(f"[CLAIM_EXTENDED] ERROR: lease_ttl {lease_ttl}s below minimum {MIN_LEASE_TTL}s")
         return
 
     # Validate heartbeat_interval

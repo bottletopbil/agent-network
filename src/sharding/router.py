@@ -144,9 +144,7 @@ class CrossShardRouter:
         """
         return self.dependencies.get(need_id, [])
 
-    def add_dependency_artifact(
-        self, need_id: str, dep_shard: int, artifact_ref: str
-    ) -> None:
+    def add_dependency_artifact(self, need_id: str, dep_shard: int, artifact_ref: str) -> None:
         """
         Add an artifact reference to a cross-shard dependency.
 
@@ -156,9 +154,7 @@ class CrossShardRouter:
             artifact_ref: Artifact hash reference
         """
         if need_id not in self.dependencies:
-            logger.warning(
-                f"No dependency tracked for need {need_id} -> shard {dep_shard}"
-            )
+            logger.warning(f"No dependency tracked for need {need_id} -> shard {dep_shard}")
             return
 
         # Find matching dependency
