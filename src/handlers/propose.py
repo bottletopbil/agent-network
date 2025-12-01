@@ -9,6 +9,7 @@ import time
 
 plan_store: PlanStore = None  # Injected at startup
 
+
 async def handle_propose(envelope: dict):
     """
     Process PROPOSE envelope:
@@ -17,10 +18,10 @@ async def handle_propose(envelope: dict):
     """
     thread_id = envelope["thread_id"]
     payload = envelope["payload"]
-    
+
     # Extract proposal details
     proposal_id = payload.get("proposal_id", str(uuid.uuid4()))
-    
+
     # Create ANNOTATE op to store the proposal
     op = PlanOp(
         op_id=str(uuid.uuid4()),
@@ -34,13 +35,14 @@ async def handle_propose(envelope: dict):
             "proposal_id": proposal_id,
             "plan": payload.get("plan", []),
             "proposer": envelope["sender_pk_b64"],
-            "metadata": payload.get("metadata", {})
+            "metadata": payload.get("metadata", {}),
         },
-        timestamp_ns=time.time_ns()
+        timestamp_ns=time.time_ns(),
     )
-    
+
     await plan_store.append_op(op)
     print(f"[PROPOSE] Stored proposal {proposal_id} in thread {thread_id}")
+
 
 # Register with dispatcher
 DISPATCHER.register("PROPOSE", handle_propose)

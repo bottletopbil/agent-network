@@ -6,8 +6,10 @@ from crypto import sign_record, verify_record, cjson, sha256_hex
 LOG_DIR = Path(os.getenv("SWARM_LOG_DIR", "logs"))
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def now_ns() -> int:
     return time.time_ns()
+
 
 def write_jsonl(line: dict, logfile: Optional[str] = None) -> str:
     """Append a signed JSON object as one line."""
@@ -19,12 +21,22 @@ def write_jsonl(line: dict, logfile: Optional[str] = None) -> str:
         f.write(json.dumps(signed, separators=(",", ":")) + "\n")
     return str(path)
 
-def log_event(*, thread_id: str, subject: str, kind: str, payload: dict, logfile: Optional[str]=None):
+
+def log_event(
+    *,
+    thread_id: str,
+    subject: str,
+    kind: str,
+    payload: dict,
+    logfile: Optional[str] = None
+):
     """
     kind: e.g. 'BUS.PUBLISH', 'BUS.DELIVER'
     payload: arbitrary JSON-friendly dict (we also store its hash).
     """
-    payload_hash = sha256_hex(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode())
+    payload_hash = sha256_hex(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    )
     record = {
         "ts_ns": now_ns(),
         "thread_id": thread_id,

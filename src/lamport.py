@@ -1,5 +1,5 @@
 import os, json, threading, time, asyncio
-from pathlib import Path  
+from pathlib import Path
 from typing import Optional
 
 # Persist the clock so restarts don't go backwards (cheap & cheerful)
@@ -12,21 +12,25 @@ _LOCK = threading.Lock()
 BATCH_INTERVAL = 1.0  # Flush every 1 second
 BATCH_SIZE = 100  # Or every 100 ticks
 
+
 def _read(path: Path) -> int:
-    if not path.exists(): return 0
+    if not path.exists():
+        return 0
     try:
         return int(json.loads(path.read_text()).get("counter", 0))
     except Exception:
         return 0
 
+
 def _write(path: Path, value: int) -> None:
     path.write_text(json.dumps({"counter": int(value)}))
+
 
 class Lamport:
     def __init__(self, path: Optional[Path] = None):
         self.path = path or DEFAULT_FILE
         self.counter = _read(self.path)
-        
+
         # Write batching state
         self._dirty = False
         self._last_write_time = time.time()
@@ -42,14 +46,14 @@ class Lamport:
             self._dirty = True
             self._ticks_since_write += 1
             current_value = self.counter
-            
+
             # Auto-flush if batch size reached
             if self._ticks_since_write >= BATCH_SIZE:
                 self._flush_unsafe()
             # Auto-flush if time interval reached
             elif time.time() - self._last_write_time >= BATCH_INTERVAL:
                 self._flush_unsafe()
-            
+
             return current_value
 
     def observe(self, other: int) -> int:
@@ -64,14 +68,14 @@ class Lamport:
             self._last_write_time = time.time()
             self._ticks_since_write = 0
             return self.counter
-    
+
     def flush(self) -> None:
         """
         Manually persist any pending writes.
         """
         with _LOCK:
             self._flush_unsafe()
-    
+
     def _flush_unsafe(self) -> None:
         """
         Internal flush that assumes lock is already held.

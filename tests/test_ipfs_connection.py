@@ -17,16 +17,16 @@ def test_ipfs_connection():
     """Test IPFS connection and basic operations"""
     print("🧪 Testing IPFS Connection...")
     print("=" * 60)
-    
+
     # Create client
     config = IPFSConfig()
     print(f"📍 API URL: {config.get_api_url()}")
     print(f"🌐 Gateway URL: {config.get_gateway_url()}")
     print(f"📌 Pinning Strategy: {config.pinning_strategy.value}")
     print()
-    
+
     client = IPFSClient(config)
-    
+
     # Test connection
     print("🔌 Connecting to IPFS...")
     if not client.connect():
@@ -35,10 +35,10 @@ def test_ipfs_connection():
         print("   - Docker: docker-compose up -d ipfs")
         print("   - Local: ipfs daemon &")
         return False
-    
+
     print("✅ Connected to IPFS!")
     print()
-    
+
     # Get peer ID
     print("🆔 Getting peer ID...")
     peer_id = client.get_peer_id()
@@ -48,7 +48,7 @@ def test_ipfs_connection():
         print("❌ Failed to get peer ID")
         return False
     print()
-    
+
     # Get stats
     print("📊 Getting node statistics...")
     stats = client.get_stats()
@@ -60,15 +60,15 @@ def test_ipfs_connection():
     else:
         print("⚠️  Could not retrieve stats")
     print()
-    
+
     # Test add and retrieve
     print("📝 Testing add and retrieve...")
     test_data = b"Hello from CAN Swarm IPFS!"
-    
+
     cid = client.add_content(test_data, pin=True)
     if cid:
         print(f"✅ Added content: {cid}")
-        
+
         retrieved = client.get_content(cid)
         if retrieved == test_data:
             print("✅ Retrieved content matches!")
@@ -79,7 +79,7 @@ def test_ipfs_connection():
         print("❌ Failed to add content")
         return False
     print()
-    
+
     # Test pinning
     print("📌 Testing pin operations...")
     pins = client.list_pins()
@@ -88,12 +88,12 @@ def test_ipfs_connection():
     else:
         print("⚠️  Content not in pin list")
     print()
-    
+
     # Cleanup
     print("🧹 Cleaning up test content...")
     if client.unpin_content(cid):
         print("✅ Unpinned test content")
-    
+
     client.close()
     print()
     print("=" * 60)

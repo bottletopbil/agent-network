@@ -21,13 +21,13 @@ def test_validation_logic_missing_thread_id():
         # Missing thread_id
         "sender_pk_b64": "test_sender",
         "lamport": 1,
-        "payload": {"task_id": "task_123"}
+        "payload": {"task_id": "task_123"},
     }
-    
+
     # Should return None (falsy)
     thread_id = envelope.get("thread_id")
     assert not thread_id
-    
+
     # Validation would log error and return
 
 
@@ -41,7 +41,7 @@ def test_validation_logic_missing_payload():
         "lamport": 1,
         # Missing payload
     }
-    
+
     payload = envelope.get("payload")
     assert not payload
 
@@ -57,9 +57,9 @@ def test_validation_logic_missing_task_id():
         "payload": {
             # Missing task_id
             "reason": "test"
-        }
+        },
     }
-    
+
     payload = envelope.get("payload")
     task_id = payload.get("task_id") if payload else None
     assert not task_id
@@ -73,9 +73,9 @@ def test_validation_logic_none_values():
         "thread_id": None,
         "sender_pk_b64": None,
         "lamport": None,
-        "payload": None
+        "payload": None,
     }
-    
+
     # All should validate as falsy
     assert not envelope.get("thread_id")
     assert not envelope.get("payload")
@@ -91,19 +91,16 @@ def test_validation_logic_valid_envelope():
         "thread_id": "thread_123",
         "sender_pk_b64": "test_sender",
         "lamport": 1,
-        "payload": {
-            "task_id": "task_123",
-            "reason": "test"
-        }
+        "payload": {"task_id": "task_123", "reason": "test"},
     }
-    
+
     # All validations should pass
     thread_id = envelope.get("thread_id")
     payload = envelope.get("payload")
     sender = envelope.get("sender_pk_b64")
     lamport = envelope.get("lamport")
     task_id = payload.get("task_id") if payload else None
-    
+
     assert thread_id
     assert payload
     assert sender
@@ -115,6 +112,7 @@ def test_error_handling_pattern():
     """
     Test the error handling pattern: validate, log, return early.
     """
+
     def mock_handler(envelope: dict) -> bool:
         """Mock handler following the error handling pattern."""
         # Validate thread_id
@@ -122,32 +120,29 @@ def test_error_handling_pattern():
         if not thread_id:
             # Would log error here
             return False
-        
+
         # Validate payload
         payload = envelope.get("payload")
         if not payload:
             # Would log error here
             return False
-        
+
         # Validate task_id
         task_id = payload.get("task_id")
         if not task_id:
             # Would log error here
             return False
-        
+
         # All validations passed
         return True
-    
+
     # Test with invalid envelopes
     assert not mock_handler({})
     assert not mock_handler({"thread_id": "t1"})
     assert not mock_handler({"thread_id": "t1", "payload": {}})
-    
+
     # Test with valid envelope
-    assert mock_handler({
-        "thread_id": "t1",
-        "payload": {"task_id": "task1"}
-    })
+    assert mock_handler({"thread_id": "t1", "payload": {"task_id": "task1"}})
 
 
 def test_get_vs_bracket_access():
@@ -155,12 +150,12 @@ def test_get_vs_bracket_access():
     Test that .get() is safe vs bracket access which raises KeyError.
     """
     envelope = {}
-    
+
     # .get() is safe
     assert envelope.get("missing_key") is None
-    
+
     # Bracket access raises
     with pytest.raises(KeyError):
         _ = envelope["missing_key"]
-    
+
     # This demonstrates why the refactored code uses .get()

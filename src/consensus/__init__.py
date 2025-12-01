@@ -7,5 +7,4 @@ except ImportError:
     # Consensus adapter may not be initialized yet
     ConsensusAdapter = None
 
-__all__ = ['ConsensusAdapter']
-
+__all__ = ["ConsensusAdapter"]

@@ -10,14 +10,14 @@ from .tracing import (
     get_current_span,
     propagate_context,
     extract_context,
-    get_tracer
+    get_tracer,
 )
 
 __all__ = [
-    'setup_tracing',
-    'create_span',
-    'get_current_span',
-    'propagate_context',
-    'extract_context',
-    'get_tracer'
+    "setup_tracing",
+    "create_span",
+    "get_current_span",
+    "propagate_context",
+    "extract_context",
+    "get_tracer",
 ]

@@ -17,6 +17,7 @@ plan_store: PlanStore = None  # Injected at startup
 # Cross-shard dependency DAG (optional, injected if using sharding)
 dependency_dag = None
 
+
 async def handle_finalize(envelope: dict):
     """
     Process FINALIZE envelope:
@@ -26,14 +27,14 @@ async def handle_finalize(envelope: dict):
     """
     thread_id = envelope["thread_id"]
     payload = envelope["payload"]
-    
+
     # Extract finalization details
     task_id = payload.get("task_id")
-    
+
     if not task_id:
         logger.error("[FINALIZE] No task_id in finalize payload")
         return
-    
+
     # Check cross-shard dependencies if enabled
     if dependency_dag and "shard_id" in payload:
         if not _check_cross_shard_dependencies(payload):
@@ -42,7 +43,7 @@ async def handle_finalize(envelope: dict):
                 f"due to incomplete cross-shard dependencies"
             )
             return
-    
+
     # Update task state to FINAL
     state_op = PlanOp(
         op_id=str(uuid.uuid4()),
@@ -52,12 +53,12 @@ async def handle_finalize(envelope: dict):
         op_type=OpType.STATE,
         task_id=task_id,
         payload={"state": TaskState.FINAL.value},
-        timestamp_ns=time.time_ns()
+        timestamp_ns=time.time_ns(),
     )
     await plan_store.append_op(state_op)
-    
+
     logger.info(f"[FINALIZE] Updated task {task_id} state to FINAL")
-    
+
     # Record completion metadata
     finalize_op = PlanOp(
         op_id=str(uuid.uuid4()),
@@ -70,14 +71,14 @@ async def handle_finalize(envelope: dict):
             "annotation_type": "finalize",
             "finalized_by": envelope["sender_pk_b64"],
             "finalized_at": time.time_ns(),
-            "metadata": payload.get("metadata", {})
+            "metadata": payload.get("metadata", {}),
         },
-        timestamp_ns=time.time_ns()
+        timestamp_ns=time.time_ns(),
     )
     await plan_store.append_op(finalize_op)
-    
+
     logger.info(f"[FINALIZE] Task {task_id} marked as complete")
-    
+
     # Mark shard as complete in dependency DAG
     if dependency_dag and "shard_id" in payload:
         shard_id = payload["shard_id"]
@@ -92,29 +93,28 @@ async def handle_finalize(envelope: dict):
 def _check_cross_shard_dependencies(payload: dict) -> bool:
     """
     Check if all cross-shard dependencies are satisfied.
-    
+
     Args:
         payload: FINALIZE payload containing shard info
-        
+
     Returns:
         True if dependencies satisfied or no dependencies
     """
     shard_id = payload.get("shard_id")
     if shard_id is None:
         return True
-    
+
     # Check if this shard has any blocking dependencies
     blocking = dependency_dag.get_blocking_shards(shard_id)
-    
+
     if blocking:
         logger.debug(
             f"Shard {shard_id} blocked by {len(blocking)} dependencies: {blocking}"
         )
         return False
-    
+
     return True
 
 
 # Register with dispatcher
 DISPATCHER.register("FINALIZE", handle_finalize)
-

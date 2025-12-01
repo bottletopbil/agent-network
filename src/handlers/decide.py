@@ -14,6 +14,7 @@ plan_store: PlanStore = None  # Injected at startup
 consensus_adapter: ConsensusAdapter = None  # Injected at startup (Redis)
 raft_adapter: RaftConsensusAdapter = None  # Injected at startup (etcd)
 
+
 async def handle_decide(envelope: dict):
     """
     Process DECIDE envelope:
@@ -25,25 +26,27 @@ async def handle_decide(envelope: dict):
     """
     thread_id = envelope["thread_id"]
     payload = envelope["payload"]
-    
+
     # Extract decision details
     need_id = payload.get("need_id")
     proposal_id = payload.get("proposal_id")
     task_id = payload.get("task_id")
     epoch = payload.get("epoch", 1)
     k_plan = payload.get("k_plan", 1)
-    
+
     if not need_id or not proposal_id:
         print(f"[DECIDE] ERROR: Missing need_id or proposal_id")
         return
-    
+
     # Attempt atomic DECIDE via consensus (Raft or Redis)
     if use_raft_consensus():
         # Use Raft consensus via etcd
         if not raft_adapter:
-            print(f"[DECIDE] ERROR: Raft adapter not configured (RAFT_CONSENSUS=true but no adapter)")
+            print(
+                f"[DECIDE] ERROR: Raft adapter not configured (RAFT_CONSENSUS=true but no adapter)"
+            )
             return
-        
+
         decide_record = raft_adapter.try_decide(
             need_id=need_id,
             proposal_id=proposal_id,
@@ -51,15 +54,15 @@ async def handle_decide(envelope: dict):
             lamport=envelope["lamport"],
             k_plan=k_plan,
             decider_id=envelope["sender_pk_b64"],
-            timestamp_ns=time.time_ns()
+            timestamp_ns=time.time_ns(),
         )
     else:
         # Use Redis consensus (existing)
-    
+
         if not consensus_adapter:
             print(f"[DECIDE] ERROR: Redis adapter not configured")
             return
-        
+
         decide_record = consensus_adapter.try_decide(
             need_id=need_id,
             proposal_id=proposal_id,
@@ -67,17 +70,21 @@ async def handle_decide(envelope: dict):
             lamport=envelope["lamport"],
             k_plan=k_plan,
             decider_id=envelope["sender_pk_b64"],
-            timestamp_ns=time.time_ns()
+            timestamp_ns=time.time_ns(),
         )
-    
+
     if decide_record is None:
         consensus_type = "Raft" if use_raft_consensus() else "Redis"
-        print(f"[DECIDE] CONFLICT ({consensus_type}): DECIDE already exists for need {need_id}")
+        print(
+            f"[DECIDE] CONFLICT ({consensus_type}): DECIDE already exists for need {need_id}"
+        )
         return
-    
+
     consensus_type = "Raft" if use_raft_consensus() else "Redis"
-    print(f"[DECIDE] ✓ Atomic DECIDE recorded ({consensus_type}) for need {need_id} -> proposal {proposal_id}")
-    
+    print(
+        f"[DECIDE] ✓ Atomic DECIDE recorded ({consensus_type}) for need {need_id} -> proposal {proposal_id}"
+    )
+
     # Update task state to DECIDED (if task_id provided)
     if task_id:
         state_op = PlanOp(
@@ -88,11 +95,11 @@ async def handle_decide(envelope: dict):
             op_type=OpType.STATE,
             task_id=task_id,
             payload={"state": TaskState.DECIDED.value},
-            timestamp_ns=time.time_ns()
+            timestamp_ns=time.time_ns(),
         )
         await plan_store.append_op(state_op)
         print(f"[DECIDE] Updated task {task_id} state to DECIDED")
-    
+
     # Record DECIDE metadata as annotation
     decide_op = PlanOp(
         op_id=str(uuid.uuid4()),
@@ -108,11 +115,12 @@ async def handle_decide(envelope: dict):
             "epoch": epoch,
             "k_plan": k_plan,
             "decider": envelope["sender_pk_b64"],
-            "decided_at": time.time_ns()
+            "decided_at": time.time_ns(),
         },
-        timestamp_ns=time.time_ns()
+        timestamp_ns=time.time_ns(),
     )
     await plan_store.append_op(decide_op)
+
 
 # Register with dispatcher
 DISPATCHER.register("DECIDE", handle_decide)

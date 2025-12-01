@@ -13,6 +13,7 @@ from nacl.signing import SigningKey, VerifyKey
 from nacl.encoding import Base64Encoder, RawEncoder
 import nacl.encoding
 
+
 # Directory for storing per-agent keys
 def _get_keys_dir() -> Path:
     """Get the directory for storing agent keypairs."""
@@ -29,13 +30,14 @@ def cjson(obj: Dict[str, Any]) -> bytes:
 def sha256_hex(data: bytes) -> str:
     """SHA256 hash as hex string."""
     import hashlib
+
     return hashlib.sha256(data).hexdigest()
 
 
 def generate_keypair() -> Tuple[SigningKey, VerifyKey]:
     """
     Generate a new Ed25519 keypair.
-    
+
     Returns:
         Tuple of (signing_key, verify_key)
     """
@@ -47,20 +49,20 @@ def generate_keypair() -> Tuple[SigningKey, VerifyKey]:
 def save_keypair(agent_id: str, signing_key: SigningKey) -> None:
     """
     Save agent's keypair to disk.
-    
+
     Args:
         agent_id: Unique identifier for the agent
         signing_key: The signing key to save
     """
     keys_dir = _get_keys_dir()
     key_file = keys_dir / f"{agent_id}.key"
-    
+
     # Save the seed (32 bytes)
     seed_b64 = base64.b64encode(signing_key.encode()).decode()
-    
+
     with open(key_file, "w") as f:
         f.write(seed_b64)
-    
+
     # Secure the file (owner read/write only)
     os.chmod(key_file, 0o600)
 
@@ -68,40 +70,40 @@ def save_keypair(agent_id: str, signing_key: SigningKey) -> None:
 def load_keypair(agent_id: str) -> Tuple[SigningKey, VerifyKey]:
     """
     Load agent's keypair from disk.
-    
+
     Args:
         agent_id: Unique identifier for the agent
-        
+
     Returns:
         Tuple of (signing_key, verify_key)
-        
+
     Raises:
         FileNotFoundError: If keypair doesn't exist for this agent
     """
     keys_dir = _get_keys_dir()
     key_file = keys_dir / f"{agent_id}.key"
-    
+
     if not key_file.exists():
         raise FileNotFoundError(f"No keypair found for agent {agent_id}")
-    
+
     with open(key_file, "r") as f:
         seed_b64 = f.read().strip()
-    
+
     seed = base64.b64decode(seed_b64)
     signing_key = SigningKey(seed)
     verify_key = signing_key.verify_key
-    
+
     return signing_key, verify_key
 
 
 def sign_with_key(signing_key: SigningKey, message: bytes) -> bytes:
     """
     Sign a message with a signing key.
-    
+
     Args:
         signing_key: The key to sign with
         message: The message to sign
-        
+
     Returns:
         Signature bytes
     """
@@ -110,14 +112,16 @@ def sign_with_key(signing_key: SigningKey, message: bytes) -> bytes:
     return signed.signature
 
 
-def sign_record(record: Dict[str, Any], agent_id: Optional[str] = None) -> Dict[str, Any]:
+def sign_record(
+    record: Dict[str, Any], agent_id: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Sign a record dictionary.
-    
+
     Args:
         record: Dictionary to sign
         agent_id: Optional agent ID for per-agent signing. If None, uses env keypair.
-        
+
     Returns:
         Record with signature fields added
     """
@@ -134,55 +138,59 @@ def sign_record(record: Dict[str, Any], agent_id: Optional[str] = None) -> Dict[
         # Fall back to env keypair (backward compatible)
         sk_b64 = os.getenv("SWARM_SIGNING_SK_B64") or os.getenv("SWARM_PRIVATE_KEY")
         if not sk_b64:
-            raise ValueError("No SWARM_SIGNING_SK_B64 or SWARM_PRIVATE_KEY in environment")
-        
+            raise ValueError(
+                "No SWARM_SIGNING_SK_B64 or SWARM_PRIVATE_KEY in environment"
+            )
+
         seed = base64.b64decode(sk_b64)
         signing_key = SigningKey(seed)
         verify_key = signing_key.verify_key
-    
+
     # Create canonical message
     message = cjson(record)
-    
+
     # Sign it
     signature = sign_with_key(signing_key, message)
-    
+
     # Add signature fields
     result = dict(record)
     result["sig_b64"] = base64.b64encode(signature).decode()
     result["sig_pk_b64"] = base64.b64encode(bytes(verify_key)).decode()
-    
+
     return result
 
 
 def verify_record(record: Dict[str, Any]) -> bool:
     """
     Verify a signed record.
-    
+
     Args:
         record: Signed record dictionary
-        
+
     Returns:
         True if signature is valid, False otherwise
     """
     sig_b64 = record.get("sig_b64")
     pk_b64 = record.get("sig_pk_b64")
-    
+
     if not sig_b64 or not pk_b64:
         return False
-    
+
     try:
         # Extract signature and public key
         signature = base64.b64decode(sig_b64)
         pk_bytes = base64.b64decode(pk_b64)
         verify_key = VerifyKey(pk_bytes)
-        
+
         # Reconstruct the message that was signed
-        to_verify = {k: v for k, v in record.items() if k not in ("sig_b64", "sig_pk_b64")}
+        to_verify = {
+            k: v for k, v in record.items() if k not in ("sig_b64", "sig_pk_b64")
+        }
         message = cjson(to_verify)
-        
+
         # Verify
         verify_key.verify(message, signature)
         return True
-        
+
     except Exception:
         return False

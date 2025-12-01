@@ -23,13 +23,13 @@ from plan_store import PlanStore, PlanOp, OpType, TaskState
 async def test_concurrent_async_operations():
     """
     Test that 100 concurrent async append_op calls complete without deadlock.
-    
+
     This will FAIL/deadlock with threading.Lock but work with asyncio.Lock.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test_plan.db"
         plan_store = PlanStore(db_path)
-        
+
         async def append_operation(i: int):
             """Helper to append a single operation."""
             op = PlanOp(
@@ -40,25 +40,27 @@ async def test_concurrent_async_operations():
                 op_type=OpType.ADD_TASK,
                 task_id=f"task_{i}",
                 payload={"type": "test_task", "index": i},
-                timestamp_ns=time.time_ns()
+                timestamp_ns=time.time_ns(),
             )
             await plan_store.append_op(op)
             return i
-        
+
         # Run 100 concurrent operations
         start_time = time.time()
         tasks = [append_operation(i) for i in range(100)]
         results = await asyncio.gather(*tasks)
         elapsed = time.time() - start_time
-        
+
         # All operations should complete
         assert len(results) == 100
         assert all(isinstance(r, int) for r in results)
-        
+
         # Should be reasonably fast (not deadlocked)
         # With proper async it should be under 5 seconds
-        assert elapsed < 5.0, f"Operations took {elapsed}s - possible deadlock or blocking"
-        
+        assert (
+            elapsed < 5.0
+        ), f"Operations took {elapsed}s - possible deadlock or blocking"
+
         # Verify all ops were actually stored
         ops = await plan_store.get_ops_for_thread("thread_123")
         assert len(ops) == 100
@@ -72,9 +74,9 @@ async def test_concurrent_state_updates():
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test_plan.db"
         plan_store = PlanStore(db_path)
-        
+
         task_id = "shared_task"
-        
+
         async def update_state(lamport: int, state: TaskState):
             """Update task state."""
             op = PlanOp(
@@ -85,10 +87,10 @@ async def test_concurrent_state_updates():
                 op_type=OpType.STATE,
                 task_id=task_id,
                 payload={"state": state.value},
-                timestamp_ns=time.time_ns()
+                timestamp_ns=time.time_ns(),
             )
             await plan_store.append_op(op)
-        
+
         # Concurrent state updates with different lamport clocks
         tasks = [
             update_state(1, TaskState.DRAFT),
@@ -97,9 +99,9 @@ async def test_concurrent_state_updates():
             update_state(7, TaskState.FINAL),
             update_state(2, TaskState.DRAFT),
         ]
-        
+
         await asyncio.gather(*tasks)
-        
+
         # Highest lamport should win (monotonic)
         task = await plan_store.get_task(task_id)
         assert task is not None
@@ -114,7 +116,7 @@ async def test_no_deadlock_under_high_concurrency():
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test_plan.db"
         plan_store = PlanStore(db_path)
-        
+
         async def rapid_append(batch_id: int):
             """Rapidly append multiple operations."""
             for i in range(10):
@@ -126,19 +128,19 @@ async def test_no_deadlock_under_high_concurrency():
                     op_type=OpType.ADD_TASK,
                     task_id=f"task_{batch_id}_{i}",
                     payload={"batch": batch_id},
-                    timestamp_ns=time.time_ns()
+                    timestamp_ns=time.time_ns(),
                 )
                 await plan_store.append_op(op)
-        
+
         # 50 batches * 10 ops = 500 total operations
         start_time = time.time()
         tasks = [rapid_append(i) for i in range(50)]
         await asyncio.gather(*tasks)
         elapsed = time.time() - start_time
-        
+
         # Should complete quickly
         assert elapsed < 10.0, f"High concurrency test took {elapsed}s"
-        
+
         print(f"✓ 500 operations completed in {elapsed:.2f}s")
 
 
@@ -150,7 +152,7 @@ async def test_annotate_task_async():
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test_plan.db"
         plan_store = PlanStore(db_path)
-        
+
         # Create a task first
         task_id = "annotated_task"
         op = PlanOp(
@@ -161,16 +163,15 @@ async def test_annotate_task_async():
             op_type=OpType.ADD_TASK,
             task_id=task_id,
             payload={"type": "test"},
-            timestamp_ns=time.time_ns()
+            timestamp_ns=time.time_ns(),
         )
         await plan_store.append_op(op)
-        
+
         # Annotate it
-        await plan_store.annotate_task(task_id, {
-            "invalidated": True,
-            "reason": "test annotation"
-        })
-        
+        await plan_store.annotate_task(
+            task_id, {"invalidated": True, "reason": "test annotation"}
+        )
+
         # Verify annotation was stored
         ops = await plan_store.get_ops_for_thread("thread_789")
         annotate_ops = [o for o in ops if o.op_type == OpType.ANNOTATE]

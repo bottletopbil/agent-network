@@ -6,11 +6,11 @@ if os.path.exists(OUT):
     print(".env already exists. Delete it if you want to regenerate.")
     raise SystemExit(0)
 
-sk = SigningKey.generate()               # 32-byte secret seed
+sk = SigningKey.generate()  # 32-byte secret seed
 vk = sk.verify_key
 
-seed_b64 = base64.b64encode(sk.encode()).decode()        # 32 bytes
-pub_b64  = base64.b64encode(bytes(vk)).decode()          # 32 bytes
+seed_b64 = base64.b64encode(sk.encode()).decode()  # 32 bytes
+pub_b64 = base64.b64encode(bytes(vk)).decode()  # 32 bytes
 
 with open(OUT, "w") as f:
     f.write(f"SWARM_SIGNING_SK_B64={seed_b64}\n")

@@ -9,22 +9,24 @@ from typing import Dict, Any
 
 class OpType(Enum):
     """Types of ledger operations"""
-    MINT = "MINT"           # Create new credits
-    TRANSFER = "TRANSFER"   # Transfer between accounts
-    ESCROW = "ESCROW"       # Lock credits in escrow
-    RELEASE = "RELEASE"     # Release escrowed credits
-    SLASH = "SLASH"         # Slash credits as penalty
+
+    MINT = "MINT"  # Create new credits
+    TRANSFER = "TRANSFER"  # Transfer between accounts
+    ESCROW = "ESCROW"  # Lock credits in escrow
+    RELEASE = "RELEASE"  # Release escrowed credits
+    SLASH = "SLASH"  # Slash credits as penalty
 
 
 @dataclass
 class LedgerOp:
     """Single operation in the ledger audit trail"""
-    op_id: str                  # UUID
-    account: str                # Account ID
-    operation: OpType           # Type of operation
-    amount: int                 # Amount in smallest credit unit
-    timestamp: int              # Timestamp in nanoseconds
-    metadata: Dict[str, Any]    # Operation-specific metadata
+
+    op_id: str  # UUID
+    account: str  # Account ID
+    operation: OpType  # Type of operation
+    amount: int  # Amount in smallest credit unit
+    timestamp: int  # Timestamp in nanoseconds
+    metadata: Dict[str, Any]  # Operation-specific metadata
 
 
 def validate_amount(amount: int) -> None:
@@ -47,7 +49,7 @@ def validate_operation(op: LedgerOp) -> None:
     """Validate a ledger operation has required fields"""
     validate_account_id(op.account)
     validate_amount(op.amount)
-    
+
     # Check required metadata per operation type
     if op.operation == OpType.TRANSFER:
         if "to_account" not in op.metadata:

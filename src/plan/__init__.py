@@ -9,13 +9,13 @@ from plan.patching import PlanPatch, PatchValidator
 from plan.versioning import PlanVersion, VersionTracker
 
 __all__ = [
-    'AutomergePlanStore',
-    'SyncManager',
-    'PeerState',
-    'PeerDiscovery',
-    'PeerInfo',
-    'PlanPatch',
-    'PatchValidator',
-    'PlanVersion',
-    'VersionTracker',
+    "AutomergePlanStore",
+    "SyncManager",
+    "PeerState",
+    "PeerDiscovery",
+    "PeerInfo",
+    "PlanPatch",
+    "PatchValidator",
+    "PlanVersion",
+    "VersionTracker",
 ]

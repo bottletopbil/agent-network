@@ -9,6 +9,7 @@ import time
 
 plan_store: PlanStore = None  # Injected at startup
 
+
 async def handle_claim(envelope: dict):
     """
     Process CLAIM envelope:
@@ -18,16 +19,16 @@ async def handle_claim(envelope: dict):
     """
     thread_id = envelope["thread_id"]
     payload = envelope["payload"]
-    
+
     # Extract claim details
     task_id = payload.get("task_id")
     if not task_id:
         print(f"[CLAIM] ERROR: No task_id in claim payload")
         return
-    
+
     claim_id = payload.get("claim_id", str(uuid.uuid4()))
     lease_ttl = payload.get("lease_ttl", 300)  # Default 5 minutes
-    
+
     # Create ANNOTATE op to record the claim
     op = PlanOp(
         op_id=str(uuid.uuid4()),
@@ -41,13 +42,16 @@ async def handle_claim(envelope: dict):
             "claim_id": claim_id,
             "claimer": envelope["sender_pk_b64"],
             "lease_ttl": lease_ttl,
-            "claimed_at": time.time_ns()
+            "claimed_at": time.time_ns(),
         },
-        timestamp_ns=time.time_ns()
+        timestamp_ns=time.time_ns(),
     )
-    
+
     await plan_store.append_op(op)
-    print(f"[CLAIM] Recorded claim {claim_id} for task {task_id} by {envelope['sender_pk_b64'][:8]}... (lease: {lease_ttl}s)")
+    print(
+        f"[CLAIM] Recorded claim {claim_id} for task {task_id} by {envelope['sender_pk_b64'][:8]}... (lease: {lease_ttl}s)"
+    )
+
 
 # Register with dispatcher
 DISPATCHER.register("CLAIM", handle_claim)

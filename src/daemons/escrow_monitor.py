@@ -15,18 +15,14 @@ logger = logging.getLogger(__name__)
 class EscrowMonitor:
     """
     Background daemon that monitors escrow TTLs and triggers expiration.
-    
+
     Runs periodically to check for expired escrows and invoke rollback.
     """
-    
-    def __init__(
-        self,
-        escrow_manager,
-        check_interval_seconds: float = 1.0
-    ):
+
+    def __init__(self, escrow_manager, check_interval_seconds: float = 1.0):
         """
         Initialize escrow monitor.
-        
+
         Args:
             escrow_manager: EscrowManager instance to monitor
             check_interval_seconds: How often to check for expirations
@@ -41,7 +37,7 @@ class EscrowMonitor:
         if self.running:
             logger.warning("Escrow monitor already running")
             return
-        
+
         self.running = True
         self._task = asyncio.create_task(self._monitor_loop())
         logger.info(
@@ -52,16 +48,16 @@ class EscrowMonitor:
         """Stop the monitor daemon."""
         if not self.running:
             return
-        
+
         self.running = False
-        
+
         if self._task:
             self._task.cancel()
             try:
                 await self._task
             except asyncio.CancelledError:
                 pass
-        
+
         logger.info("Stopped escrow monitor")
 
     async def _monitor_loop(self):
@@ -80,30 +76,30 @@ class EscrowMonitor:
         """Check for and handle expired escrows."""
         try:
             current_time_ns = int(datetime.utcnow().timestamp() * 1_000_000_000)
-            
+
             expired = self.escrow_manager.check_expirations(current_time_ns)
-            
+
             if expired:
                 logger.info(f"Expired {len(expired)} escrow(s)")
-                
+
                 # Optionally cleanup old completed escrows periodically
                 self.escrow_manager.cleanup_completed()
-                
+
         except Exception as e:
             logger.error(f"Error checking expirations: {e}", exc_info=True)
 
     def get_status(self) -> dict:
         """
         Get monitor status.
-        
+
         Returns:
             Status dictionary
         """
         pending = self.escrow_manager.get_pending_escrows()
-        
+
         return {
             "running": self.running,
             "check_interval_seconds": self.check_interval_seconds,
             "pending_escrows": len(pending),
-            "total_escrows": len(self.escrow_manager.escrows)
+            "total_escrows": len(self.escrow_manager.escrows),
         }

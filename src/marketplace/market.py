@@ -16,6 +16,7 @@ from collections import defaultdict
 
 class TaskStatus(Enum):
     """Task status in marketplace"""
+
     OPEN = "open"
     BIDDING = "bidding"
     ASSIGNED = "assigned"
@@ -26,6 +27,7 @@ class TaskStatus(Enum):
 @dataclass
 class Task:
     """Task in marketplace"""
+
     task_id: str
     description: str
     capabilities_required: List[str]
@@ -40,6 +42,7 @@ class Task:
 @dataclass
 class Bid:
     """Bid on a task"""
+
     bid_id: str
     task_id: str
     agent_id: str
@@ -53,6 +56,7 @@ class Bid:
 @dataclass
 class PriceTrend:
     """Price trend analytics"""
+
     capability: str
     avg_price: float
     min_price: float
@@ -64,6 +68,7 @@ class PriceTrend:
 @dataclass
 class AgentRating:
     """Agent rating"""
+
     agent_id: str
     rater_id: str
     rating: float
@@ -74,14 +79,14 @@ class AgentRating:
 class TaskMarketplace:
     """
     Task Marketplace for agent economy.
-    
+
     Manages task listings, bid tracking, price analytics, and ratings.
     """
-    
+
     def __init__(self, db_path: Path):
         """
         Initialize marketplace.
-        
+
         Args:
             db_path: Path to SQLite database
         """
@@ -89,13 +94,14 @@ class TaskMarketplace:
         self.conn = sqlite3.connect(str(db_path), check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self._init_db()
-    
+
     def _init_db(self):
         """Initialize database schema"""
         cursor = self.conn.cursor()
-        
+
         # Tasks table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS tasks (
                 task_id TEXT PRIMARY KEY,
                 description TEXT NOT NULL,
@@ -107,10 +113,12 @@ class TaskMarketplace:
                 assigned_to TEXT,
                 created_at REAL NOT NULL
             )
-        """)
-        
+        """
+        )
+
         # Bids table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS bids (
                 bid_id TEXT PRIMARY KEY,
                 task_id TEXT NOT NULL,
@@ -122,10 +130,12 @@ class TaskMarketplace:
                 status TEXT NOT NULL,
                 FOREIGN KEY (task_id) REFERENCES tasks(task_id)
             )
-        """)
-        
+        """
+        )
+
         # Agent ratings table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent_ratings (
                 rating_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 agent_id TEXT NOT NULL,
@@ -134,27 +144,34 @@ class TaskMarketplace:
                 comment TEXT,
                 created_at REAL NOT NULL
             )
-        """)
-        
+        """
+        )
+
         # Price history for analytics
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS price_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 capability TEXT NOT NULL,
                 price REAL NOT NULL,
                 recorded_at REAL NOT NULL
             )
-        """)
-        
+        """
+        )
+
         # Indexes
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_task_status ON tasks(status)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_bid_task ON bids(task_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_bid_agent ON bids(agent_id)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_rating_agent ON agent_ratings(agent_id)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_price_capability ON price_history(capability)")
-        
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_rating_agent ON agent_ratings(agent_id)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_price_capability ON price_history(capability)"
+        )
+
         self.conn.commit()
-    
+
     def post_task(
         self,
         task_id: str,
@@ -162,11 +179,11 @@ class TaskMarketplace:
         capabilities_required: List[str],
         budget: float,
         poster_id: str,
-        deadline: Optional[float] = None
+        deadline: Optional[float] = None,
     ) -> str:
         """
         Post a new task to marketplace.
-        
+
         Args:
             task_id: Unique task identifier
             description: Task description
@@ -174,61 +191,67 @@ class TaskMarketplace:
             budget: Maximum budget for task
             poster_id: ID of task poster
             deadline: Optional deadline timestamp
-        
+
         Returns:
             Task ID
         """
         cursor = self.conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             INSERT INTO tasks 
             (task_id, description, capabilities_required, budget, deadline, 
              status, poster_id, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            task_id,
-            description,
-            json.dumps(capabilities_required),
-            budget,
-            deadline,
-            TaskStatus.OPEN.value,
-            poster_id,
-            time.time()
-        ))
-        
+        """,
+            (
+                task_id,
+                description,
+                json.dumps(capabilities_required),
+                budget,
+                deadline,
+                TaskStatus.OPEN.value,
+                poster_id,
+                time.time(),
+            ),
+        )
+
         # Record price for analytics
         for capability in capabilities_required:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO price_history (capability, price, recorded_at)
                 VALUES (?, ?, ?)
-            """, (capability, budget, time.time()))
-        
+            """,
+                (capability, budget, time.time()),
+            )
+
         self.conn.commit()
-        
+
         return task_id
-    
+
     def list_available_tasks(
         self,
         capabilities: Optional[List[str]] = None,
         max_budget: Optional[float] = None,
-        status: Optional[TaskStatus] = None
+        status: Optional[TaskStatus] = None,
     ) -> List[Dict[str, Any]]:
         """
         List available tasks in marketplace.
-        
+
         Args:
             capabilities: Filter by required capabilities
             max_budget: Maximum budget filter
             status: Filter by status (defaults to OPEN)
-        
+
         Returns:
             List of task dictionaries
         """
         cursor = self.conn.cursor()
-        
+
         query = "SELECT * FROM tasks WHERE 1=1"
         params = []
-        
+
         # Default to open tasks
         if status is None:
             query += " AND status = ?"
@@ -236,39 +259,41 @@ class TaskMarketplace:
         else:
             query += " AND status = ?"
             params.append(status.value)
-        
+
         # Filter by budget
         if max_budget is not None:
             query += " AND budget <= ?"
             params.append(max_budget)
-        
+
         query += " ORDER BY created_at DESC"
-        
+
         rows = cursor.execute(query, params).fetchall()
-        
+
         tasks = []
         for row in rows:
             task_caps = json.loads(row["capabilities_required"])
-            
+
             # Filter by capabilities if specified
             if capabilities:
                 if not all(cap in task_caps for cap in capabilities):
                     continue
-            
-            tasks.append({
-                "task_id": row["task_id"],
-                "description": row["description"],
-                "capabilities_required": task_caps,
-                "budget": row["budget"],
-                "deadline": row["deadline"],
-                "status": row["status"],
-                "poster_id": row["poster_id"],
-                "assigned_to": row["assigned_to"],
-                "created_at": row["created_at"]
-            })
-        
+
+            tasks.append(
+                {
+                    "task_id": row["task_id"],
+                    "description": row["description"],
+                    "capabilities_required": task_caps,
+                    "budget": row["budget"],
+                    "deadline": row["deadline"],
+                    "status": row["status"],
+                    "poster_id": row["poster_id"],
+                    "assigned_to": row["assigned_to"],
+                    "created_at": row["created_at"],
+                }
+            )
+
         return tasks
-    
+
     def submit_bid(
         self,
         bid_id: str,
@@ -276,11 +301,11 @@ class TaskMarketplace:
         agent_id: str,
         amount: float,
         estimated_time: float,
-        message: str = ""
+        message: str = "",
     ) -> str:
         """
         Submit a bid for a task.
-        
+
         Args:
             bid_id: Unique bid identifier
             task_id: Task being bid on
@@ -288,124 +313,141 @@ class TaskMarketplace:
             amount: Bid amount
             estimated_time: Estimated completion time
             message: Optional message/proposal
-        
+
         Returns:
             Bid ID
         """
         cursor = self.conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             INSERT INTO bids 
             (bid_id, task_id, agent_id, amount, estimated_time, message, created_at, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            bid_id,
-            task_id,
-            agent_id,
-            amount,
-            estimated_time,
-            message,
-            time.time(),
-            "pending"
-        ))
-        
+        """,
+            (
+                bid_id,
+                task_id,
+                agent_id,
+                amount,
+                estimated_time,
+                message,
+                time.time(),
+                "pending",
+            ),
+        )
+
         # Update task status to bidding
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE tasks SET status = ? WHERE task_id = ?
-        """, (TaskStatus.BIDDING.value, task_id))
-        
+        """,
+            (TaskStatus.BIDDING.value, task_id),
+        )
+
         self.conn.commit()
-        
+
         return bid_id
-    
+
     def get_bid_history(self, task_id: str) -> List[Dict[str, Any]]:
         """
         Get bid history for a task.
-        
+
         Args:
             task_id: Task identifier
-        
+
         Returns:
             List of bids ordered by amount (lowest first)
         """
         cursor = self.conn.cursor()
-        
-        rows = cursor.execute("""
+
+        rows = cursor.execute(
+            """
             SELECT * FROM bids
             WHERE task_id = ?
             ORDER BY amount ASC, created_at ASC
-        """, (task_id,)).fetchall()
-        
+        """,
+            (task_id,),
+        ).fetchall()
+
         bids = []
         for row in rows:
-            bids.append({
-                "bid_id": row["bid_id"],
-                "task_id": row["task_id"],
-                "agent_id": row["agent_id"],
-                "amount": row["amount"],
-                "estimated_time": row["estimated_time"],
-                "message": row["message"],
-                "created_at": row["created_at"],
-                "status": row["status"]
-            })
-        
+            bids.append(
+                {
+                    "bid_id": row["bid_id"],
+                    "task_id": row["task_id"],
+                    "agent_id": row["agent_id"],
+                    "amount": row["amount"],
+                    "estimated_time": row["estimated_time"],
+                    "message": row["message"],
+                    "created_at": row["created_at"],
+                    "status": row["status"],
+                }
+            )
+
         return bids
-    
+
     def accept_bid(self, bid_id: str) -> bool:
         """Accept a bid and assign task"""
         cursor = self.conn.cursor()
-        
+
         # Get bid details
         bid = cursor.execute(
-            "SELECT task_id, agent_id FROM bids WHERE bid_id = ?",
-            (bid_id,)
+            "SELECT task_id, agent_id FROM bids WHERE bid_id = ?", (bid_id,)
         ).fetchone()
-        
+
         if not bid:
             return False
-        
+
         # Update bid status
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE bids SET status = ?
             WHERE bid_id = ?
-        """, ("accepted", bid_id))
-        
+        """,
+            ("accepted", bid_id),
+        )
+
         # Reject other bids
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE bids SET status = ?
             WHERE task_id = ? AND bid_id != ?
-        """, ("rejected", bid["task_id"], bid_id))
-        
+        """,
+            ("rejected", bid["task_id"], bid_id),
+        )
+
         # Assign task
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE tasks 
             SET status = ?, assigned_to = ?
             WHERE task_id = ?
-        """, (TaskStatus.ASSIGNED.value, bid["agent_id"], bid["task_id"]))
-        
+        """,
+            (TaskStatus.ASSIGNED.value, bid["agent_id"], bid["task_id"]),
+        )
+
         self.conn.commit()
-        
+
         return True
-    
+
     def track_price_trends(
-        self,
-        capability: Optional[str] = None,
-        days: int = 30
+        self, capability: Optional[str] = None, days: int = 30
     ) -> List[PriceTrend]:
         """
         Track price trends for capabilities.
-        
+
         Args:
             capability: Specific capability (None for all)
             days: Number of days to analyze
-        
+
         Returns:
             List of price trends
         """
         cursor = self.conn.cursor()
-        
+
         cutoff = time.time() - (days * 24 * 3600)
-        
+
         if capability:
             query = """
                 SELECT 
@@ -432,9 +474,9 @@ class TaskMarketplace:
                 GROUP BY capability
             """
             params = (cutoff,)
-        
+
         rows = cursor.execute(query, params).fetchall()
-        
+
         trends = []
         for row in rows:
             # Calculate trend direction (simplified)
@@ -443,67 +485,69 @@ class TaskMarketplace:
                 trend_direction = "up"
             elif row["min_price"] < row["avg_price"] * 0.8:
                 trend_direction = "down"
-            
-            trends.append(PriceTrend(
-                capability=row["capability"],
-                avg_price=row["avg_price"],
-                min_price=row["min_price"],
-                max_price=row["max_price"],
-                total_tasks=row["total_tasks"],
-                trend_direction=trend_direction
-            ))
-        
+
+            trends.append(
+                PriceTrend(
+                    capability=row["capability"],
+                    avg_price=row["avg_price"],
+                    min_price=row["min_price"],
+                    max_price=row["max_price"],
+                    total_tasks=row["total_tasks"],
+                    trend_direction=trend_direction,
+                )
+            )
+
         return trends
-    
+
     def rate_agent(
-        self,
-        agent_id: str,
-        rater_id: str,
-        rating: float,
-        comment: str = ""
+        self, agent_id: str, rater_id: str, rating: float, comment: str = ""
     ) -> int:
         """
         Rate an agent.
-        
+
         Args:
             agent_id: Agent being rated
             rater_id: User submitting rating
             rating: Rating value (0.0-5.0)
             comment: Optional comment
-        
+
         Returns:
             Rating ID
-        
+
         Raises:
             ValueError: If rating out of range
         """
         if not 0.0 <= rating <= 5.0:
             raise ValueError("Rating must be between 0.0 and 5.0")
-        
+
         cursor = self.conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             INSERT INTO agent_ratings (agent_id, rater_id, rating, comment, created_at)
             VALUES (?, ?, ?, ?, ?)
-        """, (agent_id, rater_id, rating, comment, time.time()))
-        
+        """,
+            (agent_id, rater_id, rating, comment, time.time()),
+        )
+
         self.conn.commit()
-        
+
         return cursor.lastrowid
-    
+
     def get_agent_ratings(self, agent_id: str) -> Dict[str, Any]:
         """
         Get agent ratings summary.
-        
+
         Args:
             agent_id: Agent identifier
-        
+
         Returns:
             Dictionary with rating statistics
         """
         cursor = self.conn.cursor()
-        
-        row = cursor.execute("""
+
+        row = cursor.execute(
+            """
             SELECT 
                 COUNT(*) as total_ratings,
                 AVG(rating) as avg_rating,
@@ -511,17 +555,22 @@ class TaskMarketplace:
                 MAX(rating) as max_rating
             FROM agent_ratings
             WHERE agent_id = ?
-        """, (agent_id,)).fetchone()
-        
+        """,
+            (agent_id,),
+        ).fetchone()
+
         # Get recent ratings
-        recent = cursor.execute("""
+        recent = cursor.execute(
+            """
             SELECT rating, rater_id, comment, created_at
             FROM agent_ratings
             WHERE agent_id = ?
             ORDER BY created_at DESC
             LIMIT 10
-        """, (agent_id,)).fetchall()
-        
+        """,
+            (agent_id,),
+        ).fetchall()
+
         return {
             "agent_id": agent_id,
             "total_ratings": row["total_ratings"],
@@ -533,25 +582,26 @@ class TaskMarketplace:
                     "rating": r["rating"],
                     "rater_id": r["rater_id"],
                     "comment": r["comment"],
-                    "created_at": r["created_at"]
+                    "created_at": r["created_at"],
                 }
                 for r in recent
-            ]
+            ],
         }
-    
+
     def get_leaderboard(self, limit: int = 10) -> List[Dict[str, Any]]:
         """
         Get agent leaderboard by average rating.
-        
+
         Args:
             limit: Number of top agents to return
-        
+
         Returns:
             List of agents with ratings
         """
         cursor = self.conn.cursor()
-        
-        rows = cursor.execute("""
+
+        rows = cursor.execute(
+            """
             SELECT 
                 agent_id,
                 COUNT(*) as total_ratings,
@@ -561,15 +611,19 @@ class TaskMarketplace:
             HAVING COUNT(*) >= 3
             ORDER BY avg_rating DESC, total_ratings DESC
             LIMIT ?
-        """, (limit,)).fetchall()
-        
+        """,
+            (limit,),
+        ).fetchall()
+
         leaderboard = []
         for i, row in enumerate(rows, 1):
-            leaderboard.append({
-                "rank": i,
-                "agent_id": row["agent_id"],
-                "avg_rating": row["avg_rating"],
-                "total_ratings": row["total_ratings"]
-            })
-        
+            leaderboard.append(
+                {
+                    "rank": i,
+                    "agent_id": row["agent_id"],
+                    "avg_rating": row["avg_rating"],
+                    "total_ratings": row["total_ratings"],
+                }
+            )
+
         return leaderboard

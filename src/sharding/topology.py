@@ -9,6 +9,7 @@ from datetime import datetime
 @dataclass
 class NodeInfo:
     """Information about a node in the shard."""
+
     node_id: str
     address: str
     capabilities: List[str]
@@ -27,7 +28,7 @@ class ShardTopology:
     def __init__(self, num_shards: int = 256):
         """
         Initialize shard topology.
-        
+
         Args:
             num_shards: Number of shards (default 256 for balanced distribution)
         """
@@ -36,27 +37,27 @@ class ShardTopology:
     def get_shard_for_need(self, need_id: str) -> int:
         """
         Determine which shard handles a given NEED using consistent hashing.
-        
+
         Args:
             need_id: The NEED identifier
-            
+
         Returns:
             Shard ID (0 to num_shards-1)
         """
         # Use SHA256 for consistent hashing
-        hash_digest = hashlib.sha256(need_id.encode('utf-8')).digest()
+        hash_digest = hashlib.sha256(need_id.encode("utf-8")).digest()
         # Convert first 4 bytes to integer
-        hash_value = int.from_bytes(hash_digest[:4], byteorder='big')
+        hash_value = int.from_bytes(hash_digest[:4], byteorder="big")
         # Modulo to get shard ID
         return hash_value % self.num_shards
 
     def get_bucket_range(self, shard_id: int) -> tuple:
         """
         Get the hash bucket range for a shard.
-        
+
         Args:
             shard_id: The shard identifier
-            
+
         Returns:
             Tuple of (min_hash, max_hash) for this shard
         """
@@ -79,15 +80,11 @@ class ShardRegistry:
         self.shard_capabilities: Dict[int, Set[str]] = {}
 
     def register_shard(
-        self,
-        shard_id: int,
-        node_id: str,
-        address: str,
-        capabilities: List[str]
+        self, shard_id: int, node_id: str, address: str, capabilities: List[str]
     ) -> None:
         """
         Register a node as part of a shard.
-        
+
         Args:
             shard_id: Shard identifier
             node_id: Node identifier
@@ -95,7 +92,7 @@ class ShardRegistry:
             capabilities: List of capabilities this node provides
         """
         now_ns = int(datetime.utcnow().timestamp() * 1_000_000_000)
-        
+
         # Create or update node info
         if node_id in self.nodes:
             # Update existing node
@@ -110,7 +107,7 @@ class ShardRegistry:
                 address=address,
                 capabilities=capabilities,
                 joined_at_ns=now_ns,
-                last_heartbeat_ns=now_ns
+                last_heartbeat_ns=now_ns,
             )
             self.nodes[node_id] = node
 
@@ -127,26 +124,26 @@ class ShardRegistry:
     def get_shard_nodes(self, shard_id: int) -> List[NodeInfo]:
         """
         Get all nodes in a shard.
-        
+
         Args:
             shard_id: Shard identifier
-            
+
         Returns:
             List of NodeInfo for nodes in this shard
         """
         if shard_id not in self.shard_map:
             return []
-        
+
         node_ids = self.shard_map[shard_id]
         return [self.nodes[nid] for nid in node_ids if nid in self.nodes]
 
     def get_healthy_nodes(self, shard_id: int) -> List[NodeInfo]:
         """
         Get healthy nodes in a shard.
-        
+
         Args:
             shard_id: Shard identifier
-            
+
         Returns:
             List of healthy NodeInfo
         """
@@ -156,10 +153,10 @@ class ShardRegistry:
     def health_check(self, shard_id: int) -> bool:
         """
         Check if a shard is healthy (has at least one healthy node).
-        
+
         Args:
             shard_id: Shard identifier
-            
+
         Returns:
             True if shard has at least one healthy node
         """
@@ -169,7 +166,7 @@ class ShardRegistry:
     def update_heartbeat(self, node_id: str) -> None:
         """
         Update heartbeat timestamp for a node.
-        
+
         Args:
             node_id: Node identifier
         """
@@ -180,7 +177,7 @@ class ShardRegistry:
     def unregister_node(self, node_id: str) -> None:
         """
         Remove a node from the registry.
-        
+
         Args:
             node_id: Node identifier
         """
@@ -198,10 +195,10 @@ class ShardRegistry:
     def get_shard_capabilities(self, shard_id: int) -> Set[str]:
         """
         Get all capabilities available in a shard.
-        
+
         Args:
             shard_id: Shard identifier
-            
+
         Returns:
             Set of capability strings
         """
@@ -210,7 +207,7 @@ class ShardRegistry:
     def get_all_shards(self) -> List[int]:
         """
         Get list of all registered shard IDs.
-        
+
         Returns:
             List of shard IDs
         """

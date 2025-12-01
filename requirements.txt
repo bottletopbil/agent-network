@@ -5,6 +5,8 @@ opentelemetry-api==1.21.0
 opentelemetry-sdk==1.21.0
 opentelemetry-exporter-otlp>=1.20.0
 pytest==7.4.3
+pytest-asyncio==0.23.8
+pytest-cov==4.1.0
 ipfshttpclient==0.8.0a2
 # libp2p==0.1.4  # Requires native GMP library - using simplified implementation
 
