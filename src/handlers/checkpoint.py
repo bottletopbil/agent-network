@@ -5,7 +5,6 @@ Handles checkpoint creation with Merkle commitments and signature collection.
 """
 
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

@@ -8,14 +8,13 @@ from audit import log_event
 from envelope import observe_envelope
 
 # from policy import validate_envelope  # ✅ Rule book v0 gate
-from policy.gates import GateEnforcer, PolicyGate
+from policy.gates import GateEnforcer
 
 # OpenTelemetry tracing
 try:
     from observability.tracing import (
         create_span,
         propagate_context,
-        extract_context,
         start_span_from_context,
     )
     from opentelemetry.trace import SpanKind

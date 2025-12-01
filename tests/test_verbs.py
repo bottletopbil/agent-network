@@ -16,7 +16,6 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
-import asyncio
 from verbs import VerbDispatcher, DISPATCHER
 from plan_store import PlanStore, OpType
 import handlers.need

@@ -2,14 +2,13 @@
 
 import sys
 import os
-import pytest
 import tempfile
 from pathlib import Path
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from checkpoint import CheckpointManager, Checkpoint, SignedCheckpoint
+from checkpoint import CheckpointManager
 from checkpoint.sync import FastSync
 
 

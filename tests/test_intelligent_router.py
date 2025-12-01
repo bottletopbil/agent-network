@@ -7,7 +7,6 @@ Tests complete routing pipeline, fallback mechanisms, metrics tracking, and perf
 import pytest
 import sys
 from pathlib import Path
-import asyncio
 import time
 
 # Add src to path
@@ -16,11 +15,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from routing.router import IntelligentRouter, get_router, reset_router
 from routing.manifests import (
     AgentManifest,
-    ManifestRegistry,
     reset_registry,
     get_registry,
 )
-from routing.metrics import MetricsCollector, reset_metrics_collector
+from routing.metrics import reset_metrics_collector
 from routing.bandit import reset_bandit
 from routing.domain_fit import reset_domain_fit_calculator
 from routing.recency import reset_recency_weighter

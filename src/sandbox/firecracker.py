@@ -17,7 +17,6 @@ from typing import Dict, Optional, List
 from enum import Enum
 import subprocess
 import uuid
-import json
 import os
 import sys
 import time
@@ -36,7 +35,6 @@ class VMState(Enum):
 class SandboxError(Exception):
     """Base exception for sandbox-related errors."""
 
-    pass
 
 
 @dataclass
@@ -257,7 +255,7 @@ class FirecrackerVM:
 
     def _mock_exec(self, command: str, timeout: int) -> Dict:
         """Mock command execution for development."""
-        start_time = time.time()
+        time.time()
 
         # Simulate some execution time
         exec_time = min(0.1, timeout)

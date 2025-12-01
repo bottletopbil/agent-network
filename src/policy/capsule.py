@@ -12,7 +12,6 @@ import logging
 from dataclasses import dataclass, asdict
 from typing import List, Optional, Dict, Any
 from pathlib import Path
-import asyncio
 
 logger = logging.getLogger(__name__)
 

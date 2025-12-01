@@ -5,8 +5,8 @@ Auction Bidding: Auction lifecycle and bid management.
 import time
 import threading
 import logging
-from typing import Dict, List, Optional
-from dataclasses import dataclass, field
+from typing import Dict, Optional
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 

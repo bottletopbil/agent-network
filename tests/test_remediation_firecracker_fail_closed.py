@@ -8,7 +8,7 @@ rather than silently falling back to mock mode in production.
 import sys
 from pathlib import Path
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))

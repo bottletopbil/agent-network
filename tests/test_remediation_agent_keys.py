@@ -39,8 +39,6 @@ def test_different_agents_produce_different_signatures():
     assert sig1 != sig2, "Different agents should produce different signatures"
 
     # Verify with correct keys
-    from nacl.signing import VerifyKey
-    from nacl.encoding import RawEncoder
 
     # Shouldn't raise
     verify_key1.verify(message, sig1)

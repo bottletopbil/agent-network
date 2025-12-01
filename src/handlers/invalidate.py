@@ -8,9 +8,8 @@ Handles:
 - Escalating K_result requirements
 """
 
-import json
 import time
-from typing import Dict, Any, List
+from typing import Dict, Any
 import logging
 
 from plan_store import PlanStore

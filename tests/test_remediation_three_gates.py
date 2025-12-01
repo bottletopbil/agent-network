@@ -7,13 +7,11 @@ properly integrated and invoked in the correct scenarios.
 
 import sys
 from pathlib import Path
-import pytest
-from unittest.mock import Mock, MagicMock
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from policy.gates import GateEnforcer, PolicyGate, PolicyDecision
+from policy.gates import GateEnforcer, PolicyGate
 
 
 def test_preflight_gate_caching():

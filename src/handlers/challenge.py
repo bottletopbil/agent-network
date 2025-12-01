@@ -17,8 +17,6 @@ from typing import Optional
 from challenges.proofs import (
     ProofType,
     ProofSchema,
-    MAX_PROOF_SIZE_BYTES,
-    MAX_GAS_ESTIMATE,
 )
 from challenges.window import ChallengeWindow
 from challenges.bonds import BondCalculator, ComplexityLevel

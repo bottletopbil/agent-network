@@ -19,7 +19,7 @@ import time
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from plan_store import PlanStore, PlanOp, OpType, TaskState
+from plan_store import PlanStore, PlanOp, OpType
 from plan.automerge_store import AutomergePlanStore
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "tools"))
@@ -283,7 +283,7 @@ class TestFullMigrationPipeline:
             assert len(loaded_ops) == 5
 
             # Step 2: Export to Automerge
-            automerge_store = tool.export_to_automerge(loaded_ops, automerge_path)
+            tool.export_to_automerge(loaded_ops, automerge_path)
             assert automerge_path.exists()
 
             # Step 3: Verify migration
@@ -385,7 +385,7 @@ class TestEmptyDatabase:
             automerge_path = Path(tmpdir) / "empty.bin"
 
             # Create empty store
-            sqlite_store = PlanStore(sqlite_path)
+            PlanStore(sqlite_path)
 
             # Migrate
             tool = MigrationTool()

@@ -6,7 +6,6 @@ Tests dual NATS+P2P publishing, deduplication, fallback, and P2P preference.
 
 import pytest
 import sys
-import os
 from pathlib import Path
 import time
 

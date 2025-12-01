@@ -1,0 +1,468 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0 -- /Library/Developer/CommandLineTools/usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/rileyhicks/Dev/Real Projects/agent-swarm
+plugins: asyncio-1.2.0
+asyncio: mode=strict, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 120 items
+
+tests/test_remediation_agent_keys.py::test_different_agents_produce_different_signatures PASSED [  0%]
+tests/test_remediation_agent_keys.py::test_save_and_load_agent_keypair PASSED [  1%]
+tests/test_remediation_agent_keys.py::test_agent_specific_signatures PASSED [  2%]
+tests/test_remediation_agent_keys.py::test_backward_compatibility_with_env_keypair PASSED [  3%]
+tests/test_remediation_async_planstore.py::test_concurrent_async_operations PASSED [  4%]
+tests/test_remediation_async_planstore.py::test_concurrent_state_updates PASSED [  5%]
+tests/test_remediation_async_planstore.py::test_no_deadlock_under_high_concurrency PASSED [  5%]
+tests/test_remediation_async_planstore.py::test_annotate_task_async PASSED [  6%]
+tests/test_remediation_auction_snipe.py::test_late_bid_extends_auction_window FAILED [  7%]
+tests/test_remediation_auction_snipe.py::test_multiple_late_bids_extend_multiple_times FAILED [  8%]
+tests/test_remediation_auction_snipe.py::test_max_extensions_limit FAILED [  9%]
+tests/test_remediation_auction_snipe.py::test_early_bid_does_not_extend FAILED [ 10%]
+tests/test_remediation_auction_snipe.py::test_extension_logged FAILED    [ 10%]
+tests/test_remediation_cas_fallback.py::test_ipfs_failure_returns_fallback_flag PASSED [ 11%]
+tests/test_remediation_cas_fallback.py::test_ipfs_success_returns_ipfs_flag PASSED [ 12%]
+tests/test_remediation_cas_fallback.py::test_file_cas_mode_returns_correct_flag PASSED [ 13%]
+tests/test_remediation_cas_fallback.py::test_ipfs_failure_logs_error PASSED [ 14%]
+tests/test_remediation_cas_fallback.py::test_return_type_is_tuple PASSED [ 15%]
+tests/test_remediation_cas_fallback.py::test_health_check_reports_cas_backend PASSED [ 15%]
+tests/test_remediation_economic_attacks.py::test_double_spend_escrow_attack FAILED [ 16%]
+tests/test_remediation_economic_attacks.py::test_double_spend_reward_claim PASSED [ 17%]
+tests/test_remediation_economic_attacks.py::test_sybil_identity_spam FAILED [ 18%]
+tests/test_remediation_economic_attacks.py::test_sybil_verifier_spam PASSED [ 19%]
+tests/test_remediation_economic_attacks.py::test_whale_committee_domination PASSED [ 20%]
+tests/test_remediation_economic_attacks.py::test_auction_sniping_attack FAILED [ 20%]
+tests/test_remediation_economic_attacks.py::test_auction_collusion PASSED [ 21%]
+tests/test_remediation_economic_attacks.py::test_slashing_fake_honest_verifiers FAILED [ 22%]
+tests/test_remediation_economic_attacks.py::test_challenge_reward_manipulation PASSED [ 23%]
+tests/test_remediation_economic_attacks.py::test_typo_fund_loss FAILED   [ 24%]
+tests/test_remediation_escrow_double_spend.py::test_escrow_double_spend_race_condition PASSED [ 25%]
+tests/test_remediation_escrow_double_spend.py::test_escrow_release_sequential_works PASSED [ 25%]
+tests/test_remediation_escrow_double_spend.py::test_escrow_already_released_error PASSED [ 26%]
+tests/test_remediation_etcd_consensus.py::test_only_one_decide_succeeds SKIPPED [ 27%]
+tests/test_remediation_etcd_consensus.py::test_loser_can_read_winner_decide SKIPPED [ 28%]
+tests/test_remediation_etcd_consensus.py::test_different_needs_independent SKIPPED [ 29%]
+tests/test_remediation_etcd_consensus.py::test_concurrent_decide_race_condition SKIPPED [ 30%]
+tests/test_remediation_firecracker_fail_closed.py::test_fail_closed_when_firecracker_unavailable PASSED [ 30%]
+tests/test_remediation_firecracker_fail_closed.py::test_auto_detect_uses_mock_when_unavailable PASSED [ 31%]
+tests/test_remediation_firecracker_fail_closed.py::test_explicit_mock_mode_always_works PASSED [ 32%]
+tests/test_remediation_firecracker_fail_closed.py::test_real_mode_succeeds_when_firecracker_available PASSED [ 33%]
+tests/test_remediation_firecracker_fail_closed.py::test_production_ready_method PASSED [ 34%]
+tests/test_remediation_firecracker_fail_closed.py::test_real_exec_raises_helpful_error PASSED [ 35%]
+tests/test_remediation_honest_proof.py::test_only_actual_attestors_receive_rewards FAILED [ 35%]
+tests/test_remediation_honest_proof.py::test_fake_honest_verifier_rejected FAILED [ 36%]
+tests/test_remediation_honest_proof.py::test_warning_logged_for_non_attestors FAILED [ 37%]
+tests/test_remediation_honest_proof.py::test_empty_attestation_log FAILED [ 38%]
+tests/test_remediation_honest_proof.py::test_all_claimed_honest_are_verified FAILED [ 39%]
+tests/test_remediation_ipfs_timeout.py::test_ipfs_get_timeout FAILED     [ 40%]
+tests/test_remediation_ipfs_timeout.py::test_ipfs_get_default_timeout FAILED [ 40%]
+tests/test_remediation_ipfs_timeout.py::test_circuit_breaker_opens_after_failures FAILED [ 41%]
+tests/test_remediation_ipfs_timeout.py::test_circuit_breaker_closes_after_cooldown FAILED [ 42%]
+tests/test_remediation_ipfs_timeout.py::test_successful_get_resets_failure_count FAILED [ 43%]
+tests/test_remediation_ipfs_timeout.py::test_circuit_breaker_logs_state_changes FAILED [ 44%]
+tests/test_remediation_mint_authorization.py::test_unauthorized_mint_rejected PASSED [ 45%]
+tests/test_remediation_mint_authorization.py::test_system_mint_authorized PASSED [ 45%]
+tests/test_remediation_mint_authorization.py::test_zero_balance_any_minter PASSED [ 46%]
+tests/test_remediation_mint_authorization.py::test_default_minter_is_system PASSED [ 47%]
+tests/test_remediation_mint_authorization.py::test_max_supply_enforcement PASSED [ 48%]
+tests/test_remediation_mint_authorization.py::test_total_supply_tracking PASSED [ 49%]
+tests/test_remediation_mint_authorization.py::test_supply_not_affected_by_transfers PASSED [ 50%]
+tests/test_remediation_negative_balance.py::test_transfer_prevents_negative_balance PASSED [ 50%]
+tests/test_remediation_negative_balance.py::test_escrow_prevents_negative_balance PASSED [ 51%]
+tests/test_remediation_negative_balance.py::test_database_check_constraints PASSED [ 52%]
+tests/test_remediation_negative_balance.py::test_check_constraint_on_locked PASSED [ 53%]
+tests/test_remediation_negative_balance.py::test_check_constraint_on_unbonding PASSED [ 54%]
+tests/test_remediation_negative_balance.py::test_exact_balance_transfer_works PASSED [ 55%]
+tests/test_remediation_negative_balance.py::test_partial_balance_transfer_works PASSED [ 55%]
+tests/test_remediation_partition_detection.py::test_partition_detection PASSED [ 56%]
+tests/test_remediation_partition_detection.py::test_partition_heal PASSED [ 57%]
+tests/test_remediation_partition_detection.py::test_multiple_peers PASSED [ 58%]
+tests/test_remediation_partition_detection.py::test_epoch_advancement_on_partition PASSED [ 59%]
+tests/test_remediation_partition_detection.py::test_reconcile_on_heal PASSED [ 60%]
+tests/test_remediation_policy_bypass.py::test_handler ERROR              [ 60%]
+tests/test_remediation_policy_bypass.py::test_missing_required_fields_rejected FAILED [ 61%]
+tests/test_remediation_policy_bypass.py::test_non_dict_envelope_rejected FAILED [ 62%]
+tests/test_remediation_policy_bypass.py::test_decorator_marks_function PASSED [ 63%]
+tests/test_remediation_policy_bypass.py::test_policy_validation_invoked FAILED [ 64%]
+tests/test_remediation_policy_bypass.py::test_policy_validation_passes_when_allowed FAILED [ 65%]
+tests/test_remediation_policy_bypass.py::test_bypass_flags_ignored FAILED [ 65%]
+tests/test_remediation_reward_scaling.py::test_reward_scales_with_slashed_amount FAILED [ 66%]
+tests/test_remediation_reward_scaling.py::test_reward_is_20_percent_of_slashed FAILED [ 67%]
+tests/test_remediation_reward_scaling.py::test_small_slash_gives_small_reward FAILED [ 68%]
+tests/test_remediation_reward_scaling.py::test_bond_returned_plus_reward FAILED [ 69%]
+tests/test_remediation_slash_precision.py::test_slash_distribution_precision_odd_number PASSED [ 70%]
+tests/test_remediation_slash_precision.py::test_slash_distribution_precision_large_number PASSED [ 70%]
+tests/test_remediation_slash_precision.py::test_slash_distribution_handles_remainder PASSED [ 71%]
+tests/test_remediation_slash_precision.py::test_no_precision_loss_with_integer_arithmetic PASSED [ 72%]
+tests/test_remediation_slash_precision.py::test_float_method_comparison PASSED [ 73%]
+tests/test_remediation_slashing_integration.py::test_slashing_integration_upheld_challenge PASSED [ 74%]
+tests/test_remediation_slashing_integration.py::test_slashing_multiple_verifiers PASSED [ 75%]
+tests/test_remediation_slashing_integration.py::test_no_slashing_when_rejected PASSED [ 75%]
+tests/test_remediation_state_reconcile.py::test_reconcile_merges_conflicting_decides PASSED [ 76%]
+tests/test_remediation_state_reconcile.py::test_orphaned_branches_marked PASSED [ 77%]
+tests/test_remediation_state_reconcile.py::test_reconcile_handler_invoked PASSED [ 78%]
+tests/test_remediation_state_reconcile.py::test_epoch_advancement_reason_included PASSED [ 79%]
+tests/test_remediation_state_reconcile.py::test_merge_error_handling PASSED [ 80%]
+tests/test_remediation_sybil_resistance.py::test_did_creation_requires_stake PASSED [ 80%]
+tests/test_remediation_sybil_resistance.py::test_did_creation_with_sufficient_stake PASSED [ 81%]
+tests/test_remediation_sybil_resistance.py::test_did_creation_without_ledger_uses_pow PASSED [ 82%]
+tests/test_remediation_sybil_resistance.py::test_rate_limiting_prevents_spam PASSED [ 83%]
+tests/test_remediation_sybil_resistance.py::test_mass_did_creation_expensive PASSED [ 84%]
+tests/test_remediation_sybil_resistance.py::test_pow_difficulty_configurable PASSED [ 85%]
+tests/test_remediation_three_gates.py::test_preflight_gate_caching PASSED [ 85%]
+tests/test_remediation_three_gates.py::test_ingress_gate_full_validation PASSED [ 86%]
+tests/test_remediation_three_gates.py::test_commit_gate_with_telemetry PASSED [ 87%]
+tests/test_remediation_three_gates.py::test_all_three_gates_invoked PASSED [ 88%]
+tests/test_remediation_three_gates.py::test_gate_enforcer_rejection PASSED [ 89%]
+tests/test_remediation_three_gates.py::test_cache_key_generation PASSED  [ 90%]
+tests/test_remediation_transfer_validation.py::test_transfer_to_nonexistent_account_raises_error FAILED [ 90%]
+tests/test_remediation_transfer_validation.py::test_transfer_with_allow_create_works FAILED [ 91%]
+tests/test_remediation_transfer_validation.py::test_transfer_to_existing_account_works FAILED [ 92%]
+tests/test_remediation_transfer_validation.py::test_typo_prevention FAILED [ 93%]
+tests/test_remediation_transfer_validation.py::test_backward_compatibility_with_flag FAILED [ 94%]
+tests/test_remediation_yield_error_handling.py::test_validation_logic_missing_thread_id PASSED [ 95%]
+tests/test_remediation_yield_error_handling.py::test_validation_logic_missing_payload PASSED [ 95%]
+tests/test_remediation_yield_error_handling.py::test_validation_logic_missing_task_id PASSED [ 96%]
+tests/test_remediation_yield_error_handling.py::test_validation_logic_none_values PASSED [ 97%]
+tests/test_remediation_yield_error_handling.py::test_validation_logic_valid_envelope PASSED [ 98%]
+tests/test_remediation_yield_error_handling.py::test_error_handling_pattern PASSED [ 99%]
+tests/test_remediation_yield_error_handling.py::test_get_vs_bracket_access PASSED [100%]
+
+==================================== ERRORS ====================================
+________________________ ERROR at setup of test_handler ________________________
+file /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_policy_bypass.py, line 20
+  @require_policy_validation
+  async def test_handler(envelope: dict):
+      """Mock handler that just returns success."""
+      return {"status": "ok", "task_id": envelope["payload"].get("task_id")}
+E       fixture 'envelope' not found
+>       available fixtures: _class_scoped_runner, _function_scoped_runner, _module_scoped_runner, _package_scoped_runner, _session_scoped_runner, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chaos_mode, doctest_namespace, event_loop_policy, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_policy_bypass.py:20
+=================================== FAILURES ===================================
+_____________________ test_late_bid_extends_auction_window _____________________
+tests/test_remediation_auction_snipe.py:25: in test_late_bid_extends_auction_window
+    auction = manager.start_auction(task_id=task_id, min_bid=100, duration_seconds=10)
+E   TypeError: start_auction() got an unexpected keyword argument 'task_id'
+________________ test_multiple_late_bids_extend_multiple_times _________________
+tests/test_remediation_auction_snipe.py:57: in test_multiple_late_bids_extend_multiple_times
+    auction = manager.start_auction(task_id=task_id, min_bid=100, duration_seconds=8)
+E   TypeError: start_auction() got an unexpected keyword argument 'task_id'
+__________________________ test_max_extensions_limit ___________________________
+tests/test_remediation_auction_snipe.py:89: in test_max_extensions_limit
+    auction = manager.start_auction(task_id=task_id, min_bid=100, duration_seconds=6)
+E   TypeError: start_auction() got an unexpected keyword argument 'task_id'
+________________________ test_early_bid_does_not_extend ________________________
+tests/test_remediation_auction_snipe.py:114: in test_early_bid_does_not_extend
+    auction = manager.start_auction(task_id=task_id, min_bid=100, duration_seconds=20)
+E   TypeError: start_auction() got an unexpected keyword argument 'task_id'
+____________________________ test_extension_logged _____________________________
+tests/test_remediation_auction_snipe.py:142: in test_extension_logged
+    manager.start_auction(task_id=task_id, min_bid=100, duration_seconds=8)
+E   TypeError: start_auction() got an unexpected keyword argument 'task_id'
+_______________________ test_double_spend_escrow_attack ________________________
+tests/test_remediation_economic_attacks.py:30: in test_double_spend_escrow_attack
+    ledger = CreditLedger()
+E   TypeError: __init__() missing 1 required positional argument: 'db_path'
+___________________________ test_sybil_identity_spam ___________________________
+tests/test_remediation_economic_attacks.py:84: in test_sybil_identity_spam
+    stake_manager = StakeManager()
+E   TypeError: __init__() missing 1 required positional argument: 'ledger'
+_________________________ test_auction_sniping_attack __________________________
+tests/test_remediation_economic_attacks.py:192: in test_auction_sniping_attack
+    auction = manager.start_auction(task_id="task1", min_bid=100, duration_seconds=8)
+E   TypeError: start_auction() got an unexpected keyword argument 'task_id'
+_____________________ test_slashing_fake_honest_verifiers ______________________
+tests/test_remediation_economic_attacks.py:231: in test_slashing_fake_honest_verifiers
+    from economics.slashing import PolicyEnforcement
+E   ImportError: cannot import name 'PolicyEnforcement' from 'economics.slashing' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/economics/slashing.py)
+_____________________________ test_typo_fund_loss ______________________________
+tests/test_remediation_economic_attacks.py:314: in test_typo_fund_loss
+    ledger = CreditLedger()
+E   TypeError: __init__() missing 1 required positional argument: 'db_path'
+__________________ test_only_actual_attestors_receive_rewards __________________
+tests/test_remediation_honest_proof.py:18: in test_only_actual_attestors_receive_rewards
+    from economics.slashing import PolicyEnforcement
+E   ImportError: cannot import name 'PolicyEnforcement' from 'economics.slashing' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/economics/slashing.py)
+______________________ test_fake_honest_verifier_rejected ______________________
+tests/test_remediation_honest_proof.py:56: in test_fake_honest_verifier_rejected
+    from economics.slashing import PolicyEnforcement
+E   ImportError: cannot import name 'PolicyEnforcement' from 'economics.slashing' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/economics/slashing.py)
+____________________ test_warning_logged_for_non_attestors _____________________
+tests/test_remediation_honest_proof.py:87: in test_warning_logged_for_non_attestors
+    from economics.slashing import PolicyEnforcement
+E   ImportError: cannot import name 'PolicyEnforcement' from 'economics.slashing' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/economics/slashing.py)
+__________________________ test_empty_attestation_log __________________________
+tests/test_remediation_honest_proof.py:114: in test_empty_attestation_log
+    from economics.slashing import PolicyEnforcement
+E   ImportError: cannot import name 'PolicyEnforcement' from 'economics.slashing' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/economics/slashing.py)
+_____________________ test_all_claimed_honest_are_verified _____________________
+tests/test_remediation_honest_proof.py:141: in test_all_claimed_honest_are_verified
+    from economics.slashing import PolicyEnforcement
+E   ImportError: cannot import name 'PolicyEnforcement' from 'economics.slashing' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/economics/slashing.py)
+____________________________ test_ipfs_get_timeout _____________________________
+tests/test_remediation_ipfs_timeout.py:30: in test_ipfs_get_timeout
+    store = IPFSContentStore()
+src/cas/ipfs_store.py:52: in __init__
+    raise ConnectionError(
+E   ConnectionError: Could not connect to IPFS at 127.0.0.1:5001. Make sure IPFS daemon is running.
+------------------------------ Captured log call -------------------------------
+ERROR    cas.ipfs_config:ipfs_config.py:120 Failed to connect to IPFS: No module named 'ipfshttpclient'
+Traceback (most recent call last):
+  File "/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/cas/ipfs_config.py", line 110, in connect
+    import ipfshttpclient
+ModuleNotFoundError: No module named 'ipfshttpclient'
+ERROR    cas.ipfs_store:ipfs_store.py:51 Failed to connect to IPFS daemon
+________________________ test_ipfs_get_default_timeout _________________________
+tests/test_remediation_ipfs_timeout.py:56: in test_ipfs_get_default_timeout
+    store = IPFSContentStore()
+src/cas/ipfs_store.py:52: in __init__
+    raise ConnectionError(
+E   ConnectionError: Could not connect to IPFS at 127.0.0.1:5001. Make sure IPFS daemon is running.
+------------------------------ Captured log call -------------------------------
+ERROR    cas.ipfs_config:ipfs_config.py:120 Failed to connect to IPFS: No module named 'ipfshttpclient'
+Traceback (most recent call last):
+  File "/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/cas/ipfs_config.py", line 110, in connect
+    import ipfshttpclient
+ModuleNotFoundError: No module named 'ipfshttpclient'
+ERROR    cas.ipfs_store:ipfs_store.py:51 Failed to connect to IPFS daemon
+__________________ test_circuit_breaker_opens_after_failures ___________________
+tests/test_remediation_ipfs_timeout.py:80: in test_circuit_breaker_opens_after_failures
+    store = IPFSContentStore()
+src/cas/ipfs_store.py:52: in __init__
+    raise ConnectionError(
+E   ConnectionError: Could not connect to IPFS at 127.0.0.1:5001. Make sure IPFS daemon is running.
+------------------------------ Captured log call -------------------------------
+ERROR    cas.ipfs_config:ipfs_config.py:120 Failed to connect to IPFS: No module named 'ipfshttpclient'
+Traceback (most recent call last):
+  File "/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/cas/ipfs_config.py", line 110, in connect
+    import ipfshttpclient
+ModuleNotFoundError: No module named 'ipfshttpclient'
+ERROR    cas.ipfs_store:ipfs_store.py:51 Failed to connect to IPFS daemon
+__________________ test_circuit_breaker_closes_after_cooldown __________________
+tests/test_remediation_ipfs_timeout.py:107: in test_circuit_breaker_closes_after_cooldown
+    store = IPFSContentStore()
+src/cas/ipfs_store.py:52: in __init__
+    raise ConnectionError(
+E   ConnectionError: Could not connect to IPFS at 127.0.0.1:5001. Make sure IPFS daemon is running.
+------------------------------ Captured log call -------------------------------
+ERROR    cas.ipfs_config:ipfs_config.py:120 Failed to connect to IPFS: No module named 'ipfshttpclient'
+Traceback (most recent call last):
+  File "/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/cas/ipfs_config.py", line 110, in connect
+    import ipfshttpclient
+ModuleNotFoundError: No module named 'ipfshttpclient'
+ERROR    cas.ipfs_store:ipfs_store.py:51 Failed to connect to IPFS daemon
+___________________ test_successful_get_resets_failure_count ___________________
+tests/test_remediation_ipfs_timeout.py:132: in test_successful_get_resets_failure_count
+    store = IPFSContentStore()
+src/cas/ipfs_store.py:52: in __init__
+    raise ConnectionError(
+E   ConnectionError: Could not connect to IPFS at 127.0.0.1:5001. Make sure IPFS daemon is running.
+------------------------------ Captured log call -------------------------------
+ERROR    cas.ipfs_config:ipfs_config.py:120 Failed to connect to IPFS: No module named 'ipfshttpclient'
+Traceback (most recent call last):
+  File "/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/cas/ipfs_config.py", line 110, in connect
+    import ipfshttpclient
+ModuleNotFoundError: No module named 'ipfshttpclient'
+ERROR    cas.ipfs_store:ipfs_store.py:51 Failed to connect to IPFS daemon
+___________________ test_circuit_breaker_logs_state_changes ____________________
+tests/test_remediation_ipfs_timeout.py:155: in test_circuit_breaker_logs_state_changes
+    store = IPFSContentStore()
+src/cas/ipfs_store.py:52: in __init__
+    raise ConnectionError(
+E   ConnectionError: Could not connect to IPFS at 127.0.0.1:5001. Make sure IPFS daemon is running.
+------------------------------ Captured log call -------------------------------
+ERROR    cas.ipfs_config:ipfs_config.py:120 Failed to connect to IPFS: No module named 'ipfshttpclient'
+Traceback (most recent call last):
+  File "/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/cas/ipfs_config.py", line 110, in connect
+    import ipfshttpclient
+ModuleNotFoundError: No module named 'ipfshttpclient'
+ERROR    cas.ipfs_store:ipfs_store.py:51 Failed to connect to IPFS daemon
+____________________ test_missing_required_fields_rejected _____________________
+tests/test_remediation_policy_bypass.py:37: in test_missing_required_fields_rejected
+    asyncio.run(test_handler(incomplete_envelope))
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py:642: in run_until_complete
+    return future.result()
+src/policy/enforcement.py:38: in wrapper
+    from bus import get_gate_enforcer
+src/bus.py:2: in <module>
+    from nats.aio.client import Client as NATS
+E   ModuleNotFoundError: No module named 'nats'
+_______________________ test_non_dict_envelope_rejected ________________________
+tests/test_remediation_policy_bypass.py:47: in test_non_dict_envelope_rejected
+    asyncio.run(test_handler("not_a_dict"))
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py:642: in run_until_complete
+    return future.result()
+src/policy/enforcement.py:38: in wrapper
+    from bus import get_gate_enforcer
+src/bus.py:2: in <module>
+    from nats.aio.client import Client as NATS
+E   ModuleNotFoundError: No module named 'nats'
+________________________ test_policy_validation_invoked ________________________
+tests/test_remediation_policy_bypass.py:81: in test_policy_validation_invoked
+    with patch("policy.enforcement.get_gate_enforcer", return_value=mock_enforcer):
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py:1405: in __enter__
+    original, local = self.get_original()
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py:1378: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'policy.enforcement' from '/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/policy/enforcement.py'> does not have the attribute 'get_gate_enforcer'
+__________________ test_policy_validation_passes_when_allowed __________________
+tests/test_remediation_policy_bypass.py:111: in test_policy_validation_passes_when_allowed
+    with patch("policy.enforcement.get_gate_enforcer", return_value=mock_enforcer):
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py:1405: in __enter__
+    original, local = self.get_original()
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py:1378: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'policy.enforcement' from '/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/policy/enforcement.py'> does not have the attribute 'get_gate_enforcer'
+__________________________ test_bypass_flags_ignored ___________________________
+tests/test_remediation_policy_bypass.py:145: in test_bypass_flags_ignored
+    with patch("policy.enforcement.get_gate_enforcer", return_value=mock_enforcer):
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py:1405: in __enter__
+    original, local = self.get_original()
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py:1378: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'policy.enforcement' from '/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/policy/enforcement.py'> does not have the attribute 'get_gate_enforcer'
+____________________ test_reward_scales_with_slashed_amount ____________________
+tests/test_remediation_reward_scaling.py:18: in test_reward_scales_with_slashed_amount
+    from challenges.outcomes import ChallengeOutcomes
+E   ImportError: cannot import name 'ChallengeOutcomes' from 'challenges.outcomes' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/challenges/outcomes.py)
+_____________________ test_reward_is_20_percent_of_slashed _____________________
+tests/test_remediation_reward_scaling.py:69: in test_reward_is_20_percent_of_slashed
+    from challenges.outcomes import ChallengeOutcomes
+E   ImportError: cannot import name 'ChallengeOutcomes' from 'challenges.outcomes' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/challenges/outcomes.py)
+_____________________ test_small_slash_gives_small_reward ______________________
+tests/test_remediation_reward_scaling.py:105: in test_small_slash_gives_small_reward
+    from challenges.outcomes import ChallengeOutcomes
+E   ImportError: cannot import name 'ChallengeOutcomes' from 'challenges.outcomes' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/challenges/outcomes.py)
+________________________ test_bond_returned_plus_reward ________________________
+tests/test_remediation_reward_scaling.py:135: in test_bond_returned_plus_reward
+    from challenges.outcomes import ChallengeOutcomes
+E   ImportError: cannot import name 'ChallengeOutcomes' from 'challenges.outcomes' (/Users/rileyhicks/Dev/Real Projects/agent-swarm/src/challenges/outcomes.py)
+______________ test_transfer_to_nonexistent_account_raises_error _______________
+tests/test_remediation_transfer_validation.py:21: in test_transfer_to_nonexistent_account_raises_error
+    ledger = CreditLedger()
+E   TypeError: __init__() missing 1 required positional argument: 'db_path'
+____________________ test_transfer_with_allow_create_works _____________________
+tests/test_remediation_transfer_validation.py:40: in test_transfer_with_allow_create_works
+    ledger = CreditLedger()
+E   TypeError: __init__() missing 1 required positional argument: 'db_path'
+___________________ test_transfer_to_existing_account_works ____________________
+tests/test_remediation_transfer_validation.py:58: in test_transfer_to_existing_account_works
+    ledger = CreditLedger()
+E   TypeError: __init__() missing 1 required positional argument: 'db_path'
+_____________________________ test_typo_prevention _____________________________
+tests/test_remediation_transfer_validation.py:78: in test_typo_prevention
+    ledger = CreditLedger()
+E   TypeError: __init__() missing 1 required positional argument: 'db_path'
+____________________ test_backward_compatibility_with_flag _____________________
+tests/test_remediation_transfer_validation.py:98: in test_backward_compatibility_with_flag
+    ledger = CreditLedger()
+E   TypeError: __init__() missing 1 required positional argument: 'db_path'
+=============================== warnings summary ===============================
+tests/test_remediation_economic_attacks.py:21
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:21: PytestUnknownMarkWarning: Unknown pytest.mark.security_critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.security_critical
+
+tests/test_remediation_economic_attacks.py:22
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:22: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:46
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:46: PytestUnknownMarkWarning: Unknown pytest.mark.security_critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.security_critical
+
+tests/test_remediation_economic_attacks.py:47
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:47: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:75
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:75: PytestUnknownMarkWarning: Unknown pytest.mark.security_critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.security_critical
+
+tests/test_remediation_economic_attacks.py:76
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:76: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:102
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:102: PytestUnknownMarkWarning: Unknown pytest.mark.security_critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.security_critical
+
+tests/test_remediation_economic_attacks.py:103
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:103: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:141
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:141: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:181
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:181: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:208
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:208: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:224
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:224: PytestUnknownMarkWarning: Unknown pytest.mark.security_critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.security_critical
+
+tests/test_remediation_economic_attacks.py:225
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:225: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:262
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:262: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+tests/test_remediation_economic_attacks.py:305
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:305: PytestUnknownMarkWarning: Unknown pytest.mark.security_critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.security_critical
+
+tests/test_remediation_economic_attacks.py:306
+  /Users/rileyhicks/Dev/Real Projects/agent-swarm/tests/test_remediation_economic_attacks.py:306: PytestUnknownMarkWarning: Unknown pytest.mark.economic - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.economic
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_remediation_auction_snipe.py::test_late_bid_extends_auction_window
+FAILED tests/test_remediation_auction_snipe.py::test_multiple_late_bids_extend_multiple_times
+FAILED tests/test_remediation_auction_snipe.py::test_max_extensions_limit - T...
+FAILED tests/test_remediation_auction_snipe.py::test_early_bid_does_not_extend
+FAILED tests/test_remediation_auction_snipe.py::test_extension_logged - TypeE...
+FAILED tests/test_remediation_economic_attacks.py::test_double_spend_escrow_attack
+FAILED tests/test_remediation_economic_attacks.py::test_sybil_identity_spam
+FAILED tests/test_remediation_economic_attacks.py::test_auction_sniping_attack
+FAILED tests/test_remediation_economic_attacks.py::test_slashing_fake_honest_verifiers
+FAILED tests/test_remediation_economic_attacks.py::test_typo_fund_loss - Type...
+FAILED tests/test_remediation_honest_proof.py::test_only_actual_attestors_receive_rewards
+FAILED tests/test_remediation_honest_proof.py::test_fake_honest_verifier_rejected
+FAILED tests/test_remediation_honest_proof.py::test_warning_logged_for_non_attestors
+FAILED tests/test_remediation_honest_proof.py::test_empty_attestation_log - I...
+FAILED tests/test_remediation_honest_proof.py::test_all_claimed_honest_are_verified
+FAILED tests/test_remediation_ipfs_timeout.py::test_ipfs_get_timeout - Connec...
+FAILED tests/test_remediation_ipfs_timeout.py::test_ipfs_get_default_timeout
+FAILED tests/test_remediation_ipfs_timeout.py::test_circuit_breaker_opens_after_failures
+FAILED tests/test_remediation_ipfs_timeout.py::test_circuit_breaker_closes_after_cooldown
+FAILED tests/test_remediation_ipfs_timeout.py::test_successful_get_resets_failure_count
+FAILED tests/test_remediation_ipfs_timeout.py::test_circuit_breaker_logs_state_changes
+FAILED tests/test_remediation_policy_bypass.py::test_missing_required_fields_rejected
+FAILED tests/test_remediation_policy_bypass.py::test_non_dict_envelope_rejected
+FAILED tests/test_remediation_policy_bypass.py::test_policy_validation_invoked
+FAILED tests/test_remediation_policy_bypass.py::test_policy_validation_passes_when_allowed
+FAILED tests/test_remediation_policy_bypass.py::test_bypass_flags_ignored - A...
+FAILED tests/test_remediation_reward_scaling.py::test_reward_scales_with_slashed_amount
+FAILED tests/test_remediation_reward_scaling.py::test_reward_is_20_percent_of_slashed
+FAILED tests/test_remediation_reward_scaling.py::test_small_slash_gives_small_reward
+FAILED tests/test_remediation_reward_scaling.py::test_bond_returned_plus_reward
+FAILED tests/test_remediation_transfer_validation.py::test_transfer_to_nonexistent_account_raises_error
+FAILED tests/test_remediation_transfer_validation.py::test_transfer_with_allow_create_works
+FAILED tests/test_remediation_transfer_validation.py::test_transfer_to_existing_account_works
+FAILED tests/test_remediation_transfer_validation.py::test_typo_prevention - ...
+FAILED tests/test_remediation_transfer_validation.py::test_backward_compatibility_with_flag
+ERROR tests/test_remediation_policy_bypass.py::test_handler
+======= 35 failed, 80 passed, 4 skipped, 16 warnings, 1 error in 20.07s ========

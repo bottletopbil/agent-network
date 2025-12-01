@@ -6,7 +6,7 @@ rollback when coordination fails.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Set, Optional, Tuple
+from typing import Dict, List, Set, Optional
 from collections import defaultdict, deque
 import logging
 

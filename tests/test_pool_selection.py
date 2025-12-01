@@ -109,7 +109,7 @@ class TestWeightCalculation:
         stake_mgr = StakeManager(ledger)
         pool = VerifierPool(stake_mgr)
         reputation = ReputationTracker(pool)
-        selector = VerifierSelector(pool, reputation)
+        VerifierSelector(pool, reputation)
 
         ledger.create_account("verifier1", 10000)
         stake_mgr.stake("verifier1", 10000)
@@ -429,7 +429,7 @@ class TestReputationTracking:
         ledger = CreditLedger(Path(tempfile.mktemp()))
         stake_mgr = StakeManager(ledger)
         pool = VerifierPool(stake_mgr)
-        reputation = ReputationTracker(pool)
+        ReputationTracker(pool)
 
         ledger.create_account("verifier1", 10000)
         stake_mgr.stake("verifier1", 5000)

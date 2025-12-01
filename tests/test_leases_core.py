@@ -17,7 +17,7 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
-from leases.manager import LeaseManager, LeaseRecord
+from leases.manager import LeaseManager
 from leases.heartbeat import HeartbeatProtocol
 from plan_store import PlanStore, OpType
 import handlers.heartbeat

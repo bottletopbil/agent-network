@@ -15,10 +15,8 @@ from pathlib import Path
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import pytest
-from challenges.proofs import ProofType
-from challenges.verification import ChallengeVerifier, VerificationResult
-from challenges.queue import ChallengeQueue, QueuedChallenge
+from challenges.verification import ChallengeVerifier
+from challenges.queue import ChallengeQueue
 from challenges.escalation import EscalationHandler, VerifierVerdict, EscalationLevel
 
 

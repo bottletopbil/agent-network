@@ -175,7 +175,7 @@ class ConnectionPool:
 
     def _remove_timed_out(self):
         """Remove connections that have timed out"""
-        current_time = time.time()
+        time.time()
         timed_out = []
 
         for peer_id, connection in self.connections.items():

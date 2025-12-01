@@ -9,7 +9,7 @@ import os
 import logging
 import hashlib
 import time
-from typing import Dict, Any, Callable, Optional, Set
+from typing import Dict, Any, Callable
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)

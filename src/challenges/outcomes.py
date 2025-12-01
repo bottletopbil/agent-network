@@ -5,7 +5,7 @@ Outcomes determine what happens to bonds and how participants are rewarded/penal
 """
 
 from enum import Enum
-from typing import Optional, Dict, Any
+from typing import Optional, Dict
 from dataclasses import dataclass
 
 from economics.slashing import SlashingRules, ViolationType, SlashEvent

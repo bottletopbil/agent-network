@@ -8,13 +8,11 @@ from prometheus_client import (
     Counter,
     Histogram,
     Gauge,
-    Summary,
     Info,
     generate_latest,
     REGISTRY,
 )
 import time
-from typing import Optional, Dict
 from functools import wraps
 
 

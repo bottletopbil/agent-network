@@ -11,7 +11,6 @@ This agent:
 
 import sys
 import os
-import uuid
 import base64
 import asyncio
 import time

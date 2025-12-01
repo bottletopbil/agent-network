@@ -16,10 +16,9 @@ from pathlib import Path
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import pytest
-from plan_store import PlanStore, PlanOp, OpType, TaskState
+from plan_store import PlanStore
 from plan.patching import PlanPatch, PatchValidator
-from plan.versioning import PlanVersion, VersionTracker
+from plan.versioning import VersionTracker
 import uuid
 import time
 

@@ -11,24 +11,22 @@ This agent:
 
 import sys
 import os
-import uuid
 import base64
 import asyncio
-import time
 from pathlib import Path
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from agent import BaseAgent
-from envelope import make_envelope, sign_envelope
-from bus import publish_envelope
-from crypto import load_verifier
-from challenges.verification import ChallengeVerifier
-from challenges.queue import ChallengeQueue
-from challenges.proofs import ProofType
-from challenges.escalation import VerifierVerdict
-import cas
+from agent import BaseAgent  # noqa: E402
+from envelope import make_envelope, sign_envelope  # noqa: E402
+from bus import publish_envelope  # noqa: E402
+from crypto import load_verifier  # noqa: E402
+from challenges.verification import ChallengeVerifier  # noqa: E402
+from challenges.queue import ChallengeQueue  # noqa: E402
+from challenges.proofs import ProofType  # noqa: E402
+from challenges.escalation import VerifierVerdict  # noqa: E402
+import cas  # noqa: E402
 
 
 # Minimum stake required to be a challenge verifier (in credits)
@@ -166,7 +164,7 @@ class ChallengeVerifierAgent(BaseAgent):
         # Extract proof type
         proof_type_str = proof_data.get("proof_type")
         if not proof_type_str:
-            print(f"[CHALLENGE_VERIFIER] ERROR: No proof_type in challenge")
+            print("[CHALLENGE_VERIFIER] ERROR: No proof_type in challenge")
             self.queue.mark_failed(challenge_id, "Missing proof_type")
             return
 
@@ -215,7 +213,7 @@ class ChallengeVerifierAgent(BaseAgent):
                 verification_result=result,
             )
         else:
-            print(f"[CHALLENGE_VERIFIER] Skipping verdict publish (test mode)")
+            print("[CHALLENGE_VERIFIER] Skipping verdict publish (test mode)")
 
         # Mark as processed
         self.processed_challenges.add(challenge_id)

@@ -5,12 +5,10 @@ Handles RECONCILE messages that signal network partition recovery.
 Advances epoch and marks orphaned branches based on conflict resolution.
 """
 
-import uuid
 from plan_store import PlanStore
 from verbs import DISPATCHER
 from consensus.epochs import epoch_manager
 from consensus.merge import MergeHandler
-import time
 
 
 plan_store: PlanStore = None  # Injected at startup

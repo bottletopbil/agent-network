@@ -13,7 +13,7 @@ This provides Automerge-like functionality without requiring Rust compilation.
 import json
 import copy
 from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from plan_store import OpType, TaskState, PlanOp
 from plan.views import TaskView, GraphView
 
@@ -279,7 +279,7 @@ class AutomergePlanStore:
 
         # Collect all ops from both documents
         our_op_ids = self._op_ids
-        peer_op_ids = {op["op_id"] for op in peer_dict["ops"]}
+        {op["op_id"] for op in peer_dict["ops"]}
 
         # Find new ops from peer (G-Set union)
         new_ops = [op for op in peer_dict["ops"] if op["op_id"] not in our_op_ids]

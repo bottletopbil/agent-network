@@ -9,7 +9,6 @@ import time
 import logging
 from typing import Dict, Optional
 from dataclasses import dataclass, field
-from collections import deque
 
 logger = logging.getLogger(__name__)
 

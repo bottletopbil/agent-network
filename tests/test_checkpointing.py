@@ -2,7 +2,6 @@
 
 import sys
 import os
-import pytest
 import tempfile
 from pathlib import Path
 
@@ -11,7 +10,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from checkpoint import (
     MerkleTree,
-    MerkleProof,
     CheckpointManager,
     Checkpoint,
     SignedCheckpoint,
@@ -105,7 +103,7 @@ class TestMerkleTree:
         """Test verifying proof with wrong root."""
         tree = MerkleTree()
         leaves = ["hash-1", "hash-2", "hash-3", "hash-4"]
-        root = tree.build_tree(leaves)
+        tree.build_tree(leaves)
 
         proof = tree.get_proof(0)
 

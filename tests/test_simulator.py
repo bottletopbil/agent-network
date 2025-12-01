@@ -12,13 +12,12 @@ import sys
 import os
 import tempfile
 import json
-from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
-from simulator import DeterministicSimulator, SimulationResult
+from simulator import DeterministicSimulator
 
 
 def create_test_audit_log(thread_id: str = "test-thread") -> str:
@@ -127,7 +126,7 @@ class TestSimulatorLoading:
 
         try:
             sim = DeterministicSimulator()
-            envelopes = sim.load_audit_log(log_file.name)
+            sim.load_audit_log(log_file.name)
 
             # Should have 1 warning for malformed line
             assert len(sim.warnings) == 1
@@ -145,7 +144,7 @@ class TestDeterministicReplay:
 
         try:
             sim = DeterministicSimulator(seed=42)
-            envelopes = sim.load_audit_log(log_path)
+            sim.load_audit_log(log_path)
             result = sim.replay_envelopes(validate_policy=False)
 
             assert result.success
@@ -435,7 +434,7 @@ class TestEndToEndSimulation:
         try:
             # First replay
             sim1 = DeterministicSimulator(seed=42)
-            envelopes = sim1.load_audit_log(log_path)
+            sim1.load_audit_log(log_path)
             result1 = sim1.replay_envelopes(validate_policy=False)
 
             # Second replay with same seed

@@ -4,7 +4,6 @@ P2P Node Implementation
 Provides libp2p-based peer-to-peer node for decentralized communication.
 """
 
-import asyncio
 import logging
 from pathlib import Path
 from typing import List, Optional
@@ -243,8 +242,6 @@ class AsyncP2PNode:
     async def start(self):
         """Start node asynchronously"""
         # Would use libp2p async APIs here
-        pass
 
     async def stop(self):
         """Stop node asynchronously"""
-        pass

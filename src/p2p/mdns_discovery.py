@@ -4,11 +4,10 @@ mDNS Peer Discovery
 Provides multicast DNS-based peer discovery for local network.
 """
 
-import socket
 import logging
 import time
 import threading
-from typing import Set, Callable, Optional
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 

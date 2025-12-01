@@ -5,9 +5,8 @@ Computes semantic similarity between task requirements and agent capabilities.
 Tracks past performance in specific domains.
 """
 
-from typing import List, Dict, Any, Set
+from typing import List, Dict, Any
 import logging
-import math
 
 logger = logging.getLogger(__name__)
 

@@ -2,10 +2,8 @@
 Base Agent: common functionality for all agent types.
 """
 
-import asyncio
 from abc import ABC, abstractmethod
 from bus import subscribe_envelopes
-from verbs import DISPATCHER
 
 
 class BaseAgent(ABC):
@@ -16,7 +14,6 @@ class BaseAgent(ABC):
     @abstractmethod
     async def on_envelope(self, envelope: dict):
         """Override to handle incoming envelopes"""
-        pass
 
     async def run(self, thread_id: str, subject: str):
         """Main agent loop"""

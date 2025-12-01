@@ -7,7 +7,6 @@ outcome system to penalize dishonest verifiers and reward successful challengers
 
 import sys
 from pathlib import Path
-import pytest
 import tempfile
 
 # Add src to path
@@ -31,7 +30,7 @@ def test_slashing_integration_upheld_challenge():
         db_path = Path(tmpdir) / "test_ledger.db"
         ledger = CreditLedger(db_path)
         stake_manager = StakeManager(ledger)
-        slashing_rules = SlashingRules(stake_manager)
+        SlashingRules(stake_manager)
 
         # Create outcome handler with stake manager
         outcome_handler = OutcomeHandler(ledger=ledger, stake_manager=stake_manager)

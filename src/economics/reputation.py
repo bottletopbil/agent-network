@@ -4,9 +4,8 @@ Reputation Tracker: manage verifier reputation with decay and boost/penalty.
 Integrates with VerifierPool to update reputation scores based on attestations and challenges.
 """
 
-import sqlite3
 import time
-from typing import List, Optional
+from typing import List
 from dataclasses import dataclass
 
 from economics.pools import VerifierPool

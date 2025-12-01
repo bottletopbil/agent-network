@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
 from economics.ledger import CreditLedger
-from economics.bounties import BountyManager, TaskClass, BOUNTY_CAPS
+from economics.bounties import BountyManager, TaskClass
 from economics.payout import PayoutDistributor
 
 
@@ -330,7 +330,7 @@ class TestIntegration:
         assert bounty_mgr.get_bounty(bounty_id).status == "CREATED"
 
         # Escrow
-        escrow_id = bounty_mgr.escrow_bounty(bounty_id, "commit-1")
+        bounty_mgr.escrow_bounty(bounty_id, "commit-1")
         assert bounty_mgr.get_bounty(bounty_id).status == "ESCROWED"
         assert ledger.get_balance("creator1") == 900
 

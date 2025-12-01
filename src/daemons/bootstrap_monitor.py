@@ -5,7 +5,6 @@ Monitors active verifier count and tracks bootstrap mode status.
 Logs when network should exit bootstrap mode based on stability criteria.
 """
 
-import time
 import logging
 from typing import Optional
 from threading import Thread, Event

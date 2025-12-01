@@ -14,13 +14,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from routing.canary import (
     CanaryTest,
-    CanaryRunner,
     CanaryResult,
     get_canary_runner,
     reset_canary_runner,
 )
 from routing.winner_selection import (
-    WinnerSelector,
     get_winner_selector,
     reset_winner_selector,
 )

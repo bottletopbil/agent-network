@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
 from economics.ledger import CreditLedger, InsufficientBalanceError
-from economics.stake import StakeManager, InsufficientStakeError, UnbondingRecord
+from economics.stake import StakeManager, InsufficientStakeError
 from economics.slashing import SlashingRules, ViolationType, SlashEvent
 import uuid
 
@@ -166,9 +166,9 @@ class TestUnbondingPeriod:
         stake_mgr.stake("verifier1", 9000)
 
         # Create multiple unbonding records
-        unbonding_id1 = stake_mgr.unstake("verifier1", 3000)
-        unbonding_id2 = stake_mgr.unstake("verifier1", 2000)
-        unbonding_id3 = stake_mgr.unstake("verifier1", 1000)
+        stake_mgr.unstake("verifier1", 3000)
+        stake_mgr.unstake("verifier1", 2000)
+        stake_mgr.unstake("verifier1", 1000)
 
         # Should have 3 unbonding records
         records = stake_mgr.get_unbonding_records("verifier1")

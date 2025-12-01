@@ -4,14 +4,13 @@ Slashing System: calculate and execute penalties for violations.
 Supports different violation types with configurable severity levels.
 """
 
-import sqlite3
 import uuid
 import time
 from enum import Enum
 from dataclasses import dataclass
 from typing import List
 
-from economics.stake import StakeManager, InsufficientStakeError
+from economics.stake import StakeManager
 
 
 class ViolationType(Enum):

@@ -8,7 +8,10 @@ Tests cover:
 - Policy validation
 """
 
-import sys, os, json, base64, tempfile
+import sys
+import os
+import base64
+import tempfile
 from pathlib import Path
 
 # Add src to path for imports
@@ -39,7 +42,7 @@ def setup_test_crypto_keys():
 # Now import after setting up environment
 from crypto import sign_record, verify_record, cjson
 from lamport import Lamport
-from envelope import make_envelope, sign_envelope, verify_envelope
+from envelope import make_envelope, sign_envelope
 from policy import validate_envelope, PolicyError, current_policy_hash
 
 

@@ -13,11 +13,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from routing.manifests import (
     AgentManifest,
-    ManifestRegistry,
     get_registry,
     reset_registry,
 )
-from routing.filters import CapabilityFilter, get_filter
+from routing.filters import CapabilityFilter
 
 
 # Test Fixtures

@@ -14,12 +14,11 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 import pytest
-import sqlite3
 import time
 
 from economics.ledger import CreditLedger
 from economics.stake import StakeManager
-from economics.slashing import SlashingRules, ViolationType
+from economics.slashing import SlashingRules
 from economics.payout import PayoutDistributor
 from economics.bounties import BountyManager, TaskClass
 from economics.relationships import RelationshipDetector, PartyInfo

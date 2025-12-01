@@ -1,8 +1,8 @@
 """Shard topology and registry for distributed task assignment."""
 
 import hashlib
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
+from dataclasses import dataclass
+from typing import Dict, List, Set
 from datetime import datetime
 
 

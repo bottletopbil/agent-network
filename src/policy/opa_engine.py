@@ -8,7 +8,6 @@ Since OPA is not available, this implements a Python-based policy engine
 that can evaluate policies defined in Python with similar semantics.
 """
 
-import json
 import logging
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass

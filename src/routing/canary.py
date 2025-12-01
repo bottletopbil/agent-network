@@ -5,12 +5,11 @@ Tests agents with small micro-tasks before assigning full work.
 Validates agent capability and measures actual performance.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Any, Optional, List, Callable
 import asyncio
 import time
 import logging
-import json
 
 logger = logging.getLogger(__name__)
 

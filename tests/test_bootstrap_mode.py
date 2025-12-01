@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from consensus.bootstrap import BootstrapManager, bootstrap_manager
-from consensus.quorum import QuorumTracker, quorum_tracker
+from consensus.quorum import QuorumTracker
 
 
 class TestBootstrapModeDetection:

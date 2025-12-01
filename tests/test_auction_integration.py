@@ -182,7 +182,7 @@ class TestBestBidWins:
 
         # Start auction
         task_id = "task-best-bid"
-        auction = manager.start_auction(task_id, 1000)
+        manager.start_auction(task_id, 1000)
 
         # Submit multiple bids
         manager.accept_bid(
@@ -230,7 +230,6 @@ class TestRejectedBidBackoff:
     async def test_rejected_bid_backoff(self):
         """Verify backoff applied on rejection"""
         from agents.planner import PlannerAgent
-        from auction.backoff import RandomizedBackoff
 
         agent = PlannerAgent("test-planner", "test-key")
 

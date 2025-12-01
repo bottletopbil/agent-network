@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from policy.wasm_runtime import WASMRuntime
-from policy.gas_meter import GasMeter, GasExceededError, GasMetrics
+from policy.gas_meter import GasMeter, GasExceededError
 
 
 class TestWASMEvaluation:

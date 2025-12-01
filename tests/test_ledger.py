@@ -15,14 +15,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import pytest
 from economics.ledger import (
     CreditLedger,
-    Account,
     InsufficientBalanceError,
     AccountExistsError,
     EscrowNotFoundError,
     EscrowAlreadyReleasedError,
 )
 from economics.operations import OpType
-import uuid
 
 
 class TestAccountCreation:

@@ -78,7 +78,7 @@ def test_did_creation_without_ledger_uses_pow():
     # Without ledger, should require PoW
     start_time = time.time()
     did = did_manager.create_did_key()
-    elapsed = time.time() - start_time
+    time.time() - start_time
 
     # PoW should take some time, but may be very fast on modern hardware
     # Just verify it completes successfully

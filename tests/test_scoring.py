@@ -13,9 +13,9 @@ import time
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from routing.manifests import AgentManifest
-from routing.scoring import AgentScorer, ScoredAgent, get_scorer, reset_scorer
-from routing.domain_fit import DomainFitCalculator, reset_domain_fit_calculator
-from routing.recency import RecencyWeighter, reset_recency_weighter
+from routing.scoring import AgentScorer, ScoredAgent
+from routing.domain_fit import reset_domain_fit_calculator
+from routing.recency import reset_recency_weighter
 
 
 # Test Fixtures

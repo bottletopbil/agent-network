@@ -5,7 +5,7 @@ and verification for individual elements.
 """
 
 import hashlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional, Tuple
 import logging
 

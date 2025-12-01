@@ -6,7 +6,7 @@ to move cold data to disk while keeping hot data in memory.
 
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Set
 from pathlib import Path
 

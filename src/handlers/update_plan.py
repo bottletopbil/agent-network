@@ -73,7 +73,7 @@ async def handle_update_plan(envelope: dict):
 
     applied_count = 0
     current_lamport = lamport
-    validator = PatchValidator(plan_store)
+    PatchValidator(plan_store)
 
     # Process each operation individually - validate and skip invalid ones
     for idx, op_data in enumerate(ops_data):

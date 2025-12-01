@@ -2,12 +2,11 @@
 
 import sys
 import os
-import pytest
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from identity import DIDManager, DIDDocument
+from identity import DIDManager
 
 
 class TestDIDManager:

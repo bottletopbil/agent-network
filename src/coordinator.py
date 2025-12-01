@@ -7,7 +7,6 @@ Responsibilities:
 - Subscribe to NATS and route envelopes to dispatcher
 """
 
-import asyncio
 from pathlib import Path
 from plan_store import PlanStore
 from consensus import ConsensusAdapter

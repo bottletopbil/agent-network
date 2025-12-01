@@ -11,9 +11,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from routing.bandit import ContextualBandit, ArmStats, get_bandit, reset_bandit
+from routing.bandit import get_bandit, reset_bandit
 from routing.features import (
-    FeatureExtractor,
     get_feature_extractor,
     reset_feature_extractor,
 )
@@ -21,7 +20,6 @@ from routing.feedback import (
     collect_feedback,
     calculate_binary_reward,
     calculate_quality_reward,
-    FeedbackCollector,
     get_feedback_collector,
     reset_feedback_collector,
 )
@@ -127,7 +125,7 @@ class TestUCB1Exploration:
             selected = bandit.ucb1(exploration_bonus=0.1)  # Low exploration
             bandit.update(selected, reward=0.9 if selected == "agent-a" else 0.3)
 
-        count_a_low = bandit.arms["agent-a"].pulls
+        bandit.arms["agent-a"].pulls
 
         # Reset and try with high exploration
         bandit.reset()
@@ -135,7 +133,7 @@ class TestUCB1Exploration:
             selected = bandit.ucb1(exploration_bonus=5.0)  # High exploration
             bandit.update(selected, reward=0.9 if selected == "agent-a" else 0.3)
 
-        count_a_high = bandit.arms["agent-a"].pulls
+        bandit.arms["agent-a"].pulls
 
         # High exploration should pull agent-a less (more exploration of others)
         # This is probabilistic so we just check the mechanism works

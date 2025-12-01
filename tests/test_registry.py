@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
-from marketplace.registry import AgentRegistry, AgentStatus, SearchFilters, AgentStats
+from marketplace.registry import AgentRegistry, AgentStatus, SearchFilters
 
 
 class TestAgentRegistration:

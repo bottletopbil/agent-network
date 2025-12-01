@@ -20,7 +20,7 @@ from observability.tracing import (
     get_tracer,
     shutdown_tracing,
 )
-from opentelemetry.trace import SpanKind, StatusCode
+from opentelemetry.trace import SpanKind
 
 
 class TestTracingSetup:
@@ -177,7 +177,7 @@ class TestContextPropagation:
             enriched = propagate_context(envelope)
 
             # Extract context
-            span_context = extract_context(enriched)
+            extract_context(enriched)
 
             # Should have extracted a valid context
             # Note: The actual context extraction requires more setup

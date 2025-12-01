@@ -8,7 +8,6 @@ import pytest
 import sys
 import tempfile
 from pathlib import Path
-import time
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))

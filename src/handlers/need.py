@@ -48,7 +48,7 @@ async def handle_need(envelope: dict):
     # Start auction if auction_manager available
     if auction_manager:
         budget = payload.get("budget", 1000.0)
-        auction = auction_manager.start_auction(task_id, budget)
+        auction_manager.start_auction(task_id, budget)
 
         bid_window = (
             auction_manager.config.bid_window

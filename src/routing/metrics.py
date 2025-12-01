@@ -7,7 +7,7 @@ Tracks performance and accuracy of the intelligent routing system.
 from typing import Dict, List, Optional
 import time
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 

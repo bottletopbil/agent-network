@@ -7,9 +7,8 @@ migration progress and detect divergence.
 
 import time
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any
 from dataclasses import dataclass, field
-from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 

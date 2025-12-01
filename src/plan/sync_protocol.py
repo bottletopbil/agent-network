@@ -7,8 +7,8 @@ Provides both full sync and incremental sync modes.
 
 import time
 import logging
-from typing import Dict, Optional, Set
-from dataclasses import dataclass, field
+from typing import Dict, Optional
+from dataclasses import dataclass
 
 from plan.automerge_store import AutomergePlanStore
 

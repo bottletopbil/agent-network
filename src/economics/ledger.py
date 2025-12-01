@@ -8,7 +8,7 @@ import threading
 import uuid
 import time
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from dataclasses import dataclass
 
 from economics.operations import OpType, LedgerOp, validate_amount, validate_account_id
@@ -18,25 +18,21 @@ from economics.operations import OpType, LedgerOp, validate_amount, validate_acc
 class InsufficientBalanceError(Exception):
     """Raised when account has insufficient balance for operation"""
 
-    pass
 
 
 class AccountExistsError(Exception):
     """Raised when attempting to create duplicate account"""
 
-    pass
 
 
 class EscrowNotFoundError(Exception):
     """Raised when escrow ID not found"""
 
-    pass
 
 
 class EscrowAlreadyReleasedError(Exception):
     """Raised when attempting to operate on already-released escrow"""
 
-    pass
 
 
 @dataclass

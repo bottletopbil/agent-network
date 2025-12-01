@@ -1,7 +1,6 @@
 """Tests for Phase 20.1 - Firecracker Sandboxing"""
 
 import pytest
-import time
 from src.sandbox.firecracker import (
     FirecrackerVM,
     ResourceLimits,
@@ -227,7 +226,7 @@ class TestSandboxedExecutor:
     def test_execute_sandboxed_cleans_up(self, executor):
         """Test that VM is cleaned up after execution."""
         # Execute should create and destroy VM
-        result = executor.execute_sandboxed("echo Test")
+        executor.execute_sandboxed("echo Test")
 
         # No VMs should remain
         assert len(executor.firecracker.list_vms()) == 0
@@ -235,7 +234,7 @@ class TestSandboxedExecutor:
     def test_execute_sandboxed_error_cleanup(self, executor):
         """Test that VM is cleaned up even on error."""
         # Force an error by using invalid command
-        result = executor.execute_sandboxed("error command")
+        executor.execute_sandboxed("error command")
 
         # VM should still be cleaned up
         assert len(executor.firecracker.list_vms()) == 0

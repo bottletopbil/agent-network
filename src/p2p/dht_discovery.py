@@ -7,8 +7,7 @@ Provides distributed hash table-based peer discovery for wide-area network.
 import logging
 import time
 import hashlib
-from typing import Dict, List, Set, Optional, Tuple
-from collections import defaultdict
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

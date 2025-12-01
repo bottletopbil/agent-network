@@ -8,8 +8,7 @@ import logging
 from typing import Optional, List, Dict
 from pathlib import Path
 
-from .checkpoint import CheckpointManager, SignedCheckpoint, Checkpoint
-from .merkle import MerkleTree
+from .checkpoint import CheckpointManager, SignedCheckpoint
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,7 @@ silently falling back to FileCAS.
 
 import sys
 from pathlib import Path
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -88,7 +87,6 @@ def test_ipfs_failure_logs_error():
     Test that IPFS connection failure logs an error.
     """
     from cas_core import get_cas_store
-    import logging
 
     with patch("cas.feature_flag.use_ipfs_cas", return_value=True):
         with patch("cas.ipfs_store.IPFSContentStore") as mock_ipfs:

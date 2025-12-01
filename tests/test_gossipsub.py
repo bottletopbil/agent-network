@@ -7,7 +7,6 @@ Tests topic subscription, message propagation, deduplication, and peer scoring.
 import pytest
 import sys
 from pathlib import Path
-import time
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -19,10 +18,8 @@ from p2p.topics import (
     parse_topic,
     filter_topics,
     get_thread_topics,
-    TopicVerbs,
     is_valid_topic,
 )
-from p2p.node import P2PNode
 
 
 class TestSwarmTopics:

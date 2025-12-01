@@ -2,7 +2,6 @@
 
 import pytest
 import time
-from datetime import datetime, timedelta
 from src.marketplace.circuit_breaker import (
     CircuitBreaker,
     CircuitState,

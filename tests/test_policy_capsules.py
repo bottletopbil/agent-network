@@ -7,14 +7,13 @@ Tests capsule creation, signing, distribution, and conformance validation.
 import pytest
 import sys
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch, AsyncMock
-import asyncio
+from unittest.mock import Mock, AsyncMock
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from policy.capsule import PolicyCapsule, CapsuleManager, get_capsule_manager
-from policy.conformance import ConformanceChecker, get_conformance_checker
+from policy.capsule import PolicyCapsule, CapsuleManager
+from policy.conformance import ConformanceChecker
 
 
 @pytest.fixture

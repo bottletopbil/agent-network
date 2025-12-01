@@ -12,9 +12,9 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from p2p.connection_pool import ConnectionPool, Connection
+from p2p.connection_pool import ConnectionPool
 from p2p.peer_reputation import PeerReputation, PeerStats
-from p2p.circuit_relay import CircuitRelayClient, RelayNode
+from p2p.circuit_relay import CircuitRelayClient
 
 
 class TestPeerReputation:
@@ -211,7 +211,7 @@ class TestConnectionPool:
         assert pool.get_connection_count() == 5
 
         # Try to exceed - should evict
-        conn = pool.add_connection("peer-extra", "192.168.1.100", 5000)
+        pool.add_connection("peer-extra", "192.168.1.100", 5000)
 
         # Should still be at limit (evicted one)
         assert pool.get_connection_count() == 5

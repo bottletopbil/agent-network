@@ -6,9 +6,7 @@ Validates that network partitions are detected and handled.
 
 import sys
 from pathlib import Path
-import pytest
 import time
-import threading
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))

@@ -1,10 +1,8 @@
 """Tests for Phase 19.4 - Governance Protocol"""
 
 import pytest
-from datetime import datetime, timedelta
 from src.marketplace.governance import (
     GovernanceSystem,
-    Proposal,
     VoteChoice,
     ProposalStatus,
 )

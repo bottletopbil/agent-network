@@ -7,7 +7,7 @@ Provides topic-based pubsub with mesh networking and message propagation.
 import logging
 import hashlib
 import time
-from typing import Dict, List, Callable, Set, Optional, Any
+from typing import Dict, List, Callable, Set, Any
 from collections import defaultdict
 from dataclasses import dataclass, field
 

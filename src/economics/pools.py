@@ -4,11 +4,10 @@ Verifier Pool: registration, deregistration, and pool management.
 Integrates with StakeManager to enforce stake requirements and filter active verifiers.
 """
 
-import sqlite3
 import json
 import time
 from typing import List, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 from economics.stake import StakeManager
 

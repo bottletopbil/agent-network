@@ -7,10 +7,8 @@ distributed availability, and cryptographic integrity.
 """
 
 import logging
-from typing import Optional
-from pathlib import Path
 
-from .ipfs_config import IPFSClient, IPFSConfig, get_ipfs_client
+from .ipfs_config import IPFSClient, IPFSConfig
 
 logger = logging.getLogger(__name__)
 

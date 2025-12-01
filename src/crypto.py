@@ -10,8 +10,6 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Tuple, Optional
 from nacl.signing import SigningKey, VerifyKey
-from nacl.encoding import Base64Encoder, RawEncoder
-import nacl.encoding
 
 
 # Directory for storing per-agent keys

@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import pytest
 from economics.ledger import CreditLedger
 from economics.stake import StakeManager
-from economics.pools import VerifierPool, VerifierMetadata, VerifierRecord
+from economics.pools import VerifierPool, VerifierMetadata
 
 
 class TestPoolRegistration:

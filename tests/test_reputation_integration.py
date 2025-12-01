@@ -16,7 +16,7 @@ import pytest
 from economics.ledger import CreditLedger
 from economics.stake import StakeManager
 from economics.pools import VerifierPool, VerifierMetadata
-from economics.reputation import ReputationTracker, ReputationEvent
+from economics.reputation import ReputationTracker
 from identity.did import DIDManager
 from identity.manifest import ManifestManager, AgentManifest
 from routing.scoring import AgentScorer

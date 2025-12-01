@@ -205,9 +205,9 @@ class TestChannelManager:
 
     def test_get_channels_by_sender(self, manager):
         """Test retrieving channels by sender."""
-        ch1 = manager.open_channel("alice", "bob", 100.0)
-        ch2 = manager.open_channel("alice", "charlie", 50.0)
-        ch3 = manager.open_channel("bob", "alice", 75.0)
+        manager.open_channel("alice", "bob", 100.0)
+        manager.open_channel("alice", "charlie", 50.0)
+        manager.open_channel("bob", "alice", 75.0)
 
         alice_channels = manager.get_channels_by_sender("alice")
         assert len(alice_channels) == 2
@@ -219,9 +219,9 @@ class TestChannelManager:
 
     def test_get_channels_by_receiver(self, manager):
         """Test retrieving channels by receiver."""
-        ch1 = manager.open_channel("alice", "bob", 100.0)
-        ch2 = manager.open_channel("charlie", "bob", 50.0)
-        ch3 = manager.open_channel("bob", "alice", 75.0)
+        manager.open_channel("alice", "bob", 100.0)
+        manager.open_channel("charlie", "bob", 50.0)
+        manager.open_channel("bob", "alice", 75.0)
 
         bob_received = manager.get_channels_by_receiver("bob")
         assert len(bob_received) == 2

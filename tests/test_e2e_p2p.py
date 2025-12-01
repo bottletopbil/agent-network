@@ -8,14 +8,10 @@ Comprehensive tests for full P2P mode operation including:
 """
 
 import asyncio
-import argparse
-import json
 import logging
 import time
-import statistics
-from typing import List, Dict, Set, Tuple
-from dataclasses import dataclass, field
-from datetime import datetime
+from typing import List
+from dataclasses import dataclass
 import sys
 from pathlib import Path
 import pytest
@@ -26,7 +22,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from p2p.node import P2PNode
 from p2p.gossipsub import GossipsubRouter
-from p2p.topics import create_thread_topic
 from bus import P2PBus
 from envelope import make_envelope, sign_envelope
 from p2p.identity import P2PIdentity

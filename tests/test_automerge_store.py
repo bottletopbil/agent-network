@@ -19,7 +19,7 @@ import uuid
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from plan.automerge_store import AutomergePlanStore
-from plan_store import PlanOp, OpType, TaskState
+from plan_store import PlanOp, OpType
 
 
 def create_test_op(

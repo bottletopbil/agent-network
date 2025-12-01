@@ -4,7 +4,7 @@ Payout Distribution: calculate and execute bounty payouts with challenge-aware d
 Supports committee-only and challenger+committee payout scenarios.
 """
 
-from typing import List, Optional, Dict
+from typing import List, Optional
 from dataclasses import dataclass
 import time
 

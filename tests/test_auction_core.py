@@ -11,12 +11,10 @@ Tests:
 
 import sys
 import os
-import time
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import pytest
 from auction.bidding import AuctionManager, AuctionConfig
 from auction.selection import BidEvaluator
 from auction.backoff import calculate_backoff, RandomizedBackoff

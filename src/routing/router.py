@@ -5,14 +5,13 @@ Combines all routing stages into a complete pipeline:
 Filter → Score → Canary → Bandit → Fallback to Auction
 """
 
-from typing import Dict, Any, Optional, List
-import asyncio
+from typing import Dict, Any, Optional
 import logging
 
 from .manifests import ManifestRegistry, get_registry
 from .filters import CapabilityFilter, get_filter
 from .scoring import AgentScorer, get_scorer
-from .canary import CanaryRunner, CanaryTest, get_canary_runner
+from .canary import CanaryRunner, get_canary_runner
 from .winner_selection import WinnerSelector, get_winner_selector
 from .bandit import ContextualBandit, get_bandit
 from .features import FeatureExtractor, get_feature_extractor
@@ -169,7 +168,8 @@ class IntelligentRouter:
                         self.bandit.add_arm(canary_winner)
 
                         # Use bandit for final selection among canary winners
-                        # For now, trust canary result (could use bandit to choose among top canaries)
+                        # For now, trust canary result (could use bandit to choose among top
+                        # canaries)
                         selected = canary_winner
                         routing_method = "bandit"
                     else:

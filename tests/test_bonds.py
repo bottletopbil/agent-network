@@ -22,7 +22,6 @@ from challenges.bonds import BondCalculator, ComplexityLevel, calculate_bond_sim
 from challenges.outcomes import ChallengeOutcome, OutcomeHandler
 from challenges.abuse_detection import AbuseDetector
 from economics.ledger import CreditLedger
-import handlers.challenge
 
 
 class TestBondCalculation:

@@ -4,12 +4,9 @@ Stake System: staking, unbonding, and stake management.
 Integrates with CreditLedger to manage verifier stakes with time-locked unbonding.
 """
 
-import sqlite3
-import threading
 import uuid
 import time
-from pathlib import Path
-from typing import List, Optional
+from typing import List
 from dataclasses import dataclass
 
 from economics.ledger import CreditLedger, InsufficientBalanceError
@@ -18,7 +15,6 @@ from economics.ledger import CreditLedger, InsufficientBalanceError
 class InsufficientStakeError(Exception):
     """Raised when account has insufficient staked amount"""
 
-    pass
 
 
 @dataclass

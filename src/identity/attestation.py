@@ -6,7 +6,7 @@ Can be replaced with real SGX SDK when running on hardware with SGX support.
 
 import hashlib
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from typing import Optional, Dict, Any
 import secrets
 

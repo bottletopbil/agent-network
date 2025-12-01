@@ -4,7 +4,6 @@ Bounty System: manage task bounties with escrow and lifecycle tracking.
 Integrates with CreditLedger for escrow management.
 """
 
-import sqlite3
 import uuid
 import time
 from typing import Optional, Dict
@@ -236,7 +235,7 @@ class BountyManager:
             else:
                 # Release to first recipient
                 first_recipient = list(recipients.keys())[0]
-                first_amount = recipients[first_recipient]
+                recipients[first_recipient]
 
                 self.ledger.release_escrow(escrow_id, first_recipient)
 

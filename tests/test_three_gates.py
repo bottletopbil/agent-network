@@ -10,12 +10,12 @@ Tests the three enforcement points:
 import pytest
 import sys
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import patch
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from policy.gates import GateEnforcer, PolicyGate, PolicyDecision
+from policy.gates import GateEnforcer, PolicyGate
 from policy.eval_digest import (
     compute_eval_digest,
     verify_eval_digest,
@@ -169,7 +169,7 @@ class TestIngressGate:
         ) as mock_eval:
             with patch.object(gate_enforcer.gas_meter, "reset") as mock_reset:
                 with patch.object(gate_enforcer.gas_meter, "used", 100, create=True):
-                    decision = gate_enforcer.ingress_validate(sample_envelope)
+                    gate_enforcer.ingress_validate(sample_envelope)
 
         # Verify gas meter was reset
         mock_reset.assert_called_once()

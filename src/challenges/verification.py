@@ -5,9 +5,7 @@ Implements deterministic verification rules for each proof type with gas meterin
 to prevent expensive verification attacks.
 """
 
-import json
-import hashlib
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any
 from dataclasses import dataclass
 from challenges.proofs import ProofType, MAX_GAS_ESTIMATE
 

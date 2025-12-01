@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "agents"))
 import pytest
 from challenge_verifier import ChallengeVerifierAgent, MIN_VERIFIER_STAKE
 from challenges.queue import ChallengeQueue
-from challenges.proofs import ProofType
 
 
 class TestChallengeVerifierAgentInitialization:

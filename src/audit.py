@@ -1,7 +1,7 @@
 import os, json, time
 from pathlib import Path
 from typing import Optional
-from crypto import sign_record, verify_record, cjson, sha256_hex
+from crypto import sign_record, sha256_hex
 
 LOG_DIR = Path(os.getenv("SWARM_LOG_DIR", "logs"))
 LOG_DIR.mkdir(parents=True, exist_ok=True)

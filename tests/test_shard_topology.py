@@ -3,13 +3,12 @@
 import sys
 import os
 import pytest
-from datetime import datetime
 import time
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from sharding import ShardTopology, ShardRegistry, NodeInfo, CrossShardRouter
+from sharding import ShardTopology, ShardRegistry, CrossShardRouter
 
 
 class TestShardTopology:
@@ -388,7 +387,7 @@ class TestCrossShardRouter:
         )
 
         # Cache endpoint
-        endpoint1 = router.get_shard_endpoint(0)
+        router.get_shard_endpoint(0)
         assert 0 in router._endpoint_cache
 
         # Make node unhealthy

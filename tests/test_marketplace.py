@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import pytest
-from marketplace.market import TaskMarketplace, TaskStatus, PriceTrend
+from marketplace.market import TaskMarketplace
 
 
 class TestTaskPosting:

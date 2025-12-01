@@ -14,7 +14,6 @@ import os
 import uuid
 import base64
 import asyncio
-import time
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -23,7 +22,7 @@ from agent import BaseAgent
 from envelope import make_envelope, sign_envelope
 from bus import publish_envelope
 from crypto import load_verifier
-from auction.agent_integration import BidSubmitter, estimate_cost, estimate_eta
+from auction.agent_integration import BidSubmitter
 from auction.backoff import RandomizedBackoff
 
 
