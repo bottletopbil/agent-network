@@ -1,0 +1,159 @@
+name: Quality Gates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: quality-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.9"
+
+jobs:
+  core-flow:
+    name: Core Flow Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run core gate tests
+        run: |
+          python -m pytest -q \
+            tests/test_core.py \
+            tests/test_challenge_verifier_agent.py \
+            tests/test_hybrid_bus.py \
+            -p no:warnings
+
+  economics:
+    name: Economics Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run economics gate tests
+        run: |
+          python -m pytest -q \
+            tests/test_slashing_payout.py::TestPayoutDistribution::test_distribute_to_honest_verifiers \
+            tests/test_slashing_payout.py::TestHonestVerifierProofEnforcement::test_missing_attestation_log_rejected \
+            tests/test_slashing_payout.py::TestHonestVerifierProofEnforcement::test_forged_honest_verifier_claim_rejected \
+            -p no:warnings
+
+  security-abuse:
+    name: Security Abuse Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run security gate tests
+        run: |
+          python -m pytest -q \
+            tests/test_remediation_claim_extended_consensus.py \
+            tests/test_remediation_mint_authorization.py \
+            -p no:warnings
+
+  epoch-partition:
+    name: Epoch/Partition Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run epoch gate tests
+        run: |
+          python -m pytest -q tests/test_epoch_fencing.py -p no:warnings
+
+  consensus-raft:
+    name: Consensus Gate (Raft/etcd)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start etcd
+        run: docker compose up -d etcd
+
+      - name: Wait for etcd
+        run: |
+          python - <<'PY'
+          import socket
+          import time
+
+          deadline = time.time() + 60
+          while time.time() < deadline:
+              s = socket.socket()
+              try:
+                  s.settimeout(1)
+                  s.connect(("127.0.0.1", 2379))
+                  print("etcd is reachable on 127.0.0.1:2379")
+                  raise SystemExit(0)
+              except OSError:
+                  time.sleep(1)
+              finally:
+                  s.close()
+          raise SystemExit("Timed out waiting for etcd on 127.0.0.1:2379")
+          PY
+
+      - name: Run raft consensus gate tests
+        run: |
+          python -m pytest -q tests/test_raft_consensus.py -p no:warnings
+
+      - name: Stop etcd
+        if: always()
+        run: docker compose down
