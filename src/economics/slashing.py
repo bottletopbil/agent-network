@@ -8,7 +8,7 @@ import uuid
 import time
 from enum import Enum
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from economics.stake import StakeManager
 
@@ -224,7 +224,7 @@ class SlashingRules:
         challenger: str,
         honest_verifiers: List[str] = None,
         timestamp_ns: int = None,
-        attestation_log: List[dict] = None,
+        attestation_log: Optional[List[dict]] = None,
     ) -> dict:
         """
         Slash multiple verifiers and distribute slashed amounts.
@@ -240,7 +240,7 @@ class SlashingRules:
             challenger: Account ID of challenger
             honest_verifiers: Optional list of claimed honest verifier account IDs
             timestamp_ns: Optional timestamp (defaults to current time)
-            attestation_log: Optional list of ATTEST records to verify honest_verifiers
+            attestation_log: Required list of ATTEST records to verify honest_verifiers
 
         Returns:
             dict with:
@@ -264,34 +264,25 @@ class SlashingRules:
                 "honest_rewards": {},
             }
 
+        if attestation_log is None:
+            raise ValueError("attestation_log is required for slash_verifiers")
+
+        if not isinstance(attestation_log, list):
+            raise ValueError("attestation_log must be a list")
+
         honest_verifiers = honest_verifiers or []
-        attestation_log = attestation_log or []
 
-        # Verify honest_verifiers actually attested
-        if honest_verifiers and attestation_log:
-            # Extract set of verifiers who actually attested
-            actual_attestors = {
-                record["verifier_id"] for record in attestation_log if "verifier_id" in record
-            }
-
-            # Filter honest_verifiers to only include verified attestors
-            verified_honest = [v for v in honest_verifiers if v in actual_attestors]
-
-            # Log warning if claimed honest contains non-attestors
-            non_attestors = set(honest_verifiers) - actual_attestors
-            if non_attestors:
-                logger.warning(
-                    f"Honest verifier list contains {len(non_attestors)} non-attestors "
-                    f"(free-riders): {non_attestors}. These will not receive rewards."
-                )
-
-            # Use only verified honest verifiers
-            honest_verifiers = verified_honest
-        elif honest_verifiers and not attestation_log:
-            # No attestation log provided - log warning but allow for backward compatibility
-            logger.warning(
-                f"No attestation log provided for {len(honest_verifiers)} claimed honest verifiers. "
-                "Cannot verify attestations - they will receive rewards without verification."
+        # Verify claimed honest verifiers actually attested.
+        actual_attestors = {
+            record["verifier_id"]
+            for record in attestation_log
+            if isinstance(record, dict) and "verifier_id" in record
+        }
+        unverified_honest = [v for v in honest_verifiers if v not in actual_attestors]
+        if unverified_honest:
+            raise ValueError(
+                "Unverified honest_verifiers claimed without proof: "
+                + ", ".join(sorted(set(unverified_honest)))
             )
 
         # Calculate slashes (50% of each verifier's stake)

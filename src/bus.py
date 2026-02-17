@@ -7,8 +7,11 @@ import logging
 from audit import log_event
 from envelope import observe_envelope
 
-# from policy import validate_envelope  # ✅ Rule book v0 gate
+from policy import validate_envelope  # Rule book v0 compatibility gate
 from policy.gates import GateEnforcer
+
+# Backward compatibility: allow importing `bus.*` submodules while this file remains a module.
+__path__ = [os.path.dirname(__file__)]
 
 # OpenTelemetry tracing
 try:

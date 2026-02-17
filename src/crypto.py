@@ -94,6 +94,43 @@ def load_keypair(agent_id: str) -> Tuple[SigningKey, VerifyKey]:
     return signing_key, verify_key
 
 
+def load_verifier(agent_id: Optional[str] = None) -> VerifyKey:
+    """
+    Load a verifier key for compatibility with agent entrypoints.
+
+    Resolution order:
+    1. Per-agent keypair (if agent_id provided)
+    2. SWARM_VERIFY_PK_B64 / SWARM_PUBLIC_KEY
+    3. Derived from SWARM_SIGNING_SK_B64 / SWARM_PRIVATE_KEY
+
+    Args:
+        agent_id: Optional agent ID for per-agent key loading.
+
+    Returns:
+        VerifyKey instance.
+
+    Raises:
+        ValueError: If no verifier key material is available.
+    """
+    if agent_id:
+        _, verify_key = load_keypair(agent_id)
+        return verify_key
+
+    pk_b64 = os.getenv("SWARM_VERIFY_PK_B64") or os.getenv("SWARM_PUBLIC_KEY")
+    if pk_b64:
+        return VerifyKey(base64.b64decode(pk_b64))
+
+    sk_b64 = os.getenv("SWARM_SIGNING_SK_B64") or os.getenv("SWARM_PRIVATE_KEY")
+    if sk_b64:
+        signing_key = SigningKey(base64.b64decode(sk_b64))
+        return signing_key.verify_key
+
+    raise ValueError(
+        "No verifier key found. Set SWARM_VERIFY_PK_B64 (preferred) or "
+        "SWARM_SIGNING_SK_B64 in environment."
+    )
+
+
 def sign_with_key(signing_key: SigningKey, message: bytes) -> bytes:
     """
     Sign a message with a signing key.

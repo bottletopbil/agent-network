@@ -13,6 +13,7 @@ import json
 import hashlib
 from typing import Optional, List, Tuple
 from dataclasses import dataclass, asdict
+from consensus.epochs import epoch_manager
 
 
 @dataclass
@@ -65,6 +66,19 @@ class RaftConsensusAdapter:
         hash_bytes = hashlib.sha256(need_id.encode()).digest()
         return hash_bytes[0]  # First byte gives 0-255
 
+    def get_decide_key(self, need_id: str) -> str:
+        """
+        Build sharded etcd key for DECIDE record.
+
+        Args:
+            need_id: NEED identifier
+
+        Returns:
+            Bucketed key path for DECIDE storage
+        """
+        bucket = self.get_bucket_for_need(need_id)
+        return f"/decide/bucket-{bucket:03d}/{need_id}"
+
     def try_decide(
         self,
         need_id: str,
@@ -93,7 +107,11 @@ class RaftConsensusAdapter:
         Returns:
             DecideRecord if successful or idempotent retry, None if conflict
         """
-        key = f"/decide/{need_id}"
+        current_epoch = epoch_manager.get_current_epoch()
+        if epoch < current_epoch:
+            return None
+
+        key = self.get_decide_key(need_id)
 
         record = DecideRecord(
             need_id=need_id,
@@ -139,7 +157,7 @@ class RaftConsensusAdapter:
         Returns:
             DecideRecord if exists, None otherwise
         """
-        key = f"/decide/{need_id}"
+        key = self.get_decide_key(need_id)
         value, _ = self.client.get(key)
 
         if not value:

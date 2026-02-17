@@ -87,6 +87,7 @@ class TestSlashOnInvalidResult:
             challenge_evidence="evidence_hash_123",
             challenger=challenger,
             honest_verifiers=[],
+            attestation_log=[],
         )
 
         # Verify slashing (50% of 10000 = 5000)
@@ -121,6 +122,7 @@ class TestSlashOnInvalidResult:
             challenge_evidence="evidence_hash_456",
             challenger=challenger,
             honest_verifiers=[],
+            attestation_log=[],
         )
 
         # Verify slashing (50% of 10000 + 50% of 20000 = 15000 total)
@@ -161,6 +163,10 @@ class TestPayoutDistribution:
             challenge_evidence="evidence_hash_789",
             challenger=challenger,
             honest_verifiers=[honest1, honest2],
+            attestation_log=[
+                {"verifier_id": honest1},
+                {"verifier_id": honest2},
+            ],
         )
 
         # Total slashed: 5000 + 5000 = 10000
@@ -194,6 +200,7 @@ class TestPayoutDistribution:
             challenge_evidence="evidence_burn",
             challenger=challenger,
             honest_verifiers=[],
+            attestation_log=[],
         )
 
         # Verify burn amount (10% of slashed)
@@ -202,6 +209,43 @@ class TestPayoutDistribution:
         assert result["total_slashed"] == (
             result["challenger_payout"] + result["honest_payout"] + result["burned"]
         )
+
+
+class TestHonestVerifierProofEnforcement:
+    """Test ECON-006: attestation proof is mandatory and verified."""
+
+    def test_missing_attestation_log_rejected(self, stake_manager, slashing_rules, ledger):
+        """Missing attestation_log should be rejected."""
+        ledger.create_account("dishonest1", 10000)
+        stake_manager.stake("dishonest1", 10000)
+        ledger.create_account("challenger1", 1000)
+        ledger.create_account("honest1", 1000)
+
+        with pytest.raises(ValueError, match="attestation_log is required"):
+            slashing_rules.slash_verifiers(
+                verifiers=["dishonest1"],
+                challenge_evidence="evidence-missing-proof",
+                challenger="challenger1",
+                honest_verifiers=["honest1"],
+            )
+
+    def test_forged_honest_verifier_claim_rejected(self, stake_manager, slashing_rules, ledger):
+        """Claimed honest verifier not in attestation_log should be rejected."""
+        ledger.create_account("dishonest1", 10000)
+        stake_manager.stake("dishonest1", 10000)
+        ledger.create_account("challenger1", 1000)
+        ledger.create_account("honest1", 1000)
+        ledger.create_account("honest2", 1000)
+
+        with pytest.raises(ValueError, match="Unverified honest_verifiers"):
+            slashing_rules.slash_verifiers(
+                verifiers=["dishonest1"],
+                challenge_evidence="evidence-forged-proof",
+                challenger="challenger1",
+                honest_verifiers=["honest1", "honest2"],
+                # honest2 is forged (missing from attestation log)
+                attestation_log=[{"verifier_id": "honest1"}],
+            )
 
 
 class TestRelatedPartyBlocking:

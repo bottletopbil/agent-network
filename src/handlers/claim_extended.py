@@ -15,6 +15,18 @@ MIN_LEASE_TTL = 60  # Minimum lease time in seconds
 # Lease registry (in-memory for now, could be persisted)
 _lease_registry = {}  # {lease_id: lease_record}
 
+# Optional consensus adapter hooks for tests/integration.
+consensus_adapter = None
+raft_adapter = None
+
+
+def _find_task_lease(task_id: str):
+    """Return existing lease for task_id if present."""
+    for lease in _lease_registry.values():
+        if lease.get("task_id") == task_id:
+            return lease
+    return None
+
 
 async def handle_claim_extended(envelope: dict):
     """
@@ -66,7 +78,51 @@ async def handle_claim_extended(envelope: dict):
         print(f"[CLAIM_EXTENDED] ERROR: ETA must be positive, got {eta}")
         return
 
-    # Create lease record
+    # Lock check: reject if task is already claimed by another worker.
+    existing_lease = _find_task_lease(task_id)
+    if existing_lease and existing_lease.get("worker_id") != worker_id:
+        print(
+            f"[CLAIM_EXTENDED] CONFLICT: task {task_id} already leased to "
+            f"{existing_lease.get('worker_id')[:8]}..., rejecting claim from {worker_id[:8]}..."
+        )
+        return
+
+    # Route DECIDED transition through the DECIDE handler.
+    # This prevents direct state bypasses in CLAIM_EXTENDED.
+    from handlers import decide as decide_handler
+
+    # Keep DECIDE dependencies aligned with current runtime/test injection.
+    decide_handler.plan_store = plan_store
+    if consensus_adapter is not None:
+        decide_handler.consensus_adapter = consensus_adapter
+    if raft_adapter is not None:
+        decide_handler.raft_adapter = raft_adapter
+
+    decide_envelope = {
+        "thread_id": thread_id,
+        "lamport": envelope["lamport"] + 1,
+        "sender_pk_b64": sender,
+        "payload": {
+            "need_id": payload.get("need_id", task_id),
+            "proposal_id": payload.get("proposal_id", worker_id),
+            "task_id": task_id,
+            "epoch": payload.get("epoch", 1),
+            "k_plan": payload.get("k_plan", 1),
+        },
+    }
+
+    await decide_handler.handle_decide(decide_envelope)
+
+    # Claim succeeds only if DECIDE path moved task to DECIDED.
+    task = await plan_store.get_task(task_id)
+    if not task or task.get("state") != TaskState.DECIDED.value:
+        print(
+            f"[CLAIM_EXTENDED] REJECTED: DECIDE not accepted for task {task_id}, "
+            f"not creating lease"
+        )
+        return
+
+    # Create lease record only after successful DECIDE.
     lease_id = str(uuid.uuid4())
     current_time = time.time_ns()
 
@@ -82,7 +138,7 @@ async def handle_claim_extended(envelope: dict):
 
     _lease_registry[lease_id] = lease_record
 
-    # Create ANNOTATE op to record the extended claim
+    # Create ANNOTATE op to record the extended claim.
     op = PlanOp(
         op_id=str(uuid.uuid4()),
         thread_id=thread_id,
@@ -102,22 +158,7 @@ async def handle_claim_extended(envelope: dict):
         },
         timestamp_ns=current_time,
     )
-
     await plan_store.append_op(op)
-
-    # Update task state to DECIDED
-    state_op = PlanOp(
-        op_id=str(uuid.uuid4()),
-        thread_id=thread_id,
-        lamport=envelope["lamport"] + 1,
-        actor_id=envelope["sender_pk_b64"],
-        op_type=OpType.STATE,
-        task_id=task_id,
-        payload={"state": TaskState.DECIDED.value},
-        timestamp_ns=time.time_ns(),
-    )
-
-    await plan_store.append_op(state_op)
 
     print(
         f"[CLAIM_EXTENDED] Lease {lease_id} created for task {task_id} by {worker_id[:8]}... (TTL: {lease_ttl}s, HB: {heartbeat_interval}s)"

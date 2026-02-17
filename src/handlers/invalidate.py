@@ -42,6 +42,7 @@ def handle_invalidate(
         "challenge_id": str,
         "slashed_verifiers": List[str],  # Account IDs of dishonest verifiers
         "honest_verifiers": List[str],   # Account IDs of honest verifiers (optional)
+        "attestation_log": List[dict],   # Required proof records with verifier_id entries
         "challenger": str,               # Account ID of challenger
         "evidence_hash": str,            # CAS hash of challenge evidence
         "new_k_result": int,             # Escalated K_result value
@@ -61,6 +62,7 @@ def handle_invalidate(
     challenge_id = payload.get("challenge_id")
     slashed_verifiers = payload.get("slashed_verifiers", [])
     honest_verifiers = payload.get("honest_verifiers", [])
+    attestation_log = payload.get("attestation_log")
     challenger = payload.get("challenger")
     evidence_hash = payload.get("evidence_hash")
     new_k_result = payload.get("new_k_result")
@@ -120,6 +122,7 @@ def handle_invalidate(
                 challenger=challenger,
                 honest_verifiers=honest_verifiers,
                 timestamp_ns=time.time_ns(),
+                attestation_log=attestation_log,
             )
 
             logger.info(
