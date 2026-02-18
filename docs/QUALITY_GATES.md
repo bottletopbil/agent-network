@@ -4,6 +4,8 @@ This is the minimum release safety system for this repository.
 
 Rule: no merge if any gate below fails.
 
+Verified snapshot date: 2026-02-18
+
 ## Gate Matrix
 
 | Gate | Purpose | Command |
@@ -23,6 +25,10 @@ It runs on:
 - pushes to `main`
 
 Consensus gate uses `docker compose up -d etcd` and runs the raft test suite against live etcd.
+
+Dependency compatibility note:
+- `etcd3==0.12.0` requires `protobuf==3.20.3` in this project.
+- Do not upgrade `protobuf` to `4.x` unless `etcd3` usage is replaced or regenerated for newer protobuf runtime.
 
 ## Local Run Checklist
 
@@ -48,3 +54,8 @@ Consensus gate uses `docker compose up -d etcd` and runs the raft test suite aga
   - code fix,
   - gate green before merge.
 - Keep this gate list small and stable. Add tests only when they are reliable.
+
+## Branch Protection Note
+
+- GitHub only offers required status checks after they have run successfully on this repository in the recent window.
+- If a check name does not appear in branch protection, run this workflow on `main` and refresh the branch protection settings page.

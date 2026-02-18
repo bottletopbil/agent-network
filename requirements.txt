@@ -11,6 +11,7 @@ ipfshttpclient==0.8.0a2
 # Web Interface
 flask==3.0.0
 etcd3==0.12.0
+protobuf==3.20.3
 scipy>=1.9.0
 numpy>=1.23.0
 zstandard>=0.22.0
