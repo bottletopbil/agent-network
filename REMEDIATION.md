@@ -4,6 +4,9 @@
 
 This document tracks remediation of all identified vulnerabilities, grouped by severity.
 
+> Status note (2026-02-18): this checklist has been reconciled against current code/tests.  
+> Some items previously marked complete were moved back to pending where implementation is partial or not integrated end-to-end.
+
 ---
 
 ## 🔴 CRITICAL SECURITY ISSUES
@@ -22,11 +25,11 @@ This document tracks remediation of all identified vulnerabilities, grouped by s
   - **Fix:** Uncomment and integrate `ledger.slash_stake()` and reward transfers
   - **Verification:** Test `test_challenge_slashing.py` confirms verifiers lose stake on failed challenge
 
-- [ ] **[ECON-003] Unlimited Credit Minting**
+- [x] **[ECON-003] Unlimited Credit Minting**
   - **File:** `src/economics/ledger.py:103-148`
   - **Issue:** No supply cap, anyone can mint arbitrary credits via `create_account()`
   - **Fix:** Add system-only mint authority, implement total supply tracking, add max supply constant
-  - **Verification:** Test `test_mint_authorization.py` rejects unauthorized mints
+  - **Verification:** Test `tests/test_remediation_mint_authorization.py` rejects unauthorized mints and validates max supply
 
 - [x] **[ECON-004] Negative Balance Allowed**
   - **File:** `src/economics/ledger.py:64-71` (schema)
@@ -36,11 +39,11 @@ This document tracks remediation of all identified vulnerabilities, grouped by s
 
 ### Isolation & Sandboxing
 
-- [x] **[SAND-001] Firecracker Mock Mode Only**
+- [ ] **[SAND-001] Firecracker Mock Mode Only**
   - **File:** `src/sandbox/firecracker.py:89, 244-283, 285-297`
   - **Issue:** No real VM isolation—untrusted code runs in Python process
-  - **Fix:** Implement fail-closed Firecracker integration with KVM, fail closed if unavailable
-  - **Verification:** Test `test_firecracker_isolation.py` confirms code runs in separate microVM, resource limits enforced
+  - **Current State:** Fail-closed checks exist, but production execution path is incomplete (`_real_exec` still raises `NotImplementedError`)
+  - **Remaining Fix:** Complete real Firecracker execution path and verify end-to-end isolation in Linux/KVM environment
 
 - [x] **[SEC-001] Sybil Attack: Free Identity Generation**
   - **File:** `src/identity/did.py:50, 58-112` (DIDManager)
@@ -48,11 +51,11 @@ This document tracks remediation of all identified vulnerabilities, grouped by s
   - **Fix:** Require MIN_DID_STAKE credits locked OR proof-of-work, add rate limiting
   - **Verification:** Test `test_sybil_attack.py` confirms mass DID creation prevented 1000 identities
 
-- [x] **[SEC-002] Policy Enforcement Bypassable**
+- [ ] **[SEC-002] Policy Enforcement Bypassable**
   - **File:** `src/bus.py:85, 101` vs handlers calling directly
   - **Issue:** Handlers can be called without policy validation
-  - **Fix:** Add mandatory @require_policy_validation decorator to handlers, make policy check non-optional
-  - **Verification:** Test `test_policy_bypass.py` confirms invalid envelopes rejected even with direct handler calls
+  - **Current State:** `@require_policy_validation` exists but is only applied to selected handlers; policy import surface has been stabilized; `SLICE-SEC-002` is tracked as `Regressed` in `docs/AUDIT_MATRIX.md`
+  - **Remaining Fix:** Enforce mandatory ingress/dispatch policy validation at all external entry points (coordinator + bus ingress paths) and replace skipped bypass tests with executable coverage
 
 ### Concurrency & Data Races
 
@@ -192,11 +195,11 @@ This document tracks remediation of all identified vulnerabilities, grouped by s
 
 ### Distributed Systems Components
 
-- [x] **[DIST-001] etcd Consensus Not Running**
+- [ ] **[DIST-001] etcd Consensus Not Running**
   - **Files:** `src/consensus/raft_adapter.py`, `docker-compose.yml:20-37`
   - **Issue:** etcd adapter exists but service integration untested
-  - **Fix:** etcd service already in docker-compose (v3.5.17), created integration tests, RaftConsensusAdapter ready
-  - **Verification:** Integration tests confirm distributed DECIDE consensus, only one winner, concurrent safety
+  - **Current State:** etcd service and adapter exist; local validation with live etcd confirms raft consensus tests pass (`tests/test_raft_consensus.py`: 10 passed on 2026-02-18)
+  - **Remaining Fix:** Enforce this coverage in CI/automation (run non-skipped against provisioned etcd)
 
 - [ ] **[DIST-002] libp2p P2P Transport Not Implemented**
   - **Files:** `requirements.txt:9` (commented), `src/p2p/node.py` (scaffolding)
@@ -224,11 +227,11 @@ This document tracks remediation of all identified vulnerabilities, grouped by s
   - **Fix:** Implement partition detector (heartbeat monitoring), auto-advance epochs on heal
   - **Verification:** Test `test_partition_detection.py` confirms split detected within 30s
 
-- [x] **[PART-002] No Automatic Reconciliation**
+- [ ] **[PART-002] No Automatic Reconciliation**
   - **Files:** `src/handlers/reconcile.py` (exists), `src/monitoring/partition_detector.py` (updated)
   - **Issue:** RECONCILE handler exists but never triggered on partition heal
-  - **Fix:** Updated partition_detector on_heal callback to trigger RECONCILE with local/remote DECIDEs, merge via highest_epoch_wins
-  - **Verification:** Tests confirm conflicting DECIDEs merged, orphaned branches marked, reconciliation triggered on heal
+  - **Current State:** Partition detector and callback hooks exist, but runtime wiring into coordinator flow is not yet present
+  - **Remaining Fix:** Integrate detector into active runtime and verify automatic RECONCILE emission under live partition-heal scenarios
 
 ### Cross-Shard Coordination
 
@@ -256,12 +259,11 @@ This document tracks remediation of all identified vulnerabilities, grouped by s
   - **Fix:** Add E2E test with real network partition simulation
   - **Verification:** Test `test_e2e_partition.py` passes
 
-- [x] **[TEST-002] No Economic Attack Test Suite**
+- [ ] **[TEST-002] No Economic Attack Test Suite**
   - **File:** `tests/test_remediation_economic_attacks.py` (NEW)
   - **Issue:** Economic vulnerabilities tested in isolation, no comprehensive suite
-  - **Fix:** Created comprehensive test suite with all attacks: double-spend, sybil, whale, auction manipulation, slashing exploitation
-  - **Verification:** 12 tests with pytest markers (security_critical, economic), all defenses validated
-  - **Verification:** Test suite `tests/test_economic_attacks.py` exists and passes
+  - **Current State:** Placeholder suite exists but is module-skipped pending API updates
+  - **Remaining Fix:** Re-enable and run full economic attack scenarios without skip gates
 
 ### Performance
 
@@ -293,5 +295,5 @@ pytest tests/test_remediation_*.py -m economics
 - `[MEDIUM]` items should be resolved for production hardening
 - `[MISSING]` features required for distributed operation
 
-**Last Updated:** 2025-11-30  
+**Last Updated:** 2026-02-18  
 **Audit Authority:** Senior Principal Systems Architect & Lead Security Auditor
