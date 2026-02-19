@@ -246,7 +246,14 @@ class TestHybridBus:
         def handler(env):
             received_count[0] += 1
 
-        envelope = {"id": "env-1", "kind": "NEED"}
+        envelope = {
+            "id": "env-1",
+            "kind": "NEED",
+            "thread_id": "thread-1",
+            "lamport": 1,
+            "sender_pk_b64": "agent-1",
+            "payload": {},
+        }
 
         # Subscribe
         bus.subscribe_envelopes("thread-1.need", handler)

@@ -54,8 +54,8 @@ This document tracks remediation of all identified vulnerabilities, grouped by s
 - [ ] **[SEC-002] Policy Enforcement Bypassable**
   - **File:** `src/bus.py:85, 101` vs handlers calling directly
   - **Issue:** Handlers can be called without policy validation
-  - **Current State:** `@require_policy_validation` exists but is only applied to selected handlers; policy import surface has been stabilized; `SLICE-SEC-002` is tracked as `Regressed` in `docs/AUDIT_MATRIX.md`
-  - **Remaining Fix:** Enforce mandatory ingress/dispatch policy validation at all external entry points (coordinator + bus ingress paths) and replace skipped bypass tests with executable coverage
+  - **Current State:** Shared ingress validator is now wired at coordinator dispatch and P2P/hybrid ingress boundaries; remediation tests are unskipped and converted to executable coverage; slice status moved to `In Progress`
+  - **Remaining Fix:** Complete full ingress-surface audit and collect passing required gate evidence for completion transition
 
 ### Concurrency & Data Races
 

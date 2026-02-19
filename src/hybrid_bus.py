@@ -12,6 +12,8 @@ import time
 from typing import Dict, Any, Callable
 from collections import OrderedDict
 
+from policy.enforcement import validate_ingress_envelope, PolicyEnforcementError
+
 logger = logging.getLogger(__name__)
 
 
@@ -202,6 +204,16 @@ class HybridBus:
 
         # Wrapper for deduplication
         def deduplicated_handler(envelope: Dict[str, Any], transport: str):
+            try:
+                validate_ingress_envelope(
+                    envelope,
+                    source=f"hybrid.{transport.lower()}_ingress",
+                )
+            except PolicyEnforcementError as e:
+                logger.warning(f"Rejected envelope from {transport}: {e}")
+                self.monitor.record_error(transport, str(e))
+                return
+
             msg_id = self._compute_msg_id(envelope)
 
             # Check cache

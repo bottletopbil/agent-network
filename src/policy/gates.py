@@ -9,6 +9,7 @@ Implements three enforcement points:
 
 from enum import Enum
 from typing import Dict, Any, Optional
+import json
 import logging
 from dataclasses import dataclass
 
@@ -213,22 +214,48 @@ class GateEnforcer:
 
     def _make_cache_key(self, envelope: Dict[str, Any]) -> str:
         """Create cache key from envelope"""
-        op_type = envelope.get("operation", "unknown")
-        agent_id = envelope.get("agent_id", "unknown")
+        op_type = self._resolve_operation(envelope)
+        agent_id = self._resolve_agent_id(envelope)
         return f"{op_type}:{agent_id}"
 
     def _extract_policy_input(self, envelope: Dict[str, Any], gate: PolicyGate) -> Dict[str, Any]:
         """Extract policy input from envelope for given gate"""
+        operation = self._resolve_operation(envelope)
+        agent_id = self._resolve_agent_id(envelope)
+        kind = envelope.get("kind") or operation
+        payload = envelope.get("payload", {})
+
+        try:
+            payload_size = len(
+                json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            )
+        except Exception:
+            payload_size = 0
+
         return {
             "gate": gate.value,
-            "operation": envelope.get("operation"),
-            "agent_id": envelope.get("agent_id"),
+            "operation": operation,
+            "kind": kind,
+            "agent_id": agent_id,
+            "actor_id": envelope.get("actor_id") or agent_id,
             "thread_id": envelope.get("thread_id"),
-            "payload": envelope.get("payload", {}),
+            "payload": payload,
+            "payload_size": envelope.get("payload_size", payload_size),
             "lamport": envelope.get("lamport", 0),
-            "signature": envelope.get("signature"),
-            "timestamp": envelope.get("timestamp"),
+            "signature": envelope.get("signature") or envelope.get("sig_b64"),
+            "timestamp": envelope.get("timestamp") or envelope.get("ts_ns"),
         }
+
+    def _resolve_operation(self, envelope: Dict[str, Any]) -> str:
+        return str(envelope.get("operation") or envelope.get("kind") or "unknown")
+
+    def _resolve_agent_id(self, envelope: Dict[str, Any]) -> str:
+        return str(
+            envelope.get("agent_id")
+            or envelope.get("actor_id")
+            or envelope.get("sender_pk_b64")
+            or "unknown"
+        )
 
     def _check_resource_violations(
         self, envelope: Dict[str, Any], telemetry: Dict[str, Any]

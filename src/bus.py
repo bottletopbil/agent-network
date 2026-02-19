@@ -9,6 +9,7 @@ from envelope import observe_envelope
 
 from policy import validate_envelope  # Rule book v0 compatibility gate
 from policy.gates import GateEnforcer
+from policy.enforcement import validate_ingress_envelope, PolicyEnforcementError
 
 # Backward compatibility: allow importing `bus.*` submodules while this file remains a module.
 __path__ = [os.path.dirname(__file__)]
@@ -361,9 +362,20 @@ class P2PBus:
         def gossipsub_handler(message_bytes):
             try:
                 envelope = json.loads(message_bytes.decode("utf-8"))
+            except Exception as e:
+                logger.error(f"Error decoding P2P envelope: {e}")
+                return
+
+            try:
+                validate_ingress_envelope(envelope, source="p2p.subscribe")
+            except PolicyEnforcementError as e:
+                logger.warning(f"P2P ingress validation failed: {e}")
+                return
+
+            try:
                 handler(envelope)
             except Exception as e:
-                logger.error(f"Error in P2P subscriber: {e}")
+                logger.error(f"Error in P2P subscriber handler: {e}")
 
         self.gossipsub.subscribe(topic, gossipsub_handler)
         logger.info(f"Subscribed to P2P topic: {topic}")

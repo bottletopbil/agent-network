@@ -16,6 +16,8 @@ Core hardening work is integrated and the required quality-gate workflow is gree
 - `CLAIM_EXTENDED` direct-consensus bypass removal via DECIDE handler path
 - DECIDE stale-epoch rejection in handler and raft adapter path
 - Bucketed raft DECIDE key storage and idempotent retry coverage
+- Shared ingress policy validation helper with fail-closed behavior
+- Ingress validation now wired at coordinator dispatch and P2P/hybrid receive boundaries
 - Completion confidence workflow artifacts:
   - `docs/COMPLETION_DEFINITION.md`
   - `docs/AUDIT_MATRIX.md`
@@ -45,9 +47,18 @@ All five required gates were run in this clean baseline and passed.
    - Command: `docker compose up -d etcd && /Users/rileyhicks/Dev/Real Projects/agent-swarm/.venv/bin/python -m pytest -q tests/test_raft_consensus.py -p no:warnings && docker compose down`
    - Result: `10 passed`
 
+## SEC-002 Slice Validation (2026-02-18)
+
+1. Remediation coverage
+   - Command: `/Users/rileyhicks/Dev/Real Projects/agent-swarm/.venv/bin/python -m pytest -q tests/test_remediation_policy_bypass.py -p no:warnings`
+   - Result: `5 passed`
+2. Scope status
+   - Ingress enforcement is wired at coordinator dispatch plus P2P/hybrid ingress boundaries.
+   - Slice state moved from `Regressed` to `In Progress` in `docs/AUDIT_MATRIX.md`.
+
 ## Known Gaps Still Open
 
-- `SEC-002` remains `Regressed` in the audit matrix (ingress policy bypass closure incomplete)
+- `SEC-002` is `In Progress`; final gate-evidence closure is still pending
 - Firecracker real execution path is not implemented (`SAND-001`)
 - Partition detection/reconcile runtime integration remains incomplete (`PART-001`, `PART-002`)
 - WASM runtime is still Python-backed mock (`SEC-004`)

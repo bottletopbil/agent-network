@@ -167,6 +167,20 @@ key = f"/decide/bucket-{bucket}/{need_id}"
 
 ---
 
+### 6.6 SEC-002 Ingress Policy Bypass Closure 🔴
+
+**Files**: `src/policy/enforcement.py`, `src/policy/gates.py`, `src/coordinator.py`, `src/bus.py`, `src/hybrid_bus.py`  
+**Vulnerability**: External ingress paths can route envelopes without mandatory policy enforcement
+
+**Current Status**:
+- [x] Shared fail-closed ingress validation helper added
+- [x] Coordinator dispatch ingress validation wired
+- [x] P2P and hybrid ingress validation wired
+- [x] Policy input normalization supports both canonical envelope fields and legacy gate fields
+- [ ] Required gate evidence not yet attached for completion transition
+
+---
+
 ### Definition of Done (Phase 6)
 - [ ] Property P1 (Single DECIDE) passes under simulated partition
 - [ ] Property P2 (Deterministic replay) passes with concurrent ops

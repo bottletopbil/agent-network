@@ -13,6 +13,7 @@ from consensus import ConsensusAdapter
 from bus import subscribe_envelopes
 from verbs import DISPATCHER
 from daemons import BootstrapMonitor
+from policy.enforcement import validate_ingress_envelope, PolicyEnforcementError
 
 # Import all handlers to trigger auto-registration
 import handlers.need
@@ -138,6 +139,12 @@ class Coordinator:
         thread_id = envelope.get("thread_id", "unknown")
 
         print(f"[COORDINATOR] Received {kind} envelope in thread {thread_id}")
+
+        try:
+            validate_ingress_envelope(envelope, source="coordinator.dispatch")
+        except PolicyEnforcementError as e:
+            print(f"[COORDINATOR] ✗ Rejected envelope at ingress: {e}")
+            return
 
         # Dispatch to registered handler
         handled = await DISPATCHER.dispatch(envelope)
